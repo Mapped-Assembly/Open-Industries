@@ -8,6 +8,7 @@ import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game
 
 import { initializeScience, materialBatch, scienceProjection, processPlan, processOutputs, inspectAtBench, evaluateScience, catalog, scienceVersions } from './game-materials.mjs';
 import { planProcess } from '@openindustries/material-science/engine';
+import { initializeRobots, contentsOf, grams, commandRobot, stopRobot, settleRobots, robotStepLimit, chargingRobot, advanceRobots, robotProjection, checkRobotInvariants, robotsBusy } from './game-robots.mjs';
 
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -37,7 +38,7 @@ export class GameDatabase {
     if (path !== ':memory:' && process.platform !== 'win32') chmodSync(path, 0o600);
     this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
     const version = this.db.prepare('PRAGMA user_version').get().user_version;
-    if (![0, 1, 2, 3].includes(version)) { this.db.close(); throw new Error('UNSUPPORTED_SQLITE_SCHEMA'); }
+    if (![0, 1, 2, 3, 4].includes(version)) { this.db.close(); throw new Error('UNSUPPORTED_SQLITE_SCHEMA'); }
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS accounts(id TEXT PRIMARY KEY, username TEXT NOT NULL UNIQUE, salt TEXT NOT NULL, password_hash TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, owner TEXT NOT NULL REFERENCES accounts(id), expires INTEGER NOT NULL);
@@ -78,6 +79,13 @@ export class GameDatabase {
         const match = JSON.parse(row.state); initializeScience(match); match.revision++; this.save(match);
       }
       this.db.exec('PRAGMA user_version=3');
+    });
+    if (version < 4) this.transaction(() => {
+      for (const row of this.db.prepare('SELECT state FROM matches').all()) {
+        const match = JSON.parse(row.state);
+        this.advance(match); initializeRobots(match, true); match.revision++; this.save(match);
+      }
+      this.db.exec('PRAGMA user_version=4');
     });
   }
 
@@ -128,17 +136,18 @@ export class GameDatabase {
   save(match) {
     initializeScience(match);
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
+    if (match.robot_version) checkRobotInvariants(match, gameFail);
     for (const p of match.players) {
-      for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
+      if (!match.robot_version) for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
         const total = (p.deposit.collected ? 0 : p.deposit[constituent])
           + p.batches.filter(b => b.state !== 'consumed').reduce((sum, b) => sum + b[constituent], 0);
         if (total !== p.deposit[constituent]) gameFail('INVARIANT_FAILED');
       }
       if (p.machine.energy_mj < 0 || p.machine.energy_mj > p.base.power.capacity_mj || p.machine.energy_mj + p.machine.dissipated_mj
-        + p.base.power.spilled_mj + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== p.base.power.initial_mj + p.base.power.generated_mj) gameFail('INVARIANT_FAILED');
+        + p.base.power.spilled_mj + (p.robot_charge_mj ?? 0) + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== p.base.power.initial_mj + p.base.power.generated_mj) gameFail('INVARIANT_FAILED');
       if (canonical(p.components.map(c => ({ kind: c.kind, quantity: c.quantity, unit_mass_g: c.unitMassG }))) !== canonical(p.base.inventory)
         || p.components.some(c => c.owner !== p.owner || c.allocation !== 'component-only')) gameFail('INVARIANT_FAILED');
-      for (const b of p.batches) if (b.material.massG !== b.copper_g + b.hdpe_g + b.dirt_g
+      for (const b of p.batches) if (b.material.massG !== grams(contentsOf(b))
         || canonical(b.material.constituents) !== canonical(materialBatch(b).constituents)) gameFail('INVARIANT_FAILED');
       const allocations = [...p.base.assets.flatMap(a => a.components.map(c => ({ ...c, allocation_id: a.id }))), ...p.base.inventory.map(c => ({ ...c, allocation_id: 'store' }))];
       if (canonical(allocations) !== canonical(p.base.starter_ledger) || p.base.assets.filter(a => a.kind === 'tower').length !== 1
@@ -157,6 +166,7 @@ export class GameDatabase {
     match.status = 'completed'; match.completion = { reason, winner_slot: null }; match.invite_hash = null;
   }
   advance(match) {
+    if (match.robot_version) return this.advanceWithRobots(match);
     const now = Math.max(this.clock(), match.last_advanced_ms);
     if (match.status === 'waiting' && match.invite_expires <= now) {
       this.complete(match, 'invite-expired'); match.revision++;
@@ -196,16 +206,72 @@ export class GameDatabase {
     if (changed) match.revision++;
     match.last_advanced_ms = now;
   }
+  finishProcess(match, p, job, now) {
+    if (job.kind?.endsWith('inspection')) inspectAtBench(match, p, job, now);
+    else {
+      const input = p.batches.find(b => b.id === job.input_batch_id);
+      if (!input || input.state !== 'reserved') gameFail('INVARIANT_FAILED');
+      input.state = 'consumed';
+      for (const output of job.outputs) if (grams(contentsOf(output))) {
+        if (p.batches.some(b => b.source_job_id === job.id && b.output_role === output.output_role)) gameFail('INVARIANT_FAILED');
+        p.batches.push({ id: randomUUID(), state: 'available', ...output, observation_id: null, source_job_id: job.id, grade: 'recovered-ungraded' });
+      }
+    }
+    job.state = 'completed'; job.pause_reason = null;
+  }
+  advanceWithRobots(match) {
+    const now = Math.max(this.clock(), match.last_advanced_ms);
+    if (match.status === 'waiting' && match.invite_expires <= now) { this.complete(match, 'invite-expired'); match.revision++; }
+    let at = match.last_advanced_ms, changed = false;
+    if (match.status === 'active') {
+      changed = settleRobots(match, at) || changed;
+      // Event boundaries make catch-up equivalent to frequent ticks, even with concurrent charging.
+      while (at < now) {
+        let dt = now - at;
+        const plans = match.players.map(p => {
+          const solar = p.machine.status === 'ready' ? p.base.power.solar_w : 0;
+          let job = p.jobs.find(j => j.state === 'running');
+          if (job && job.work_ms === job.duration_ms) { this.finishProcess(match, p, job, at); changed = true; job = undefined; }
+          const power = job?.power_w ?? (job ? 500 : 0);
+          if (job && power > solar && p.machine.energy_mj < power - solar) { job.state = 'paused'; job.pause_reason = 'power'; changed = true; job = undefined; }
+          const robot = !job && p.machine.status === 'ready' ? chargingRobot(p) : undefined;
+          const chargeRate = robot ? (p.machine.energy_mj >= 500 - solar ? 500 : solar) : 0;
+          let limit = robotStepLimit(p);
+          if (job) limit = Math.min(limit, job.duration_ms - job.work_ms, power > solar ? Math.floor(p.machine.energy_mj / (power - solar)) : Infinity);
+          if (robot && chargeRate) limit = Math.min(limit, Math.ceil((robot.capacity_mj - robot.energy_mj) / chargeRate), chargeRate > solar ? Math.floor(p.machine.energy_mj / (chargeRate - solar)) : Infinity);
+          dt = Math.min(dt, limit);
+          return { p, solar, job, robot, chargeRate };
+        });
+        if (!Number.isSafeInteger(dt) || dt <= 0) gameFail('INVARIANT_FAILED');
+        for (const { p, solar, job, robot, chargeRate } of plans) {
+          const generated = dt * solar;
+          const used = job ? dt * (job.power_w ?? 500) : 0;
+          const transferred = robot ? Math.min(robot.capacity_mj - robot.energy_mj, dt * chargeRate) : 0;
+          if (job) { job.work_ms += dt; job.energy_mj += used; job.last_tick_ms = at + dt; }
+          const energy = p.machine.energy_mj + generated - used - transferred;
+          p.base.power.generated_mj += generated; p.base.power.spilled_mj += Math.max(0, energy - p.base.power.capacity_mj);
+          p.machine.energy_mj = Math.min(p.base.power.capacity_mj, energy); p.robot_charge_mj += transferred;
+          changed = advanceRobots(p, dt, robot, transferred, !!job || p.machine.status !== 'ready') || changed;
+          if (job && job.work_ms === job.duration_ms) { this.finishProcess(match, p, job, at + dt); changed = true; }
+        }
+        at += dt; changed = settleRobots(match, at) || changed;
+      }
+    }
+    if (changed) match.revision++;
+    match.last_advanced_ms = now;
+  }
   snapshot(match, owner) {
     const p = match.players.find(p => p.owner === owner);
     if (!p) gameFail('NOT_AVAILABLE');
     return { match_id: match.id, revision: match.revision, status: match.status, completion: match.completion,
-      world: worldProjection(match), base: p.base, science: scienceProjection(match, p), invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
+      world: worldProjection(match), base: p.base, science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
       server_time_ms: Math.max(this.clock(), match.last_advanced_ms), scheduler_healthy: this.healthy(),
       players: match.players.map(p => ({ slot: p.slot, you: p.owner === owner })),
       deposits: [{ id: p.deposit.id, collected: p.deposit.collected, observation: p.deposit.observation
         ? { id: p.deposit.observation, sensor: 'cable-assay-v1', ...mass(p.deposit) } : null }],
-      machines: [p.machine], batches: p.batches.map(({ material, material_revision, ...visible }) => visible),
+      machines: [p.machine], batches: p.batches.map(b => ({ id: b.id, form: b.form, state: b.state, mass_g: grams(contentsOf(b)),
+        ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, b.field_collected && b.material.inspection !== 'graded' ? null : contentsOf(b)[k] ?? 0])),
+        observation_id: b.observation_id, source_job_id: b.source_job_id, output_role: b.output_role, grade: b.grade })),
       jobs: p.jobs.map(({ last_tick_ms, outputs, kind, power_w, ...visible }) => visible),
     };
   }
@@ -232,7 +298,7 @@ export class GameDatabase {
       if (operation === 'list_matches') {
         const rows = this.db.prepare('SELECT m.state,m.created,p.slot FROM matches m JOIN members p ON p.match_id=m.id WHERE p.owner=? AND (? IS NULL OR m.id>?) ORDER BY m.id LIMIT 21').all(owner, args.cursor, args.cursor);
         const matches = rows.slice(0, 20).map(row => { const m = JSON.parse(row.state); this.advance(m); this.save(m); return { match_id: m.id, status: m.status, slot: row.slot, created_at_ms: row.created }; });
-        return validateGameResult(name, { version: 4, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
+        return validateGameResult(name, { version: 5, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
       }
       if (!readOnly) {
         const receipt = this.db.prepare('SELECT * FROM receipts WHERE owner=? AND command_id=?').get(owner, args.command_id);
@@ -245,7 +311,7 @@ export class GameDatabase {
         invite = randomUUID();
         match = { id: randomUUID(), revision: 1, status: 'waiting', invite_hash: hash(invite), invite_expires: this.clock() + 3600000,
           last_advanced_ms: this.clock(), completion: null, world: makeWorld(), players: [] };
-        match.players.push(provisionPlayer(owner, 1, match.world)); initializeScience(match);
+        match.players.push(provisionPlayer(owner, 1, match.world)); initializeRobots(match); initializeScience(match);
         this.db.prepare('INSERT INTO matches VALUES(?,?,?,?,?,?)').run(match.id, owner, match.status, this.clock(), match.last_advanced_ms, JSON.stringify(match));
         this.db.prepare('INSERT INTO members VALUES(?,?,1)').run(match.id, owner);
       } else {
@@ -261,7 +327,7 @@ export class GameDatabase {
         this.advance(match); initializeScience(match);
         if (operation === 'science_catalog' || operation === 'evaluate') {
           if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
-          const result = operation === 'science_catalog' ? { version: 4, catalog: catalog() } : { version: 4, match_id: match.id, revision: match.revision, result: evaluateScience(own, args, gameFail) };
+          const result = operation === 'science_catalog' ? { version: 5, catalog: catalog() } : { version: 5, match_id: match.id, revision: match.revision, result: evaluateScience(own, args, gameFail) };
           this.save(match); return validateGameResult(name, result);
         }
         if (!readOnly) {
@@ -269,9 +335,9 @@ export class GameDatabase {
           if (!['join_match', 'abandon_match', 'rotate_invite'].includes(action) && match.status !== 'active') gameFail('MATCH_INACTIVE');
           if (action === 'abandon_match' && match.status === 'completed') gameFail('MATCH_INACTIVE');
           if (action !== 'abandon_match' && this.db.prepare('SELECT count(*) n FROM receipts WHERE owner=? AND match_id=?').get(owner, match.id).n >= 256) gameFail('LIMIT_REACHED');
-          if (!['pause_job', 'cancel_job', 'dismantle_machine', 'abandon_match'].includes(action) && !this.healthy()) gameFail('SCHEDULER_UNAVAILABLE');
+          if (!['pause_job', 'cancel_job', 'interrupt_robot', 'retreat_robot', 'dismantle_machine', 'abandon_match'].includes(action) && !this.healthy()) gameFail('SCHEDULER_UNAVAILABLE');
           if (action === 'join_match') {
-            match.players.push(provisionPlayer(owner, 2, match.world)); match.status = 'active'; match.invite_hash = null;
+            match.players.push(provisionPlayer(owner, 2, match.world)); initializeRobots(match); match.status = 'active'; match.invite_hash = null;
             this.db.prepare('INSERT INTO members VALUES(?,?,2)').run(match.id, owner);
           } else if (action === 'rotate_invite') {
             if (own.slot !== 1 || match.status !== 'waiting') gameFail('NOT_AVAILABLE');
@@ -281,7 +347,7 @@ export class GameDatabase {
         }
       }
       this.save(match);
-      const result = { version: 4, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
+      const result = { version: 5, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
         ...(!readOnly ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
       validateGameResult(name, result);
       if (!readOnly) this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(owner, args.command_id, match.id, request, JSON.stringify(result));
@@ -292,14 +358,19 @@ export class GameDatabase {
     const { action } = args;
     if (action === 'inspect_deposit' || action === 'collect_deposit') {
       if (p.deposit.id !== args.deposit_id) gameFail('NOT_AVAILABLE');
+      if (!match.legacy_recovery) gameFail('ROBOT_REQUIRED');
       if (p.deposit.collected) gameFail('DEPOSIT_EMPTY');
       if (action === 'inspect_deposit') p.deposit.observation ||= randomUUID();
       else {
         if (!p.deposit.observation) gameFail('INSPECTION_REQUIRED');
         p.deposit.collected = true;
+        const d = match.world.deposits.find(d => d.id === p.deposit.id); d.stock.remaining = {}; d.stock.revision++;
         p.batches.push({ id: randomUUID(), form: 'cable', state: 'available', ...mass(p.deposit), observation_id: p.deposit.observation,
           source_job_id: null, output_role: null, grade: 'assayed-feedstock' });
       }
+    } else if (['survey_robot', 'collect_robot', 'return_robot', 'recharge_robot', 'interrupt_robot', 'retreat_robot'].includes(action)) {
+      commandRobot(match, p, args, Math.max(this.clock(), match.last_advanced_ms), gameFail);
+      settleRobots(match, Math.max(this.clock(), match.last_advanced_ms));
     } else if (action === 'inspect_batch' || action === 'inspect_component') {
       const component = action === 'inspect_component';
       const target = (component ? p.components : p.batches).find(b => b.id === (component ? args.component_id : args.batch_id));
@@ -339,12 +410,15 @@ export class GameDatabase {
       for (const job of p.jobs) this.cancel(p, job, 'machine_destroyed');
       p.machine.status = 'destroyed'; p.base.assets.find(a => a.id === p.machine.id).status = 'destroyed'; p.machine.dissipated_mj += p.machine.energy_mj; p.machine.energy_mj = 0;
     } else if (action === 'abandon_match') {
-      for (const player of match.players) for (const job of player.jobs) this.cancel(player, job, 'match_abandoned');
+      for (const player of match.players) {
+        for (const job of player.jobs) this.cancel(player, job, 'match_abandoned');
+        for (const r of player.robots) stopRobot(match, player, r, 'match-abandoned');
+      }
       this.complete(match, 'abandoned');
     } else if (action === 'finish_recovery') {
-      if (!p.jobs.some(j => j.state === 'completed' && !j.kind?.endsWith('inspection')) || p.jobs.some(live)) gameFail('NOT_READY');
+      if (!p.jobs.some(j => j.state === 'completed' && !j.kind?.endsWith('inspection')) || p.jobs.some(live) || robotsBusy(p) || p.robots.some(r => r.cargo.length)) gameFail('NOT_READY');
       p.base.ready_to_finish = true;
-      if (match.players.every(player => player.base.ready_to_finish && !player.jobs.some(live))) this.complete(match, 'recovery-complete');
+      if (match.players.every(player => player.base.ready_to_finish && !player.jobs.some(live) && !robotsBusy(player) && !player.robots.some(r => r.cargo.length))) this.complete(match, 'recovery-complete');
     } else gameFail('INVALID_REQUEST');
   }
   close() { this.db.close(); }
