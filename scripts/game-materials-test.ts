@@ -1,0 +1,78 @@
+import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { GameDatabase, canonical } from '../server/game-sqlite.mjs';
+const dir = await mkdtemp(join(tmpdir(), 'oi-materials-'));
+let time = 1000000;
+const path = join(dir, 'materials.sqlite');
+let db = new GameDatabase(path, { clock: () => time });
+const command = () => ({ version: 4, command_id: randomUUID() });
+try {
+  const a = (await db.authenticate({ username: 'alice', password: 'material-test-password' }, true)).token;
+  const b = (await db.authenticate({ username: 'bob', password: 'material-test-password' }, true)).token;
+  const outsider = (await db.authenticate({ username: 'outsider', password: 'material-test-password' }, true)).token;
+  const call = (token: string, name: string, args: object) => db.dispatch(token, `astra.game_${name}`, args);
+  db.tick();
+  const created = call(a, 'create_match', command()), id = created.snapshot.match_id;
+  call(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
+  const read = (token = a) => call(token, 'read_match', { version: 4, match_id: id }).snapshot;
+  const act = (action: string, fields = {}, token = a) => call(token, 'command', { ...command(), match_id: id, expected_revision: read(token).revision, action, ...fields });
+  const evaluate = (target_id: string, query: string, design_id: string, temperature_c = 20, token = a) => call(token, 'evaluate', { version: 4, match_id: id, target_id, query, design_id, temperature_c }).result;
+  const tick = (ms: number) => { time += ms; db.tick(); };
+  const cat = call(a, 'science_catalog', { version: 4, match_id: id }).catalog;
+  assert.equal(Object.keys(cat.materials).length, 6); assert.equal(cat.recipes.length, 7);
+  assert.equal(cat.versions.catalog, 'materials-v2');
+  assert.throws(() => call(outsider, 'science_catalog', { version: 4, match_id: id }), { code: 'NOT_AVAILABLE' });
+  const deposit = read().deposits[0].id;
+  act('inspect_deposit', { deposit_id: deposit }); act('collect_deposit', { deposit_id: deposit });
+  const input = read().batches[0].id, machine = read().machines[0].id;
+  const plan = evaluate(input, 'process', 'strip-cable'); assert.equal(plan.energyJ, 10000); assert.equal(plan.durationMs, 20000);
+  act('start_material_process', { batch_id: input, machine_id: machine, recipe_id: 'strip-cable' }); tick(20000);
+  const copper = read().batches.find((v: any) => v.output_role === 'conductor').id;
+  assert.equal(evaluate(copper, 'use', 'copper-conductor').code, 'NEEDS_INSPECTION');
+  assert(!('properties' in read().science.batches.find((v: any) => v.id === copper).evidence));
+  assert.throws(() => evaluate(copper, 'use', 'copper-conductor', 20, b), { code: 'NOT_AVAILABLE' });
+  assert.throws(() => act('inspect_batch', { batch_id: copper, grade: 'game-copper-v1' }), { code: 'INVALID_REQUEST' });
+  act('finish_recovery'); assert.equal(read().base.ready_to_finish, true);
+  act('inspect_batch', { batch_id: copper }); assert.equal(read().base.ready_to_finish, false); tick(1000); act('cancel_job', { job_id: read().jobs.at(-1).id });
+  assert.equal(read().science.observations.length, 0); assert.equal(read().jobs.at(-1).energy_mj, 100000);
+  const req = { ...command(), match_id: id, expected_revision: read().revision, action: 'inspect_batch', batch_id: copper };
+  const receipt = call(a, 'command', req); tick(1000);
+  db.close(); db = new GameDatabase(path, { clock: () => time }); tick(2000);
+  assert.deepEqual(call(a, 'command', req), receipt);
+  assert.equal(read().science.observations.length, 1); assert.equal(read().jobs.at(-1).energy_mj, 300000);
+  assert.equal(evaluate(copper, 'use', 'copper-conductor').status, 'eligible');
+  assert.equal(evaluate(copper, 'use', 'copper-conductor', 90).code, 'PROPERTY_NOT_ESTABLISHED');
+  assert.equal(evaluate(input, 'process', 'strip-cable').code, 'BATCH_UNAVAILABLE');
+  assert(!JSON.stringify(read(b)).includes(read().science.observations[0].id));
+  assert.equal(read().science.observations[0].position.x, read().base.assets.find((v: any) => v.kind === 'bench').position.x);
+  const component = read().science.components[0].id;
+  assert.equal(evaluate(component, 'component', 'starter-maintenance-v1').code, 'NEEDS_COMPONENT_TEST');
+  const ledger = canonical(read().base.starter_ledger);
+  act('inspect_component', { component_id: component }); tick(3000);
+  assert.equal(evaluate(component, 'component', 'starter-maintenance-v1').status, 'eligible');
+  assert.equal(evaluate(component, 'component', 'robot-battery').code, 'INCOMPATIBLE_COMPONENT');
+  assert.equal(canonical(read().base.starter_ledger), ledger);
+  const flakes = read().batches.find((v: any) => v.form === 'flakes').id;
+  act('inspect_batch', { batch_id: flakes }); tick(3000);
+  assert.equal(evaluate(flakes, 'process', 'mold-hdpe').code, 'MACHINE_UNAVAILABLE');
+  for (let n = 0; n < 9; n++) {
+    const residue = read().batches.find((v: any) => v.form === 'residue' && v.state === 'available');
+    act('inspect_batch', { batch_id: residue.id }); tick(3000);
+    const preview = evaluate(residue.id, 'process', 'recover-cable-residue');
+    assert.equal(preview.status, 'eligible');
+    act('start_material_process', { batch_id: residue.id, machine_id: machine, recipe_id: 'recover-cable-residue' }); tick(preview.durationMs);
+    for (const k of ['copper_g', 'hdpe_g', 'dirt_g']) assert.equal(read().batches.filter((v: any) => v.state !== 'consumed').reduce((sum: number, v: any) => sum + v[k], 0), read().deposits[0].observation[k]);
+  }
+  // Upgrade real v3-shaped state once, preserving mass/work and immutable receipts, without granting measurements.
+  const saved = db.load(id); delete saved.science;
+  for (const p of saved.players) { delete p.components; delete p.observations; for (const batch of p.batches) { delete batch.material; delete batch.material_revision; } }
+  db.db.prepare('UPDATE matches SET state=? WHERE id=?').run(JSON.stringify(saved), id); db.db.exec('PRAGMA user_version=2');
+  db.close(); db = new GameDatabase(path, { clock: () => time });
+  assert.equal(read().science.observations.length, 0); assert.equal(evaluate(copper, 'use', 'copper-conductor').code, 'NEEDS_INSPECTION');
+  assert.deepEqual(call(a, 'command', req), receipt);
+  const migrated = canonical(db.load(id)); db.close(); db = new GameDatabase(path, { clock: () => time }); assert.equal(canonical(db.load(id)), migrated);
+  console.log('PASS material authority: owned evidence, private previews, durable paid inspections, exact retry, stock allocations, installed machines, nine residue passes, constituent conservation and idempotent v3 migration');
+} finally { db.close(); await rm(dir, { recursive: true, force: true }); }
