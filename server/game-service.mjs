@@ -14,7 +14,7 @@ export async function startGameService({ database, port = 8790, allowSignup = fa
       // Server-to-server transport only. Browsers must use the game backend.
       if (req.headers.origin || req.url?.includes('?')) return send(403, { error: { code: 'INVALID_REQUEST', message: gameErrors.INVALID_REQUEST } });
       const token = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization || '')?.[1];
-      if (req.method === 'GET' && req.url === '/health') return send(200, { scheduler_healthy: db.healthy(), registration_enabled: allowSignup, version: 4 });
+      if (req.method === 'GET' && req.url === '/health') return send(200, { scheduler_healthy: db.healthy(), registration_enabled: allowSignup, version: 5 });
       if (req.method === 'GET' && req.url === '/auth/session') { db.identity(token); return send(200, { authenticated: true }); }
       if (req.method !== 'POST' || !['/auth/login', '/auth/register', '/auth/logout', '/game'].includes(req.url)) return send(404, { error: { code: 'INVALID_REQUEST', message: gameErrors.INVALID_REQUEST } });
       if (req.headers['content-type']?.split(';')[0] !== 'application/json') gameFail('INVALID_REQUEST');

@@ -3,15 +3,16 @@ import { BatchSchema, ComponentSchema, ObservationSchema, CATALOG_VERSION, BALAN
 import { evaluateUse, evaluateSubstitution, evaluateComponent, planProcess, projectBatch } from '@openindustries/material-science/engine';
 import { listMaterials, listRecipes, listParts, listSubstitutions } from '@openindustries/material-science/catalog';
 import { ResultSchema } from '@openindustries/material-science/protocol';
+import { contentsOf, grams } from './game-robots.mjs';
 
 export const scienceVersions = { catalog: CATALOG_VERSION, recipes: BALANCE_VERSION, sensors: 'bench-v1' };
 export const catalog = () => ({ versions: scienceVersions, materials: listMaterials(), recipes: listRecipes(), parts: listParts(), substitutions: listSubstitutions(),
   scope: 'bounded-game-rules-not-engineering-certification', inspection: { duration_ms: 3000, power_w: 100, energy_j: 300 } });
-export const constituents = b => ['copper', 'hdpe', 'dirt'].filter(k => b[`${k}_g`] > 0).map(material => ({ material, massG: b[`${material}_g`] }));
+export const constituents = b => ['copper', 'hdpe', 'dirt', 'steel', 'aluminum', 'glass', 'rubber', 'unknown'].filter(k => contentsOf(b)[k] > 0).map(material => ({ material, massG: contentsOf(b)[material] }));
 export function materialBatch(b, inspected = false) {
-  return BatchSchema.parse({ id: b.id, catalogVersion: CATALOG_VERSION, massG: b.copper_g + b.hdpe_g + b.dirt_g,
-    constituents: constituents(b), form: b.form, inspection: inspected ? 'graded' : 'identified', grade: null,
-    condition: inspected ? 'sound' : 'unknown', hazard: inspected ? 'none-detected' : 'unknown', properties: [] });
+  return BatchSchema.parse({ id: b.id, catalogVersion: CATALOG_VERSION, massG: grams(contentsOf(b)),
+    constituents: constituents(b), form: b.form, inspection: inspected ? 'graded' : b.field_collected ? 'uninspected' : 'identified', grade: null,
+    condition: inspected ? 'sound' : 'unknown', hazard: inspected ? b.hazard_truth ?? 'none-detected' : 'unknown', properties: [] });
 }
 export function initializeScience(match) {
   match.science ??= { ...scienceVersions };
@@ -34,7 +35,7 @@ export function processPlan(p, batch, recipe) {
 }
 export function processOutputs(plan) {
   const streams = [...plan.outputs, ...(plan.residue.massG ? [{ ...plan.residue, id: 'residue', form: 'residue' }] : [])];
-  return streams.map(s => ({ output_role: s.id, form: s.form, ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, s.constituents.find(c => c.material === k)?.massG ?? 0])) }));
+  return streams.map(s => ({ output_role: s.id, form: s.form, contents: Object.fromEntries(s.constituents.map(c => [c.material, c.massG])), ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, s.constituents.find(c => c.material === k)?.massG ?? 0])) }));
 }
 export function scienceProjection(match, p) {
   return { versions: match.science, observations: p.observations, components: p.components,
@@ -51,7 +52,7 @@ export function inspectAtBench(match, p, job, now) {
   } else {
     target.state = 'available'; target.material = materialBatch(target, true); target.material_revision++;
     // A deterministic sensor/game-grade fixture, not pure-element data or a claim about real scrap.
-    if (target.form === 'wire' && target.copper_g === target.material.massG) {
+    if (target.form === 'wire' && contentsOf(target).copper === target.material.massG) {
       target.material.grade = 'game-copper-v1';
       target.material.properties = [
         { kind: 'electricalConductivity', value: 47000000, unit: 'S/m', validFromC: 20, validToC: 20, uncertainty: { lower: 45000000, upper: 49000000 }, basis: 'measurement-fixture', source: 'bench-v1/copper-wire-test-fixture' },

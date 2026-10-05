@@ -9,7 +9,7 @@ const root = await mkdtemp(join(tmpdir(), 'oi-world-'));
 let time = 1000000;
 const path = join(root, 'world.sqlite');
 let db = new GameDatabase(path, { clock: () => time });
-const cmd = () => ({ version: 4, command_id: randomUUID() });
+const cmd = () => ({ version: 5, command_id: randomUUID() });
 const call = (token: string, name: string, args: object) => db.dispatch(token, `astra.game_${name}`, args);
 try {
   const accounts = await Promise.all(['north', 'south', 'outsider'].map(username => db.authenticate({ username, password: 'world-test-password' }, true)));
@@ -17,15 +17,17 @@ try {
   db.tick();
   const created = call(a, 'create_match', cmd());
   const id = created.snapshot.match_id;
-  const read = (token = a) => call(token, 'read_match', { version: 4, match_id: id }).snapshot;
+  // Retain regression coverage for the original starter path in migrated matches.
+  const legacyFixture = db.load(id); legacyFixture.legacy_recovery = true; db.save(legacyFixture);
+  const read = (token = a) => call(token, 'read_match', { version: 5, match_id: id }).snapshot;
   const action = (token: string, action: string, fields = {}) => call(token, 'command', { ...cmd(), match_id: id, expected_revision: read(token).revision, action, ...fields });
   const rotated = action(a, 'rotate_invite');
   assert.notEqual(rotated.invite_code, created.invite_code);
   assert.throws(() => call(b, 'join_match', { ...cmd(), match_id: id, invite_code: created.invite_code }), { code: 'NOT_AVAILABLE' });
   const joined = call(b, 'join_match', { ...cmd(), match_id: id, invite_code: rotated.invite_code });
   assert.equal(joined.snapshot.status, 'active');
-  assert.equal(call(c, 'list_matches', { version: 4, cursor: null }).matches.length, 0);
-  assert.equal(call(b, 'list_matches', { version: 4, cursor: null }).matches[0].match_id, id);
+  assert.equal(call(c, 'list_matches', { version: 5, cursor: null }).matches.length, 0);
+  assert.equal(call(b, 'list_matches', { version: 5, cursor: null }).matches[0].match_id, id);
   assert.throws(() => action(b, 'rotate_invite'), { code: 'NOT_AVAILABLE' });
   const w = read().world;
   assert.equal(w.deposits.length, 14);
@@ -80,7 +82,7 @@ try {
   // A real persisted legacy row migrates once, with cable/batches/jobs/receipts intact.
   const before = db.load(id); const preserved = before.players.map((p: any) => ({ deposit: p.deposit, batches: p.batches, jobs: p.jobs }));
   for (const p of before.players) { delete p.base; p.machine.energy_mj = 10000000; }
-  delete before.world; delete before.completion; before.status = 'abandoned';
+  delete before.robot_version; delete before.legacy_recovery; for (const p of before.players) { delete p.robots; delete p.robot_jobs; delete p.surveys; delete p.robot_charge_mj; } delete before.world; delete before.completion; before.status = 'abandoned';
   db.db.prepare('UPDATE matches SET state=? WHERE id=?').run(JSON.stringify(before), id);
   db.db.exec('PRAGMA user_version=1'); db.close();
   db = new GameDatabase(path, { clock: () => time });
@@ -100,7 +102,7 @@ try {
     Object.assign(p.jobs[0], { state: 'running', work_ms: 5000, energy_mj: 2500000, last_tick_ms: time });
     p.machine.energy_mj = 17500000;
   }
-  delete legacy.world;
+  delete legacy.robot_version; delete legacy.legacy_recovery; for (const p of legacy.players) { delete p.robots; delete p.robot_jobs; delete p.surveys; delete p.robot_charge_mj; } delete legacy.world;
   db.db.prepare('UPDATE matches SET state=?,status=? WHERE id=?').run(JSON.stringify(legacy), 'active', id);
   db.db.exec('PRAGMA user_version=1'); db.close(); time += 5000;
   db = new GameDatabase(path, { clock: () => time });
@@ -117,8 +119,8 @@ try {
     call(session, 'command', { ...cmd(), match_id: m.snapshot.match_id, expected_revision: m.snapshot.revision, action: 'abandon_match' });
   }
   const token = (await db.authenticate({ username: 'north', password: 'world-test-password' })).token;
-  const page1 = call(token, 'list_matches', { version: 4, cursor: null });
-  const page2 = call(token, 'list_matches', { version: 4, cursor: page1.next_cursor });
+  const page1 = call(token, 'list_matches', { version: 5, cursor: null });
+  const page2 = call(token, 'list_matches', { version: 5, cursor: page1.next_cursor });
   assert.equal(page1.matches.length, 20); assert.equal(page2.matches.length, 2); assert.equal(page2.next_cursor, null);
   assert.equal(new Set([...page1.matches, ...page2.matches].map(m => m.match_id)).size, 22);
   console.log('PASS finite mirrored world, secret projections, starter ledgers, invite rotation, both recovery loops, solar accounting, restart, completion, migration and membership pagination');

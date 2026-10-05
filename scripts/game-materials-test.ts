@@ -8,7 +8,7 @@ const dir = await mkdtemp(join(tmpdir(), 'oi-materials-'));
 let time = 1000000;
 const path = join(dir, 'materials.sqlite');
 let db = new GameDatabase(path, { clock: () => time });
-const command = () => ({ version: 4, command_id: randomUUID() });
+const command = () => ({ version: 5, command_id: randomUUID() });
 try {
   const a = (await db.authenticate({ username: 'alice', password: 'material-test-password' }, true)).token;
   const b = (await db.authenticate({ username: 'bob', password: 'material-test-password' }, true)).token;
@@ -17,14 +17,16 @@ try {
   db.tick();
   const created = call(a, 'create_match', command()), id = created.snapshot.match_id;
   call(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
-  const read = (token = a) => call(token, 'read_match', { version: 4, match_id: id }).snapshot;
+  // Retain regression coverage for the original starter path in migrated matches.
+  const legacyFixture = db.load(id); legacyFixture.legacy_recovery = true; db.save(legacyFixture);
+  const read = (token = a) => call(token, 'read_match', { version: 5, match_id: id }).snapshot;
   const act = (action: string, fields = {}, token = a) => call(token, 'command', { ...command(), match_id: id, expected_revision: read(token).revision, action, ...fields });
-  const evaluate = (target_id: string, query: string, design_id: string, temperature_c = 20, token = a) => call(token, 'evaluate', { version: 4, match_id: id, target_id, query, design_id, temperature_c }).result;
+  const evaluate = (target_id: string, query: string, design_id: string, temperature_c = 20, token = a) => call(token, 'evaluate', { version: 5, match_id: id, target_id, query, design_id, temperature_c }).result;
   const tick = (ms: number) => { time += ms; db.tick(); };
-  const cat = call(a, 'science_catalog', { version: 4, match_id: id }).catalog;
+  const cat = call(a, 'science_catalog', { version: 5, match_id: id }).catalog;
   assert.equal(Object.keys(cat.materials).length, 6); assert.equal(cat.recipes.length, 7);
   assert.equal(cat.versions.catalog, 'materials-v2');
-  assert.throws(() => call(outsider, 'science_catalog', { version: 4, match_id: id }), { code: 'NOT_AVAILABLE' });
+  assert.throws(() => call(outsider, 'science_catalog', { version: 5, match_id: id }), { code: 'NOT_AVAILABLE' });
   const deposit = read().deposits[0].id;
   act('inspect_deposit', { deposit_id: deposit }); act('collect_deposit', { deposit_id: deposit });
   const input = read().batches[0].id, machine = read().machines[0].id;

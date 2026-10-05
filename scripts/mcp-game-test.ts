@@ -11,7 +11,7 @@ import { startClient } from './lib/mcp-scene-workflows.mjs';
 
 const root = await mkdtemp(join(tmpdir(), 'oi-sqlite-test-'));
 const credentials = (username: string) => ({ username, password: 'only-a-test-password-123' });
-const command = () => ({ version: 4, command_id: randomUUID() });
+const command = () => ({ version: 5, command_id: randomUUID() });
 const tool = (name: string) => 'astra.game_' + name;
 const code = (expected: string) => (error: any) => error?.code === expected;
 const delay = (ms: number) => new Promise(done => setTimeout(done, ms));
@@ -33,9 +33,11 @@ try {
   const joined = db.dispatch(b.token, tool('join_match'), joinArgs);
   assert.deepEqual(db.dispatch(b.token, tool('join_match'), joinArgs), joined);
   assert.throws(() => db.dispatch(c.token, tool('join_match'), { ...joinArgs, ...command() }), code('NOT_AVAILABLE'));
-  assert.throws(() => db.dispatch(c.token, tool('read_match'), { version: 4, match_id: id }), code('NOT_AVAILABLE'));
+  assert.throws(() => db.dispatch(c.token, tool('read_match'), { version: 5, match_id: id }), code('NOT_AVAILABLE'));
   assert.throws(() => db.dispatch(a.token, tool('create_match'), { ...command(), owner_id: db.identity(b.token) }), code('INVALID_REQUEST'));
-  const read = () => db.dispatch(a.token, tool('read_match'), { version: 4, match_id: id }).snapshot;
+  // Retain regression coverage for the original starter path in migrated matches.
+  const legacyFixture = db.load(id); legacyFixture.legacy_recovery = true; db.save(legacyFixture);
+  const read = () => db.dispatch(a.token, tool('read_match'), { version: 5, match_id: id }).snapshot;
   const act = (action: string, targets = {}) => db.dispatch(a.token, tool('command'), { ...command(), match_id: id, expected_revision: read().revision, action, ...targets });
   const deposit = created.snapshot.deposits[0].id, machine = created.snapshot.machines[0].id;
   assert.throws(() => act('collect_deposit', { deposit_id: deposit }), code('INSPECTION_REQUIRED'));
@@ -129,7 +131,7 @@ try {
   await start();
   const aToken = await account('alice'), bToken = await account('bob');
   let a = connect(aToken), b = connect(bToken), a2 = connect(aToken);
-  const contract = await ok(a, 'describe', { version: 4 });
+  const contract = await ok(a, 'describe', { version: 5 });
   assert.equal(contract.persistence, 'sqlite-wal'); assert.equal(contract.ready_for_full_game, false);
   assert.equal((await a.rpc('tools/list')).tools.filter((t: any) => t.name.startsWith('astra.game_')).length, 8);
   const create = command();
@@ -137,9 +139,13 @@ try {
   assert.deepEqual(pair[0], pair[1]);
   const created = pair[0], id = created.snapshot.match_id;
   await ok(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
-  const read = async () => (await ok(a, 'read_match', { version: 4, match_id: id })).snapshot;
+  const migrationFixture = new DatabaseSync(database);
+  const row = migrationFixture.prepare('SELECT state FROM matches WHERE id=?').get(id) as { state: string };
+  const old = JSON.parse(row.state); old.legacy_recovery = true;
+  migrationFixture.prepare('UPDATE matches SET state=? WHERE id=?').run(JSON.stringify(old), id); migrationFixture.close();
+  const read = async () => (await ok(a, 'read_match', { version: 5, match_id: id })).snapshot;
   const inspected = await ok(a, 'command', { ...command(), match_id: id, expected_revision: (await read()).revision, action: 'inspect_deposit', deposit_id: created.snapshot.deposits[0].id });
-  const args = { version: 4, match_id: id, expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: created.snapshot.deposits[0].id };
+  const args = { version: 5, match_id: id, expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: created.snapshot.deposits[0].id };
   const race = await Promise.all([a, a2].map(c => c.call('game_command', { ...args, command_id: randomUUID() })));
   assert.equal(race.filter(r => !r.isError).length, 1);
   assert.equal(race.find(r => r.isError).structuredContent.error.code, 'CONFLICT');
@@ -162,7 +168,7 @@ try {
   assert.equal((await read()).batches.length, 4);
   assert.deepEqual(await ok(a, 'create_match', create), created, 'receipt survives process restart');
   await fetch(origin + '/auth/logout', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${aToken}` }, body: '{}' });
-  const revoked = await a.call('game_read_match', { version: 4, match_id: id }); assert.equal(revoked.structuredContent.error.code, 'AUTH_REQUIRED');
+  const revoked = await a.call('game_read_match', { version: 5, match_id: id }); assert.equal(revoked.structuredContent.error.code, 'AUTH_REQUIRED');
   console.log('PASS real SQLite service + MCP: isolated sessions, duplicate commands, concurrent collection, autonomous scheduling, process kill/restart, exactly-once outputs and revocation');
 } finally {
   await Promise.all(clients.map(c => c.close())); await stop(); await rm(root, { recursive: true, force: true });

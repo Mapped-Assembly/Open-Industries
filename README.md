@@ -163,7 +163,7 @@ Live cloud tests need a dedicated Supabase test project and test-only credential
 - [Revision history and restore](docs/scene-history.md) — compare saved versions, restore a new head, and preserve exact geometry bindings.
 - [Cross-agent walkthrough](docs/mcp-agent-workflows.md) — deterministic Grok/ChatGPT/Codex fixtures, local agent setup, and create/update/reopen commands.
 - [External-agent scene authoring](docs/mcp-scenes.md) — MCP setup, typed tools, revision URLs, and the deterministic cleanroom fixture.
-- [Authoritative city-dump runtime](docs/mcp-game-runtime.md) — authenticated two-player matches, private material inspection, durable processing and database scheduler setup.
+- [Authoritative city-dump runtime](docs/mcp-game-runtime.md) — authenticated two-player recovery, private sensor evidence, robot scavenging/hauling/charging, material inspection and durable processing in SQLite.
 - [Development and integration guide](docs/development.md) — local generation, MCP, CLI, import contracts, and GIF details.
 - [Scene links](docs/scene-links.md) — private scene/revision URLs, expiring shared links, and deployment steps.
 - [Cloud storage guide](docs/cloud-storage.md) — private asset transfers, setup, limits, and lifecycle.
