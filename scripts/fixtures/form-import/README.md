@@ -1,0 +1,7 @@
+# Hardware IR import contract fixtures
+
+`hardware-ir-0.1.json` and `hardware-ir-0.2.json` are hand-authored, sanitized contract fixtures for #19. They are **not captured SDK/OpenCode/Codex output** and do not complete the workflow-produced fixture requirement in #21.
+
+Known fields were checked against [Form OSS Hardware IR models](https://github.com/caid-technologies/Form-OSS/blob/d594bd3317860eb1225030dcc38d8a2a26f5d291/forma_core/workspaces/projects/models.py) and its [0.1/0.2 migration documentation](https://github.com/caid-technologies/Form-OSS/blob/d594bd3317860eb1225030dcc38d8a2a26f5d291/docs/hardware-ir.md). The 0.1 fixture retains an aggregate component quantity; 0.2 separates definitions, physical instances and BOM references. Sparse optional sections and legacy string validation findings exercise the spatial import compatibility contract.
+
+The test wraps both documents in raw IR, `project_ir`, `hardware_ir`, current/legacy manifests, SDK `response` and current/legacy namespace objects, with each supported authoring-agent label. It verifies retained compiler findings, artifacts, extension data and provenance, source immutability, normalized geometry, portable round trips and malformed-field errors. STEP conversion is stubbed only for the companion-file path check; this is not a CAD tessellation benchmark. URLs use example.invalid and digests are illustrative; no credentials, private data or network calls are required.

@@ -1,0 +1,31 @@
+{
+  "format": "mergence.mcp-workflow",
+  "version": 1,
+  "origin": "authored-example-not-provider-capture",
+  "client": "codex",
+  "initialize": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "codex-fixture-host",
+      "version": "1.0.0"
+    }
+  },
+  "response_mode": "both",
+  "request_ids": "number",
+  "create": {
+    "request_id": "f1650000-0000-4000-8000-000000000003",
+    "agent": "codex-fixture"
+  },
+  "update": {
+    "request_id": "f1650000-0000-4000-9000-000000000003",
+    "agent": "codex-fixture",
+    "room_width": 28,
+    "instance_id": "fa8b1ffc-5a00-4987-9cbd-3ffbf1a1e6aa",
+    "position": [
+      3.348,
+      0.21,
+      -3.8
+    ]
+  }
+}

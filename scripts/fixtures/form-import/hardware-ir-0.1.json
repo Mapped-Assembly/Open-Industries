@@ -1,0 +1,183 @@
+{
+  "hardware_ir_version": "0.1",
+  "overview": {
+    "title": "Import contract bench",
+    "description": "Sanitized authored fixture",
+    "difficulty": "Beginner",
+    "category": "Laboratory",
+    "estimated_cost": 12.5
+  },
+  "assembly_metadata": {
+    "project_id": "import-fixture",
+    "revision": 7,
+    "source_agent": "sdk",
+    "generated_at": "2026-09-29T00:00:00Z",
+    "extension_note": "preserved"
+  },
+  "components": [
+    {
+      "ref_des": "U1",
+      "name": "Sensor",
+      "part_number": "S-1",
+      "category": "Sensor",
+      "quantity": 2,
+      "unit_price": 12.5,
+      "pins": [
+        {
+          "pin_id": "1",
+          "name": "VCC",
+          "pin_type": "Power",
+          "voltage": 3.3,
+          "description": null
+        }
+      ]
+    }
+  ],
+  "bom": [
+    {
+      "name": "Sensor",
+      "quantity": 2,
+      "unit_price": 12.5
+    }
+  ],
+  "nets": [
+    {
+      "net_id": "NET_VCC",
+      "name": "3.3V",
+      "net_type": "Power",
+      "voltage": 3.3,
+      "pins": [
+        {
+          "ref_des": "U1",
+          "pin_id": "1"
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "critical": [],
+    "warning": [
+      {
+        "severity": "WARNING",
+        "category": "Clearance",
+        "description": "Check service clearance",
+        "troubleshooting": "Review mounting",
+        "extension_code": "C1"
+      }
+    ],
+    "info": [
+      "Fixture only"
+    ]
+  },
+  "mechanical": {
+    "physical_form": "Box",
+    "enclosure_type": "Off-the-shelf",
+    "mounting_guidance": "Use spacers",
+    "fabrication_details": [
+      "No manufacturing approval implied"
+    ],
+    "render_dimensions": {
+      "x_mm": 100,
+      "y_mm": 200,
+      "z_mm": 100
+    },
+    "component_placements": [
+      {
+        "ref_des": "U1",
+        "label": "Sensor",
+        "position": {
+          "x_mm": 0,
+          "y_mm": 0,
+          "z_mm": 50
+        },
+        "size": {
+          "x_mm": 100,
+          "y_mm": 200,
+          "z_mm": 100
+        },
+        "orientation_deg": {
+          "x_deg": 0,
+          "y_deg": 0,
+          "z_deg": 0
+        }
+      }
+    ],
+    "cad_sources": [
+      {
+        "name": "Reference CAD",
+        "source_type": "Reference CAD",
+        "url": "https://example.invalid/reference",
+        "license": null
+      }
+    ],
+    "motion_intents": [
+      {
+        "type": "prismatic",
+        "target_ref": "U1",
+        "axis": "Z",
+        "pivot_mm": [
+          0,
+          0,
+          50
+        ],
+        "min_mm": 0,
+        "max_mm": 10
+      }
+    ]
+  },
+  "assembly": [
+    {
+      "step_num": 1,
+      "title": "Mount sensor",
+      "description": "Secure the part",
+      "danger_flag": false,
+      "danger_message": null,
+      "affected_components": [
+        "U1"
+      ]
+    }
+  ],
+  "requirements": {
+    "requirements": [
+      "Inspect in room"
+    ],
+    "power_needs": "3.3V",
+    "operating_voltage": 3.3,
+    "safety_notes": []
+  },
+  "constraints": [
+    "Keep source data immutable"
+  ],
+  "fabrication_notes": [],
+  "is_valid": true,
+  "extension": {
+    "nested": [
+      "preserve",
+      {
+        "value": 42
+      }
+    ]
+  },
+  "artifacts": [
+    {
+      "path": "cad/bench.step",
+      "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "kind": "cad",
+      "extension_note": "compiled output"
+    }
+  ],
+  "system_architecture": {
+    "summary": "Sensor bench",
+    "root": {
+      "system_id": "product",
+      "name": "Bench",
+      "children": [
+        {
+          "system_id": "electrical.sensor",
+          "purpose": "Measurement",
+          "interfaces": []
+        }
+      ]
+    }
+  }
+}

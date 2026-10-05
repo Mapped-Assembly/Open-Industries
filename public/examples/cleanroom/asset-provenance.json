@@ -1,0 +1,48 @@
+{
+  "format": "mergence.example-provenance",
+  "version": 1,
+  "assets": [
+    {
+      "example_id": "cleanroom-architecture",
+      "asset_id": "generated-cleanroom-doubled-v1",
+      "source_kind": "generated",
+      "filename": "cleanroom-suite-doubled.generated.json",
+      "digest": "fe67e511747730ab99ff8cdf253f4ea375e3e51de60960c97e461f4015929783",
+      "units": "m",
+      "up_axis": "Y",
+      "source_project": null,
+      "geometry_note": "Procedurally generated architectural boxes; illustrative room layout, not CAD or compliance approval.",
+      "declared_license": null,
+      "license_evidence": "No repository license file is present.",
+      "permission_note": "Repository-authored example with no explicit license grant found. Confirm permission with maintainers before redistribution."
+    },
+    {
+      "example_id": "cleanroom-robot",
+      "asset_id": "step-37e1e7bcb93047a3ba6e9effe16675d430b1aee09b692806fdb0ec4e1c700cf8-Z-1",
+      "source_kind": "step",
+      "filename": "swab_bot.step",
+      "digest": "37e1e7bcb93047a3ba6e9effe16675d430b1aee09b692806fdb0ec4e1c700cf8",
+      "units": "m",
+      "up_axis": "Y",
+      "source_project": "forma-cleanroom-swab-bot",
+      "geometry_note": "Tessellated STEP from a Form-authored project; mostly fused pose. Whole-robot sampling approach/retract is approximate, not articulated simulation.",
+      "declared_license": "CERN-OHL-S-2.0",
+      "license_evidence": "public/examples/cleanroom/README.md at commit 4f0ee0c (upstream license files not included)",
+      "permission_note": "Existing example documentation reports the CAD license; source archive, license notices, and redistribution conditions require verification before reuse. No additional permission is granted here."
+    },
+    {
+      "example_id": "cleanroom-desk",
+      "asset_id": "step-d4f334030bfb8c4d80fcceb006607ff5c8eb66a312d930131ee5d5252793f727-Z-1",
+      "source_kind": "step",
+      "filename": "cleanroom_desk.step",
+      "digest": "d4f334030bfb8c4d80fcceb006607ff5c8eb66a312d930131ee5d5252793f727",
+      "units": "m",
+      "up_axis": "Y",
+      "source_project": "forma-cleanroom-desk",
+      "geometry_note": "Tessellated STEP workbench from a Form-authored project; rendered geometry, not fabrication validation.",
+      "declared_license": "CERN-OHL-S-2.0",
+      "license_evidence": "public/examples/cleanroom/README.md at commit 4f0ee0c (upstream license files not included)",
+      "permission_note": "Existing example documentation reports the CAD license; source archive, license notices, and redistribution conditions require verification before reuse. No additional permission is granted here."
+    }
+  ]
+}

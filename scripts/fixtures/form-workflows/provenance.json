@@ -1,0 +1,48 @@
+{
+  "agent_client_sha256": "ee8141f1a99312d83055e1f17cce3e98802207c135d17bed1fc1af11e8880898",
+  "agent_mode": "published portable agent compile client + real local MCP handler + isolated SQLite",
+  "files": {
+    "codex/authored-ir-0.1.json": "508671d81273d5d53704357c0c9d3ad6ceb48850a44a9d32a408e4742e44a746",
+    "codex/compiled-project.json": "3e61575d143583da1ccbcf3948584590910c5820874fd8cea8c1b07a8cf06f45",
+    "codex/forma-project.json": "0625f4e8a1d5cdc42c0f4a392feae3660048a22f1a2c87c488346a26fc8ec51d",
+    "codex/project-object.json": "a5619576169697d70704c6caadf9b7e4ecd947daeaa5bc697ada3a88dc510ff6",
+    "codex/schematic.svg": "909b3e1ae86434ab9d3493fc0300616c411573f12c437756216e6695074cd5d8",
+    "codex/validation.json": "08df8ea009e7855e60c5a86a4a08810070b437c26b5154efd80cde3e67b23820",
+    "codex/wiring.mmd": "92a2d51055586fffe12b1447cd7de617b7495b8520c1a54f16234b705190a75a",
+    "compile-requests.json": "ee09fed759f2ae99d4ec22d6c548403ae9475c7a91533d9960778bc841faa072",
+    "opencode/authored-ir-0.1.json": "aad64889092fb34a84e15470b2e2e916e23694af2987103e30513f02f82fe048",
+    "opencode/compiled-project.json": "256e8bc8f5b64d45da6090e308985bdac0bef7ccf2dd3d7405a443fb896cf44d",
+    "opencode/forma-project.json": "44f87a207c45c26a171a4ff69777904562e4b00328b76257127e6b40f83a07a6",
+    "opencode/models/block.step": "60dac9a8f4e9f6b29c6ca424b2eb9fcaf5b413b22d123309fe56f12dd7178e1f",
+    "opencode/project-object.json": "1d9542396f7d2112ba7ddf3fb759c3b8f0033e05ff9cd4ee64f4f4e83965fa78",
+    "opencode/schematic.svg": "cd0395526297c3ccecf4ba4892d88945a2f80b3a5792472eb851b8439c4b70f5",
+    "opencode/validation.json": "08df8ea009e7855e60c5a86a4a08810070b437c26b5154efd80cde3e67b23820",
+    "opencode/wiring.mmd": "92a2d51055586fffe12b1447cd7de617b7495b8520c1a54f16234b705190a75a",
+    "sdk/project-ir-0.1.json": "de6c6828689be02bde75a73fa9b345c3419bef8f463eb26e68aca06efecd5b06",
+    "sdk/project-ir.json": "155e6b3457e193e26ddec8c98b4d4455ee49e700901f4b0685bc5a5cc59c8822",
+    "sdk/project-object.json": "1f5b46abf3bda82d3772a6b8560dd21145dee1b0244acd0b6bfd0b3bd9b7f31a"
+  },
+  "legacy_sdk_commit": "6125a56e16b71de21d38929bc1ec09e94119ec21",
+  "live_provider_calls": false,
+  "native_agent_apps_executed": false,
+  "normalized_fields": [
+    "created_at",
+    "updated_at",
+    "generated_at",
+    "timestamp"
+  ],
+  "sanitized_fields": [
+    "llm_provider",
+    "model_name",
+    "model_overridden",
+    "provider_overridden",
+    "requested_model",
+    "requested_provider",
+    "runtime_model",
+    "runtime_provider"
+  ],
+  "sdk_distribution": "caid-forma-core==0.3.5",
+  "sdk_mode": "deterministic simulation",
+  "upstream_commit": "d594bd3317860eb1225030dcc38d8a2a26f5d291",
+  "upstream_repository": "https://github.com/caid-technologies/Form-OSS"
+}

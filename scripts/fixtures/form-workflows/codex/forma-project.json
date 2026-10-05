@@ -1,0 +1,235 @@
+{
+  "artifacts": [
+    {
+      "media_type": "application/json",
+      "path": "validation.json",
+      "sha256": "08df8ea009e7855e60c5a86a4a08810070b437c26b5154efd80cde3e67b23820"
+    },
+    {
+      "media_type": "text/vnd.mermaid",
+      "path": "wiring.mmd",
+      "sha256": "92a2d51055586fffe12b1447cd7de617b7495b8520c1a54f16234b705190a75a"
+    },
+    {
+      "media_type": "image/svg+xml",
+      "path": "schematic.svg",
+      "sha256": "909b3e1ae86434ab9d3493fc0300616c411573f12c437756216e6695074cd5d8"
+    }
+  ],
+  "format": "forma-project",
+  "project_id": "10000000-0000-4000-8000-000000000002",
+  "project_ir": {
+    "assembly": [],
+    "assembly_metadata": {
+      "authoring_agent": "codex",
+      "cad_generation": {
+        "adapter": "forma-opencad",
+        "required": false,
+        "status": "provided"
+      },
+      "chat_id": null,
+      "compile_revision": 1,
+      "compiled_by": "forma.compile_project",
+      "created_at": "2026-09-29T00:00:00Z",
+      "project_id": "10000000-0000-4000-8000-000000000002",
+      "source_prompt": "Codex workflow fixture"
+    },
+    "bom": [
+      {
+        "category": "Mechanical",
+        "extended_price": 5.0,
+        "instance_refs": [
+          "BASE"
+        ],
+        "line_id": "BOM_PART_BASE_FIXTURE",
+        "manufacturer": null,
+        "name": "Fixture base",
+        "part_definition_id": "PART_BASE_FIXTURE",
+        "part_number": "BASE-FIXTURE",
+        "quantity": 1,
+        "rationale": "Deterministic spatial import fixture",
+        "sourcing_url": null,
+        "unit_price": 5.0
+      },
+      {
+        "category": "Mechanical",
+        "extended_price": 5.0,
+        "instance_refs": [
+          "TOP"
+        ],
+        "line_id": "BOM_PART_TOP_FIXTURE",
+        "manufacturer": null,
+        "name": "Fixture top",
+        "part_definition_id": "PART_TOP_FIXTURE",
+        "part_number": "TOP-FIXTURE",
+        "quantity": 1,
+        "rationale": "Deterministic spatial import fixture",
+        "sourcing_url": null,
+        "unit_price": 5.0
+      }
+    ],
+    "buses": [],
+    "cad_model": {
+      "meshes": [
+        {
+          "faces": [
+            0,
+            1,
+            2
+          ],
+          "name": "Fixture base CAD",
+          "ref_des": "BASE",
+          "vertices": [
+            -50,
+            -30,
+            0,
+            50,
+            -30,
+            0,
+            0,
+            30,
+            20
+          ]
+        }
+      ]
+    },
+    "components": [
+      {
+        "configuration": {},
+        "part_definition_id": "PART_BASE_FIXTURE",
+        "rationale": "Deterministic spatial import fixture",
+        "ref_des": "BASE"
+      },
+      {
+        "configuration": {},
+        "part_definition_id": "PART_TOP_FIXTURE",
+        "rationale": "Deterministic spatial import fixture",
+        "ref_des": "TOP"
+      }
+    ],
+    "constraints": [],
+    "estimated_current_draw_ma": 0.0,
+    "fabrication_notes": [],
+    "hardware_ir_version": "0.2",
+    "is_valid": true,
+    "mechanical": {
+      "cad_operations": [],
+      "cad_sources": [],
+      "component_placements": [
+        {
+          "category": null,
+          "label": "Fixture base",
+          "layer": "electrical",
+          "mounting_face": null,
+          "notes": null,
+          "orientation_deg": {
+            "x_deg": 0.0,
+            "y_deg": 0.0,
+            "z_deg": 0.0
+          },
+          "position": {
+            "x_mm": 0.0,
+            "y_mm": 0.0,
+            "z_mm": 10.0
+          },
+          "ref_des": "BASE",
+          "size": {
+            "x_mm": 100.0,
+            "y_mm": 60.0,
+            "z_mm": 20.0
+          }
+        },
+        {
+          "category": null,
+          "label": "Fixture top",
+          "layer": "electrical",
+          "mounting_face": null,
+          "notes": null,
+          "orientation_deg": {
+            "x_deg": 0.0,
+            "y_deg": 0.0,
+            "z_deg": 0.0
+          },
+          "position": {
+            "x_mm": 0.0,
+            "y_mm": 0.0,
+            "z_mm": 30.0
+          },
+          "ref_des": "TOP",
+          "size": {
+            "x_mm": 60.0,
+            "y_mm": 40.0,
+            "z_mm": 20.0
+          }
+        }
+      ],
+      "enclosure_type": "Test fixture",
+      "fabrication_cost_estimate_usd": 0.0,
+      "fabrication_details": [],
+      "manufacturability_rating": "Unverified",
+      "mechanism_benchmark": null,
+      "motion_intents": [],
+      "mounting_guidance": "Review only",
+      "physical_form": "Unspecified",
+      "render_dimensions": {
+        "x_mm": 100.0,
+        "y_mm": 60.0,
+        "z_mm": 40.0
+      },
+      "spatial_relationships": []
+    },
+    "nets": [],
+    "overview": {
+      "category": "Laboratory",
+      "description": "Authored test geometry; no physical design claims",
+      "difficulty": "Beginner",
+      "estimated_cost": 0.0,
+      "title": "Codex workflow fixture"
+    },
+    "part_definitions": [
+      {
+        "category": "Mechanical",
+        "datasheet_url": null,
+        "description": "",
+        "dimensions_mm": {},
+        "electrical_specs": {},
+        "manufacturer": null,
+        "name": "Fixture base",
+        "part_definition_id": "PART_BASE_FIXTURE",
+        "part_number": "BASE-FIXTURE",
+        "pins": [],
+        "sourcing_offers": [],
+        "sourcing_url": null,
+        "unit_price": 5.0
+      },
+      {
+        "category": "Mechanical",
+        "datasheet_url": null,
+        "description": "",
+        "dimensions_mm": {},
+        "electrical_specs": {},
+        "manufacturer": null,
+        "name": "Fixture top",
+        "part_definition_id": "PART_TOP_FIXTURE",
+        "part_number": "TOP-FIXTURE",
+        "pins": [],
+        "sourcing_offers": [],
+        "sourcing_url": null,
+        "unit_price": 5.0
+      }
+    ],
+    "pin_mappings": [],
+    "power_rails": [],
+    "project_version_history": [],
+    "requirements": null,
+    "system_architecture": null,
+    "validation": {
+      "critical": [],
+      "info": [],
+      "warning": []
+    }
+  },
+  "prompt": "Codex workflow fixture",
+  "title": "Codex workflow fixture",
+  "version": 1
+}

@@ -1,0 +1,76 @@
+name: Scene authoring
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  scenes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:mcp
+      - run: npm run test:form-import
+      - run: npm run test:form-workflows
+      - run: npm run test:project-files
+      - run: npm run test:cad
+      - run: node --import tsx scripts/workspace-test.ts
+      - run: npm run test:animation
+      - run: npm run test:scene-links
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:project-files-browser
+        env:
+          OI_PROJECT_EVIDENCE_DIR: ${{ runner.temp }}/oi-project-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: oi-project-browser-evidence
+          path: ${{ runner.temp }}/oi-project-evidence
+          if-no-files-found: ignore
+      - run: npm run test:form-workflows-browser
+        env:
+          FORM_IMPORT_EVIDENCE_DIR: ${{ runner.temp }}/form-import-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: form-import-browser-evidence
+          path: ${{ runner.temp }}/form-import-evidence
+          if-no-files-found: ignore
+      - run: npm run test:animation-browser
+        env:
+          ANIMATION_EVIDENCE_DIR: ${{ runner.temp }}/animation-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: animation-browser-evidence
+          path: ${{ runner.temp }}/animation-evidence
+          if-no-files-found: ignore
+      - run: npm run test:room-transitions
+        env:
+          ROOM_EVIDENCE_DIR: ${{ runner.temp }}/room-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: room-transition-browser-evidence
+          path: ${{ runner.temp }}/room-evidence
+          if-no-files-found: ignore
+      - run: npm run test:portable-scenes-browser
+      - run: npm run test:mcp-scenes-browser
+      - run: npm run test:scene-history-browser
+      - run: npm run test:mcp-agent-workflows-browser
+        env:
+          MCP_WORKFLOW_EVIDENCE_DIR: ${{ runner.temp }}/mcp-workflow-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mcp-workflow-browser-evidence
+          path: ${{ runner.temp }}/mcp-workflow-evidence
+          if-no-files-found: ignore

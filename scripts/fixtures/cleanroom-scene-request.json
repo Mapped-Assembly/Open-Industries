@@ -1,0 +1,478 @@
+{
+  "version": 1,
+  "request_id": "f1640000-0000-4000-8000-000000000001",
+  "agent": "fixture-agent",
+  "scene": {
+    "name": "Cleanroom sampling mission",
+    "room": {
+      "width": 24.384,
+      "depth": 24.384,
+      "height": 3.048
+    },
+    "instances": [
+      {
+        "id": "doubled-cleanroom-architecture-instance",
+        "name": "Doubled cleanroom architecture",
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "visible": true,
+        "asset": {
+          "kind": "example",
+          "id": "cleanroom-architecture"
+        }
+      },
+      {
+        "id": "49dce8c4-23db-4f3e-9d6d-0bcfb2369d33",
+        "name": "Form Swab-Sampling Robot",
+        "position": [
+          -3.048,
+          0.16,
+          -7.2
+        ],
+        "rotation": [
+          0,
+          90,
+          0
+        ],
+        "visible": true,
+        "asset": {
+          "kind": "example",
+          "id": "cleanroom-robot"
+        }
+      },
+      {
+        "id": "71c0f494-bce9-46af-b8df-0eb166ff6758",
+        "name": "Cleanroom Desk 1",
+        "position": [
+          -3.048,
+          0.21,
+          -3.8
+        ],
+        "rotation": [
+          0,
+          -90,
+          0
+        ],
+        "visible": true,
+        "asset": {
+          "kind": "example",
+          "id": "cleanroom-desk"
+        }
+      },
+      {
+        "id": "fa8b1ffc-5a00-4987-9cbd-3ffbf1a1e6aa",
+        "name": "Cleanroom Desk 2",
+        "position": [
+          3.048,
+          0.21,
+          -3.8
+        ],
+        "rotation": [
+          0,
+          -90,
+          0
+        ],
+        "visible": true,
+        "asset": {
+          "kind": "example",
+          "id": "cleanroom-desk"
+        }
+      },
+      {
+        "id": "b601caba-5d57-4de2-9c4c-584208a69b55",
+        "name": "Cleanroom Desk 3",
+        "position": [
+          -3.048,
+          0.21,
+          3.8
+        ],
+        "rotation": [
+          0,
+          90,
+          0
+        ],
+        "visible": true,
+        "asset": {
+          "kind": "example",
+          "id": "cleanroom-desk"
+        }
+      },
+      {
+        "id": "86315a8b-1aec-4c40-886d-696d1c32faf7",
+        "name": "Cleanroom Desk 4",
+        "position": [
+          3.048,
+          0.21,
+          3.8
+        ],
+        "rotation": [
+          0,
+          90,
+          0
+        ],
+        "visible": true,
+        "asset": {
+          "kind": "example",
+          "id": "cleanroom-desk"
+        }
+      }
+    ],
+    "animation": {
+      "duration": 110,
+      "loop": false,
+      "tracks": [
+        {
+          "instance_id": "49dce8c4-23db-4f3e-9d6d-0bcfb2369d33",
+          "keys": [
+            {
+              "time": 0,
+              "position": [
+                -3.048,
+                0.16,
+                -7.2
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 5,
+              "position": [
+                -4.2,
+                0.21,
+                -5.3
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 5.2,
+              "position": [
+                -4.2,
+                0.21,
+                -5.16
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 8,
+              "position": [
+                -4.2,
+                0.21,
+                -5.16
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 8.2,
+              "position": [
+                -4.2,
+                0.21,
+                -5.3
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 10,
+              "position": [
+                -1.9,
+                0.21,
+                -5.3
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 10.2,
+              "position": [
+                -1.9,
+                0.21,
+                -5.16
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 13,
+              "position": [
+                -1.9,
+                0.21,
+                -5.16
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 13.2,
+              "position": [
+                -1.9,
+                0.21,
+                -5.3
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 15,
+              "position": [
+                -3.048,
+                0.16,
+                -7.2
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 30,
+              "position": [
+                -9.144,
+                0.16,
+                -7.2
+              ],
+              "rotation": [
+                0,
+                180,
+                0
+              ]
+            },
+            {
+              "time": 50,
+              "position": [
+                -9.144,
+                0.16,
+                7.2
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 60,
+              "position": [
+                -3.048,
+                0.16,
+                7.2
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 65,
+              "position": [
+                -4.2,
+                0.21,
+                5.3
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 65.2,
+              "position": [
+                -4.2,
+                0.21,
+                5.16
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 68,
+              "position": [
+                -4.2,
+                0.21,
+                5.16
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 68.2,
+              "position": [
+                -4.2,
+                0.21,
+                5.3
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 70,
+              "position": [
+                -1.9,
+                0.21,
+                5.3
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 70.2,
+              "position": [
+                -1.9,
+                0.21,
+                5.16
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 73,
+              "position": [
+                -1.9,
+                0.21,
+                5.16
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 73.2,
+              "position": [
+                -1.9,
+                0.21,
+                5.3
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            },
+            {
+              "time": 75,
+              "position": [
+                -3.048,
+                0.16,
+                7.2
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 85,
+              "position": [
+                -9.144,
+                0.16,
+                7.2
+              ],
+              "rotation": [
+                0,
+                180,
+                0
+              ]
+            },
+            {
+              "time": 88,
+              "position": [
+                -9.144,
+                0.16,
+                9.144
+              ],
+              "rotation": [
+                0,
+                90,
+                0
+              ]
+            },
+            {
+              "time": 103,
+              "position": [
+                9.144,
+                0.16,
+                9.144
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 110,
+              "position": [
+                9.144,
+                0.16,
+                0
+              ],
+              "rotation": [
+                0,
+                -90,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

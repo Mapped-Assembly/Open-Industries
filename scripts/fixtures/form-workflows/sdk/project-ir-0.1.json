@@ -1,0 +1,571 @@
+{
+  "assembly": [
+    {
+      "affected_components": [
+        "U1",
+        "PWR1",
+        "ACT1"
+      ],
+      "danger_flag": true,
+      "danger_message": "Do not attach a bare LiPo directly to VIN. Add a proper charger/boost module before implementing battery backup.",
+      "description": "Seat the ESP32 on your proto-board. Connect PWR1 5V to ESP32 VIN and relay VCC, then tie PWR1 GND to the shared ground rail. Use ESP32 3V3 only for the BMP280 and OLED logic rail.",
+      "step_num": 1,
+      "title": "Wire 5V adapter and low-voltage rails"
+    },
+    {
+      "affected_components": [
+        "SEN1",
+        "DISP1",
+        "U1"
+      ],
+      "danger_flag": false,
+      "danger_message": null,
+      "description": "Connect SCL on both OLED and BMP280 to ESP32 Pin D22. Connect SDA on both display and pressure sensor to ESP32 Pin D21. Power them with 3.3V power rails and verify no crosstalk.",
+      "step_num": 2,
+      "title": "Construct Shared I2C Bus"
+    },
+    {
+      "affected_components": [
+        "ACT1",
+        "U1"
+      ],
+      "danger_flag": true,
+      "danger_message": "Unplug structural heating supplies before hooking up high voltage terminals!",
+      "description": "Power the relay coil from the PWR1 5V rail. Send the 3.3V-compatible input line (IN) to ESP32 GPIO pin D25. Route furnace control lines into Normally Open (NO) and Common (COM) blocks.",
+      "step_num": 3,
+      "title": "Integrate HVAC Switching relay"
+    }
+  ],
+  "assembly_metadata": {
+    "component_placement_count": 5,
+    "pipeline": "deterministic simulation + ADK-style hardware agents",
+    "project_id": "10000000-0000-4000-8000-000000000004",
+    "render_dimensions": {
+      "x_mm": 86.0,
+      "y_mm": 24.0,
+      "z_mm": 86.0
+    },
+    "render_pipeline": "Three.js + React Three Fiber",
+    "revision": 1,
+    "schematic": {
+      "canvas": {
+        "height": 720,
+        "width": 1180
+      },
+      "placements": {
+        "ACT1": {
+          "x": 870,
+          "y": 120
+        },
+        "DISP1": {
+          "x": 870,
+          "y": 380
+        },
+        "PWR1": {
+          "x": 80,
+          "y": 80
+        },
+        "SEN1": {
+          "x": 250,
+          "y": 420
+        },
+        "U1": {
+          "x": 460,
+          "y": 300
+        }
+      }
+    },
+    "source_agent": "sdk",
+    "source_usage": {
+      "catalog": true,
+      "data_warehouse": true,
+      "external_provider": null,
+      "external_sources": false,
+      "firecrawl": false,
+      "source_labels": [
+        "Catalog"
+      ],
+      "sources": [
+        "catalog"
+      ],
+      "tavily": false,
+      "web_research": false,
+      "workflow": "default"
+    },
+    "spatial_relationship_count": 4,
+    "status": "active",
+    "workflow": "default"
+  },
+  "buses": [
+    {
+      "bus_id": "BUS_I2C_1",
+      "bus_type": "I2C",
+      "clock_frequency_hz": 100000.0,
+      "nets": [
+        "NET_I2C_SDA",
+        "NET_I2C_SCL"
+      ]
+    }
+  ],
+  "components": [
+    {
+      "category": "Microcontroller",
+      "name": "ESP32 NodeMCU Development Board",
+      "part_number": "ESP32-WROOM-32D",
+      "pins": [],
+      "quantity": 1,
+      "rationale": "Onboard Bluetooth and WiFi allow web setpoints, scheduling, and logging integrations.",
+      "ref_des": "U1",
+      "sourcing_url": null,
+      "unit_price": 4.5
+    },
+    {
+      "category": "Sensor",
+      "name": "BMP280 Barometric Pressure & Temp Sensor",
+      "part_number": "BMP280",
+      "pins": [],
+      "quantity": 1,
+      "rationale": "Performs precision temperature tracking to regulate comfortable setpoints within 0.1C.",
+      "ref_des": "SEN1",
+      "sourcing_url": null,
+      "unit_price": 1.8
+    },
+    {
+      "category": "Actuator",
+      "name": "5V 1-Channel Optocoupled Relay Module",
+      "part_number": "Relay-5V-1Ch",
+      "pins": [],
+      "quantity": 1,
+      "rationale": "Switches active HVAC furnace control logic safely.",
+      "ref_des": "ACT1",
+      "sourcing_url": null,
+      "unit_price": 1.2
+    },
+    {
+      "category": "Display",
+      "name": "0.96 inch OLED Display (I2C)",
+      "part_number": "SSD1306-I2C",
+      "pins": [],
+      "quantity": 1,
+      "rationale": "Renders a real-time UI showing current temp vs user target setpoints.",
+      "ref_des": "DISP1",
+      "sourcing_url": null,
+      "unit_price": 2.5
+    },
+    {
+      "category": "Power",
+      "name": "5V Stationary Adapter Feed",
+      "part_number": "USB-5V-Plug",
+      "pins": [],
+      "quantity": 1,
+      "rationale": "Provides regulated 5V input for ESP32 VIN and the relay coil supply.",
+      "ref_des": "PWR1",
+      "sourcing_url": null,
+      "unit_price": 1.5
+    }
+  ],
+  "constraints": [
+    "Standard wall box mounting.",
+    "Total weight under 150g."
+  ],
+  "estimated_current_draw_ma": 180.0,
+  "fabrication_notes": [
+    "Front-facing slot for BMP280 air-exposure.",
+    "Laser cut clear acrylic viewing window.",
+    "Mounting holes spaced 60mm vertically to match US wall standards."
+  ],
+  "hardware_ir_version": "0.1",
+  "is_valid": true,
+  "mechanical": {
+    "cad_sources": [
+      {
+        "estimated_unit_price_usd": 0.0,
+        "file_formats": [
+          "STL"
+        ],
+        "license": "Model-specific licenses vary; verify selected model before fabrication",
+        "name": "Thermostat trim plate STL candidate index",
+        "notes": "Use as a geometry reference for wall coverage, then generate a project-specific acrylic DXF for the OLED/BMP280 layout.",
+        "source_type": "Reference CAD",
+        "url": "https://www.stlfinder.com/3dmodels/thermostat-trim-plate/"
+      },
+      {
+        "estimated_unit_price_usd": 4.02,
+        "file_formats": [
+          "STL"
+        ],
+        "license": "Commercial model listing; verify current download price and license before reuse",
+        "name": "Google Nest thermostat wallmount candidate index",
+        "notes": "Useful reference for wall-mount clip geometry and cable pass-through placement.",
+        "source_type": "Paid STL",
+        "url": "https://cults3d.com/es/etiquetas/termostato%2Bnest%2Be%2Buk"
+      }
+    ],
+    "component_placements": [
+      {
+        "category": "Microcontroller",
+        "label": "ESP32 NodeMCU Development Board",
+        "layer": "electrical",
+        "mounting_face": "internal",
+        "notes": "Onboard Bluetooth and WiFi allow web setpoints, scheduling, and logging integrations.",
+        "orientation_deg": {
+          "x_deg": 0.0,
+          "y_deg": 0.0,
+          "z_deg": 0.0
+        },
+        "position": {
+          "x_mm": 0.0,
+          "y_mm": 0.0,
+          "z_mm": -3.44
+        },
+        "ref_des": "U1",
+        "size": {
+          "x_mm": 38.0,
+          "y_mm": 28.0,
+          "z_mm": 5.0
+        }
+      },
+      {
+        "category": "Sensor",
+        "label": "BMP280 Barometric Pressure & Temp Sensor",
+        "layer": "electrical",
+        "mounting_face": "front",
+        "notes": "Performs precision temperature tracking to regulate comfortable setpoints within 0.1C.",
+        "orientation_deg": {
+          "x_deg": 0.0,
+          "y_deg": 0.0,
+          "z_deg": 0.0
+        },
+        "position": {
+          "x_mm": 0.0,
+          "y_mm": -10.08,
+          "z_mm": 13.76
+        },
+        "ref_des": "SEN1",
+        "size": {
+          "x_mm": 20.0,
+          "y_mm": 12.0,
+          "z_mm": 14.0
+        }
+      },
+      {
+        "category": "Actuator",
+        "label": "5V 1-Channel Optocoupled Relay Module",
+        "layer": "electrical",
+        "mounting_face": "internal",
+        "notes": "Switches active HVAC furnace control logic safely.",
+        "orientation_deg": {
+          "x_deg": 0.0,
+          "y_deg": 0.0,
+          "z_deg": 0.0
+        },
+        "position": {
+          "x_mm": 25.8,
+          "y_mm": 2.88,
+          "z_mm": -3.44
+        },
+        "ref_des": "ACT1",
+        "size": {
+          "x_mm": 38.0,
+          "y_mm": 26.0,
+          "z_mm": 16.0
+        }
+      },
+      {
+        "category": "Display",
+        "label": "0.96 inch OLED Display (I2C)",
+        "layer": "electrical",
+        "mounting_face": "front",
+        "notes": "Renders a real-time UI showing current temp vs user target setpoints.",
+        "orientation_deg": {
+          "x_deg": 0.0,
+          "y_deg": 0.0,
+          "z_deg": 0.0
+        },
+        "position": {
+          "x_mm": 0.0,
+          "y_mm": -10.32,
+          "z_mm": 20.64
+        },
+        "ref_des": "DISP1",
+        "size": {
+          "x_mm": 34.0,
+          "y_mm": 3.0,
+          "z_mm": 18.0
+        }
+      },
+      {
+        "category": "Power",
+        "label": "5V Stationary Adapter Feed",
+        "layer": "electrical",
+        "mounting_face": "front",
+        "notes": "Provides regulated 5V input for ESP32 VIN and the relay coil supply.",
+        "orientation_deg": {
+          "x_deg": 0.0,
+          "y_deg": 0.0,
+          "z_deg": 0.0
+        },
+        "position": {
+          "x_mm": 24.08,
+          "y_mm": -8.64,
+          "z_mm": -24.08
+        },
+        "ref_des": "PWR1",
+        "size": {
+          "x_mm": 18.0,
+          "y_mm": 8.0,
+          "z_mm": 7.0
+        }
+      }
+    ],
+    "enclosure_type": "Custom Acrylic",
+    "fabrication_cost_estimate_usd": 7.5,
+    "fabrication_details": [
+      "Front-facing slot for BMP280 air-exposure.",
+      "Laser cut clear acrylic viewing window.",
+      "Mounting holes spaced 60mm vertically to match US wall standards."
+    ],
+    "manufacturability_rating": "Moderate",
+    "mounting_guidance": "Screw back-plate onto dry-wall with standard drywall screws. Clip the acrylic cover overlay on top for clean bezel appearance.",
+    "render_dimensions": {
+      "x_mm": 86.0,
+      "y_mm": 24.0,
+      "z_mm": 86.0
+    },
+    "spatial_relationships": [
+      {
+        "axis": "Z",
+        "notes": "SEN1 is placed along the Z axis relative to U1.",
+        "offset_mm": 17.2,
+        "relation": "spatial offset from controller",
+        "source_ref_des": "U1",
+        "target_ref_des": "SEN1"
+      },
+      {
+        "axis": "X",
+        "notes": "ACT1 is placed along the X axis relative to U1.",
+        "offset_mm": 25.8,
+        "relation": "spatial offset from controller",
+        "source_ref_des": "U1",
+        "target_ref_des": "ACT1"
+      },
+      {
+        "axis": "Z",
+        "notes": "DISP1 is placed along the Z axis relative to U1.",
+        "offset_mm": 24.08,
+        "relation": "spatial offset from controller",
+        "source_ref_des": "U1",
+        "target_ref_des": "DISP1"
+      },
+      {
+        "axis": "X",
+        "notes": "PWR1 is placed along the X axis relative to U1.",
+        "offset_mm": 24.08,
+        "relation": "spatial offset from controller",
+        "source_ref_des": "U1",
+        "target_ref_des": "PWR1"
+      }
+    ]
+  },
+  "nets": [
+    {
+      "name": "Ground Wire",
+      "net_id": "NET_GND",
+      "net_type": "Ground",
+      "pins": [
+        {
+          "pin_id": "GND",
+          "ref_des": "U1"
+        },
+        {
+          "pin_id": "GND",
+          "ref_des": "SEN1"
+        },
+        {
+          "pin_id": "GND",
+          "ref_des": "ACT1"
+        },
+        {
+          "pin_id": "GND",
+          "ref_des": "DISP1"
+        },
+        {
+          "pin_id": "GND",
+          "ref_des": "PWR1"
+        }
+      ],
+      "voltage": 0.0
+    },
+    {
+      "name": "3.3V Power Line",
+      "net_id": "NET_3V3",
+      "net_type": "Power",
+      "pins": [
+        {
+          "pin_id": "3V3",
+          "ref_des": "U1"
+        },
+        {
+          "pin_id": "VCC",
+          "ref_des": "SEN1"
+        },
+        {
+          "pin_id": "VCC",
+          "ref_des": "DISP1"
+        }
+      ],
+      "voltage": 3.3
+    },
+    {
+      "name": "5V Adapter Rail",
+      "net_id": "NET_5V",
+      "net_type": "Power",
+      "pins": [
+        {
+          "pin_id": "5V",
+          "ref_des": "PWR1"
+        },
+        {
+          "pin_id": "VIN",
+          "ref_des": "U1"
+        },
+        {
+          "pin_id": "VCC",
+          "ref_des": "ACT1"
+        }
+      ],
+      "voltage": 5.0
+    },
+    {
+      "name": "I2C Serial Data",
+      "net_id": "NET_I2C_SDA",
+      "net_type": "I2C",
+      "pins": [
+        {
+          "pin_id": "D21",
+          "ref_des": "U1"
+        },
+        {
+          "pin_id": "SDA",
+          "ref_des": "DISP1"
+        },
+        {
+          "pin_id": "SDA",
+          "ref_des": "SEN1"
+        }
+      ],
+      "voltage": 3.3
+    },
+    {
+      "name": "I2C Serial Clock",
+      "net_id": "NET_I2C_SCL",
+      "net_type": "I2C",
+      "pins": [
+        {
+          "pin_id": "D22",
+          "ref_des": "U1"
+        },
+        {
+          "pin_id": "SCL",
+          "ref_des": "DISP1"
+        },
+        {
+          "pin_id": "SCL",
+          "ref_des": "SEN1"
+        }
+      ],
+      "voltage": 3.3
+    },
+    {
+      "name": "Furnace Control Net",
+      "net_id": "NET_RELAY_CTRL",
+      "net_type": "Digital",
+      "pins": [
+        {
+          "pin_id": "D25",
+          "ref_des": "U1"
+        },
+        {
+          "pin_id": "IN",
+          "ref_des": "ACT1"
+        }
+      ],
+      "voltage": 3.3
+    }
+  ],
+  "overview": {
+    "category": "Smart Home",
+    "description": "Intelligent wall-mounted environment controller with climate regulation compiled for: 'A small temperature sensor enclosure for a laboratory bench'",
+    "difficulty": "Intermediate",
+    "estimated_cost": 11.5,
+    "title": "Smart Nest-Style Environmental Thermostat Controller"
+  },
+  "pin_mappings": [
+    {
+      "connected_to": "OLED/BMP280 Data",
+      "mcu_pin": "D21",
+      "net_name": "NET_I2C_SDA"
+    },
+    {
+      "connected_to": "OLED/BMP280 Clock",
+      "mcu_pin": "D22",
+      "net_name": "NET_I2C_SCL"
+    },
+    {
+      "connected_to": "Climate Control Relay Trigger",
+      "mcu_pin": "D25",
+      "net_name": "NET_RELAY_CTRL"
+    }
+  ],
+  "power_rails": [
+    {
+      "max_current_capacity_ma": 500.0,
+      "rail_id": "RAIL_3V3",
+      "source_component": "U1",
+      "voltage": 3.3
+    },
+    {
+      "max_current_capacity_ma": 1000.0,
+      "rail_id": "RAIL_5V0",
+      "source_component": "PWR1",
+      "voltage": 5.0
+    }
+  ],
+  "project_version_history": [
+    {
+      "description": "Initial fallback design generation",
+      "version": "0.1"
+    }
+  ],
+  "requirements": {
+    "missing_info": [],
+    "operating_voltage": 3.3,
+    "physical_constraints": [
+      "Standard wall box mounting.",
+      "Total weight under 150g."
+    ],
+    "power_needs": "5V stationary adapter feed. Rechargeable battery backup requires a charger/boost module not represented in this low-voltage wiring preset.",
+    "requirements": [
+      "Collect high-precision altitude, pressure, and ambient temperature readings.",
+      "Display custom menu, heat indices, and setpoint targets on OLED.",
+      "Actuate solid-state heating elements or fan control through an optoisolated relay switch.",
+      "Maintain low-power standby during battery backups."
+    ],
+    "safety_notes": [
+      "Incorporate thermal fusing if controlling resistive heater elements.",
+      "Double check voltage bounds before wiring rechargeable LiPos."
+    ]
+  },
+  "validation": {
+    "critical": [],
+    "info": [
+      {
+        "category": "Scope Gap",
+        "description": "The battery-backup requirement is documented, but this preset wiring only models the safe 5V adapter-powered thermostat core.",
+        "severity": "INFO",
+        "troubleshooting": "Add a LiPo charger/protection module and boost or power-path regulator before implementing rechargeable backup operation."
+      }
+    ],
+    "warning": []
+  }
+}

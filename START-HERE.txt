@@ -1,0 +1,33 @@
+OpenIndustries — verified local snapshot b7a35f2
+
+This is the checkout used for the scene-workflow verification. It includes the
+Forma generation/import/export changes and PR #82 workflow checks.
+The interface currently uses the Mergence name.
+
+WINDOWS QUICK START
+1. Install Node.js 22 or newer if it is not already installed.
+2. Extract the ZIP.
+3. Open a terminal inside the OpenIndustries folder and run:
+
+   npm ci
+   npm run dev
+
+4. Open http://127.0.0.1:5173
+5. Click Import OI project and select samples/forma-projects.oi.json.
+
+The sample contains the saved pan-tilt platform, hexapod, LED bar and robot arm
+preview meshes. samples/forma-scene-orbit.gif is the rendered camera orbit.
+The source projects' saved preview detail varies, including a simplified hexapod.
+
+Importing, editing and exporting local scenes needs no Supabase account.
+For new Forma generation, Python 3.11+ and the pinned Forma package are required;
+see docs/development.md under Local Form generation.
+Cloud scene persistence requires your OI Supabase configuration and owner sign-in.
+
+SNAPSHOT
+Repository: https://github.com/caid-technologies/Open-Industries
+Commit: b7a35f2a50b8408731f7e651110f23a697ca4fa3
+Branch at packaging: docs/issue-62-verification
+
+This archive includes source and the sample exports. Install dependencies with
+npm ci; a Python environment and account credentials are not bundled.

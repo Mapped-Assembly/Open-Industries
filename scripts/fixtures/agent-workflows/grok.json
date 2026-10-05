@@ -1,0 +1,31 @@
+{
+  "format": "mergence.mcp-workflow",
+  "version": 1,
+  "origin": "authored-example-not-provider-capture",
+  "client": "grok",
+  "initialize": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "grok-fixture-host",
+      "version": "1.0.0"
+    }
+  },
+  "response_mode": "text",
+  "request_ids": "string",
+  "create": {
+    "request_id": "f1650000-0000-4000-8000-000000000001",
+    "agent": "grok-fixture"
+  },
+  "update": {
+    "request_id": "f1650000-0000-4000-9000-000000000001",
+    "agent": "grok-fixture",
+    "room_width": 26,
+    "instance_id": "fa8b1ffc-5a00-4987-9cbd-3ffbf1a1e6aa",
+    "position": [
+      3.148,
+      0.21,
+      -3.8
+    ]
+  }
+}

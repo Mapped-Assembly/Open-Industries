@@ -1,0 +1,12 @@
+.git/
+.env
+.env.*
+.venv/
+.astra/
+node_modules/
+dist/
+test-results/
+playwright-report/
+supabase/
+server/
+*.log

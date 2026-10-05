@@ -1,0 +1,7 @@
+# Intentionally minimal: config push changes only these declared hosted settings.
+# Set the production Site URL and add its exact origin before deploying Auth.
+project_id = "astra-industries"
+
+[auth]
+site_url = "https://astra-industries.vercel.app"
+additional_redirect_urls = ["https://astra-industries.vercel.app", "http://127.0.0.1:8787", "http://localhost:8787", "http://127.0.0.1:5173", "http://localhost:5173"]

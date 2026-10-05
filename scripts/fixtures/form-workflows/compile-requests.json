@@ -1,0 +1,199 @@
+[
+  {
+    "id": "capture-request",
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "arguments": {
+        "authoring_agent": "opencode",
+        "project_ir": {
+          "assembly_metadata": {
+            "project_id": "10000000-0000-4000-8000-000000000001"
+          },
+          "cad_model": "models/block.step",
+          "components": [
+            {
+              "category": "Mechanical",
+              "name": "Fixture base",
+              "part_number": "BASE-FIXTURE",
+              "pins": [],
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "ref_des": "BASE",
+              "unit_price": 5
+            },
+            {
+              "category": "Mechanical",
+              "name": "Fixture top",
+              "part_number": "TOP-FIXTURE",
+              "pins": [],
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "ref_des": "TOP",
+              "unit_price": 5
+            }
+          ],
+          "hardware_ir_version": "0.1",
+          "mechanical": {
+            "component_placements": [
+              {
+                "label": "Fixture base",
+                "position": {
+                  "x_mm": 0,
+                  "y_mm": 0,
+                  "z_mm": 10
+                },
+                "ref_des": "BASE",
+                "size": {
+                  "x_mm": 100,
+                  "y_mm": 60,
+                  "z_mm": 20
+                }
+              },
+              {
+                "label": "Fixture top",
+                "position": {
+                  "x_mm": 0,
+                  "y_mm": 0,
+                  "z_mm": 30
+                },
+                "ref_des": "TOP",
+                "size": {
+                  "x_mm": 60,
+                  "y_mm": 40,
+                  "z_mm": 20
+                }
+              }
+            ],
+            "enclosure_type": "Test fixture",
+            "manufacturability_rating": "Unverified",
+            "mounting_guidance": "Review only",
+            "render_dimensions": {
+              "x_mm": 100,
+              "y_mm": 60,
+              "z_mm": 40
+            }
+          },
+          "nets": [],
+          "overview": {
+            "category": "Laboratory",
+            "description": "Authored test geometry; no physical design claims",
+            "difficulty": "Beginner",
+            "title": "Opencode workflow fixture"
+          }
+        }
+      },
+      "name": "forma.compile_project"
+    }
+  },
+  {
+    "id": "capture-request",
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "arguments": {
+        "authoring_agent": "codex",
+        "project_ir": {
+          "assembly_metadata": {
+            "project_id": "10000000-0000-4000-8000-000000000002"
+          },
+          "cad_model": {
+            "meshes": [
+              {
+                "faces": [
+                  0,
+                  1,
+                  2
+                ],
+                "name": "Fixture base CAD",
+                "ref_des": "BASE",
+                "vertices": [
+                  -50,
+                  -30,
+                  0,
+                  50,
+                  -30,
+                  0,
+                  0,
+                  30,
+                  20
+                ]
+              }
+            ]
+          },
+          "components": [
+            {
+              "category": "Mechanical",
+              "name": "Fixture base",
+              "part_number": "BASE-FIXTURE",
+              "pins": [],
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "ref_des": "BASE",
+              "unit_price": 5
+            },
+            {
+              "category": "Mechanical",
+              "name": "Fixture top",
+              "part_number": "TOP-FIXTURE",
+              "pins": [],
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "ref_des": "TOP",
+              "unit_price": 5
+            }
+          ],
+          "hardware_ir_version": "0.1",
+          "mechanical": {
+            "component_placements": [
+              {
+                "label": "Fixture base",
+                "position": {
+                  "x_mm": 0,
+                  "y_mm": 0,
+                  "z_mm": 10
+                },
+                "ref_des": "BASE",
+                "size": {
+                  "x_mm": 100,
+                  "y_mm": 60,
+                  "z_mm": 20
+                }
+              },
+              {
+                "label": "Fixture top",
+                "position": {
+                  "x_mm": 0,
+                  "y_mm": 0,
+                  "z_mm": 30
+                },
+                "ref_des": "TOP",
+                "size": {
+                  "x_mm": 60,
+                  "y_mm": 40,
+                  "z_mm": 20
+                }
+              }
+            ],
+            "enclosure_type": "Test fixture",
+            "manufacturability_rating": "Unverified",
+            "mounting_guidance": "Review only",
+            "render_dimensions": {
+              "x_mm": 100,
+              "y_mm": 60,
+              "z_mm": 40
+            }
+          },
+          "nets": [],
+          "overview": {
+            "category": "Laboratory",
+            "description": "Authored test geometry; no physical design claims",
+            "difficulty": "Beginner",
+            "title": "Codex workflow fixture"
+          }
+        }
+      },
+      "name": "forma.compile_project"
+    }
+  }
+]

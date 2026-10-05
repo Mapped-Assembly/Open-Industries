@@ -1,0 +1,31 @@
+{
+  "format": "mergence.mcp-workflow",
+  "version": 1,
+  "origin": "authored-example-not-provider-capture",
+  "client": "chatgpt",
+  "initialize": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "chatgpt-fixture-host",
+      "version": "1.0.0"
+    }
+  },
+  "response_mode": "structured",
+  "request_ids": "string",
+  "create": {
+    "request_id": "f1650000-0000-4000-8000-000000000002",
+    "agent": "chatgpt-fixture"
+  },
+  "update": {
+    "request_id": "f1650000-0000-4000-9000-000000000002",
+    "agent": "chatgpt-fixture",
+    "room_width": 27,
+    "instance_id": "fa8b1ffc-5a00-4987-9cbd-3ffbf1a1e6aa",
+    "position": [
+      3.248,
+      0.21,
+      -3.8
+    ]
+  }
+}

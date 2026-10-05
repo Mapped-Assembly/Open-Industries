@@ -1,0 +1,1827 @@
+{
+  "metadata": {
+    "context_governance": {
+      "default_mode": "none",
+      "rules": [
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.architecture",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.electrical",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.bom",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.mech",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.firmware",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.visuals",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.validation",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "constraints": [],
+            "overview": [
+              "title",
+              "description",
+              "difficulty",
+              "estimated_cost",
+              "category"
+            ],
+            "requirements": [
+              "requirements",
+              "power_needs",
+              "operating_voltage",
+              "physical_constraints",
+              "safety_notes"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Product intent and constraints are shared with every domain specialist.",
+          "recipient_namespace": "product.assembly",
+          "source_namespace": "product.overview"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.electrical",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.bom",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.mech",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.firmware",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.visuals",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.validation",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "system_architecture": []
+          },
+          "mode": "summary",
+          "reason": "The architecture agent routes the shared system hierarchy.",
+          "recipient_namespace": "product.assembly",
+          "source_namespace": "product.architecture"
+        },
+        {
+          "allowed_attributes": {
+            "components": [
+              "ref_des",
+              "part_definition_id",
+              "part_number",
+              "name",
+              "category",
+              "rationale",
+              "configuration"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Mechanical placement needs component identity, not electrical pins.",
+          "recipient_namespace": "product.mech",
+          "source_namespace": "product.electrical"
+        },
+        {
+          "allowed_attributes": {
+            "components": [
+              "ref_des",
+              "part_definition_id",
+              "part_number",
+              "name",
+              "category",
+              "rationale",
+              "configuration"
+            ]
+          },
+          "mode": "summary",
+          "reason": "BOM planning needs procurement identity, not pin-level data.",
+          "recipient_namespace": "product.bom",
+          "source_namespace": "product.electrical"
+        },
+        {
+          "allowed_attributes": {
+            "buses": [],
+            "components": [
+              "ref_des",
+              "part_definition_id",
+              "part_number",
+              "name",
+              "category",
+              "rationale",
+              "configuration"
+            ],
+            "pin_mappings": []
+          },
+          "mode": "summary",
+          "reason": "Firmware needs hardware interface assignments.",
+          "recipient_namespace": "product.firmware",
+          "source_namespace": "product.electrical"
+        },
+        {
+          "allowed_attributes": {
+            "components": [
+              "ref_des",
+              "part_definition_id",
+              "part_number",
+              "name",
+              "category",
+              "rationale",
+              "configuration"
+            ],
+            "nets": [
+              "net_id",
+              "name",
+              "net_type",
+              "voltage",
+              "component_refs"
+            ]
+          },
+          "mode": "summary",
+          "reason": "Assembly needs build-level connectivity without pin disclosure.",
+          "recipient_namespace": "product.assembly",
+          "source_namespace": "product.electrical"
+        },
+        {
+          "allowed_attributes": {
+            "buses": [],
+            "components": [],
+            "nets": [],
+            "part_definitions": [],
+            "pin_mappings": [],
+            "power_rails": []
+          },
+          "mode": "summary",
+          "reason": "Validation owns electrical safety checks and requires the complete electrical state.",
+          "recipient_namespace": "product.validation",
+          "source_namespace": "product.electrical"
+        },
+        {
+          "allowed_attributes": {
+            "fabrication_notes": [],
+            "mechanical": []
+          },
+          "mode": "summary",
+          "reason": "BOM planning may use mechanical sourcing and fabrication costs.",
+          "recipient_namespace": "product.bom",
+          "source_namespace": "product.mech"
+        },
+        {
+          "allowed_attributes": {
+            "cad_model": [],
+            "fabrication_notes": [],
+            "mechanical": []
+          },
+          "mode": "summary",
+          "reason": "Visuals must render the canonical mechanical form rather than inventing it.",
+          "recipient_namespace": "product.visuals",
+          "source_namespace": "product.mech"
+        },
+        {
+          "allowed_attributes": {
+            "fabrication_notes": [],
+            "mechanical": []
+          },
+          "mode": "summary",
+          "reason": "Validation checks physical constraints and fabrication risks.",
+          "recipient_namespace": "product.validation",
+          "source_namespace": "product.mech"
+        },
+        {
+          "allowed_attributes": {
+            "fabrication_notes": [],
+            "mechanical": []
+          },
+          "mode": "summary",
+          "reason": "Assembly needs the canonical mechanical build context.",
+          "recipient_namespace": "product.assembly",
+          "source_namespace": "product.mech"
+        },
+        {
+          "allowed_attributes": {
+            "validation": []
+          },
+          "mode": "summary",
+          "reason": "Assembly must receive safety gates and blocking findings.",
+          "recipient_namespace": "product.assembly",
+          "source_namespace": "product.validation"
+        },
+        {
+          "allowed_attributes": {
+            "assembly": []
+          },
+          "mode": "summary",
+          "reason": "Documentation projects the approved builder-facing sequence.",
+          "recipient_namespace": "project.docs",
+          "source_namespace": "product.assembly"
+        },
+        {
+          "allowed_attributes": {
+            "bom": []
+          },
+          "mode": "summary",
+          "reason": "Documentation may publish the approved procurement view.",
+          "recipient_namespace": "project.docs",
+          "source_namespace": "product.bom"
+        }
+      ],
+      "schema_version": "1.0"
+    },
+    "namespace_versions": {
+      "product.architecture": 1,
+      "product.assembly": 1,
+      "product.bom": 1,
+      "product.electrical": 1,
+      "product.firmware": 1,
+      "product.mech": 1,
+      "product.overview": 1,
+      "product.validation": 1,
+      "product.visuals": 1,
+      "project.docs": 1,
+      "project.history": 1,
+      "project.meta": 1
+    },
+    "project_id": "10000000-0000-4000-8000-000000000001",
+    "revision": 1,
+    "updated_at": "2026-09-29T00:00:00Z"
+  },
+  "namespaces": [
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "system_architecture",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "System Architecture",
+            "namespace": "product.architecture",
+            "source_path": "product.architecture.system_architecture",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        }
+      ],
+      "description": "Purpose-driven hierarchy of product, electrical, mechanical, firmware, and nested systems.",
+      "label": "Product Architecture",
+      "name": "product.architecture",
+      "payload": {
+        "system_architecture": null
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "assembly",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Assembly",
+            "namespace": "product.assembly",
+            "source_path": "product.assembly.assembly",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        }
+      ],
+      "description": "Step-by-step physical assembly and build workflow.",
+      "label": "Product Assembly",
+      "name": "product.assembly",
+      "payload": {
+        "assembly": []
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [
+            {
+              "meta": {
+                "attribute": "line_items",
+                "category": "Mechanical",
+                "index": 0,
+                "item_id": "BASE-FIXTURE",
+                "item_kind": "bom_line_item",
+                "label": "Fixture base",
+                "namespace": "product.bom",
+                "part_number": "BASE-FIXTURE",
+                "ref_des": null,
+                "source_path": "product.bom.line_items[0]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "extended_price": 5.0,
+                "instance_refs": [
+                  "BASE"
+                ],
+                "line_id": "BOM_PART_BASE_FIXTURE",
+                "name": "Fixture base",
+                "part_definition_id": "PART_BASE_FIXTURE",
+                "part_number": "BASE-FIXTURE",
+                "quantity": 1,
+                "rationale": "Deterministic spatial import fixture",
+                "unit_price": 5.0
+              }
+            },
+            {
+              "meta": {
+                "attribute": "line_items",
+                "category": "Mechanical",
+                "index": 1,
+                "item_id": "TOP-FIXTURE",
+                "item_kind": "bom_line_item",
+                "label": "Fixture top",
+                "namespace": "product.bom",
+                "part_number": "TOP-FIXTURE",
+                "ref_des": null,
+                "source_path": "product.bom.line_items[1]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "extended_price": 5.0,
+                "instance_refs": [
+                  "TOP"
+                ],
+                "line_id": "BOM_PART_TOP_FIXTURE",
+                "name": "Fixture top",
+                "part_definition_id": "PART_TOP_FIXTURE",
+                "part_number": "TOP-FIXTURE",
+                "quantity": 1,
+                "rationale": "Deterministic spatial import fixture",
+                "unit_price": 5.0
+              }
+            }
+          ],
+          "meta": {
+            "attribute": "line_items",
+            "item_count": 2,
+            "item_kind": "bom_line_item",
+            "label": "Line Items",
+            "namespace": "product.bom",
+            "source_path": "product.bom.line_items",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": [
+            {
+              "category": "Mechanical",
+              "extended_price": 5.0,
+              "instance_refs": [
+                "BASE"
+              ],
+              "line_id": "BOM_PART_BASE_FIXTURE",
+              "name": "Fixture base",
+              "part_definition_id": "PART_BASE_FIXTURE",
+              "part_number": "BASE-FIXTURE",
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "unit_price": 5.0
+            },
+            {
+              "category": "Mechanical",
+              "extended_price": 5.0,
+              "instance_refs": [
+                "TOP"
+              ],
+              "line_id": "BOM_PART_TOP_FIXTURE",
+              "name": "Fixture top",
+              "part_definition_id": "PART_TOP_FIXTURE",
+              "part_number": "TOP-FIXTURE",
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "unit_price": 5.0
+            }
+          ]
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "component_count",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Component Count",
+            "namespace": "product.bom",
+            "source_path": "product.bom.component_count",
+            "value_type": "integer",
+            "version": 1
+          },
+          "value": 2
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "line_item_count",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Line Item Count",
+            "namespace": "product.bom",
+            "source_path": "product.bom.line_item_count",
+            "value_type": "integer",
+            "version": 1
+          },
+          "value": 2
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "estimated_electrical_cost",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Estimated Electrical Cost",
+            "namespace": "product.bom",
+            "source_path": "product.bom.estimated_electrical_cost",
+            "value_type": "number",
+            "version": 1
+          },
+          "value": 10.0
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "estimated_total_cost",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Estimated Total Cost",
+            "namespace": "product.bom",
+            "source_path": "product.bom.estimated_total_cost",
+            "value_type": "number",
+            "version": 1
+          },
+          "value": 0.0
+        }
+      ],
+      "description": "Bill of materials and cost rollups.",
+      "label": "Product BOM",
+      "name": "product.bom",
+      "payload": {
+        "component_count": 2,
+        "estimated_electrical_cost": 10.0,
+        "estimated_total_cost": 0.0,
+        "line_item_count": 2,
+        "line_items": [
+          {
+            "category": "Mechanical",
+            "extended_price": 5.0,
+            "instance_refs": [
+              "BASE"
+            ],
+            "line_id": "BOM_PART_BASE_FIXTURE",
+            "name": "Fixture base",
+            "part_definition_id": "PART_BASE_FIXTURE",
+            "part_number": "BASE-FIXTURE",
+            "quantity": 1,
+            "rationale": "Deterministic spatial import fixture",
+            "unit_price": 5.0
+          },
+          {
+            "category": "Mechanical",
+            "extended_price": 5.0,
+            "instance_refs": [
+              "TOP"
+            ],
+            "line_id": "BOM_PART_TOP_FIXTURE",
+            "name": "Fixture top",
+            "part_definition_id": "PART_TOP_FIXTURE",
+            "part_number": "TOP-FIXTURE",
+            "quantity": 1,
+            "rationale": "Deterministic spatial import fixture",
+            "unit_price": 5.0
+          }
+        ]
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [
+            {
+              "meta": {
+                "attribute": "part_definitions",
+                "category": "Mechanical",
+                "index": 0,
+                "item_id": "BASE-FIXTURE",
+                "item_kind": "part_definition",
+                "label": "Fixture base",
+                "namespace": "product.electrical",
+                "part_number": "BASE-FIXTURE",
+                "ref_des": null,
+                "source_path": "product.electrical.part_definitions[0]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "description": "",
+                "dimensions_mm": {},
+                "electrical_specs": {},
+                "name": "Fixture base",
+                "part_definition_id": "PART_BASE_FIXTURE",
+                "part_number": "BASE-FIXTURE",
+                "pins": [],
+                "sourcing_offers": [],
+                "unit_price": 5.0
+              }
+            },
+            {
+              "meta": {
+                "attribute": "part_definitions",
+                "category": "Mechanical",
+                "index": 1,
+                "item_id": "TOP-FIXTURE",
+                "item_kind": "part_definition",
+                "label": "Fixture top",
+                "namespace": "product.electrical",
+                "part_number": "TOP-FIXTURE",
+                "ref_des": null,
+                "source_path": "product.electrical.part_definitions[1]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "description": "",
+                "dimensions_mm": {},
+                "electrical_specs": {},
+                "name": "Fixture top",
+                "part_definition_id": "PART_TOP_FIXTURE",
+                "part_number": "TOP-FIXTURE",
+                "pins": [],
+                "sourcing_offers": [],
+                "unit_price": 5.0
+              }
+            }
+          ],
+          "meta": {
+            "attribute": "part_definitions",
+            "item_count": 2,
+            "item_kind": "part_definition",
+            "label": "Part Definitions",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.part_definitions",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": [
+            {
+              "category": "Mechanical",
+              "description": "",
+              "dimensions_mm": {},
+              "electrical_specs": {},
+              "name": "Fixture base",
+              "part_definition_id": "PART_BASE_FIXTURE",
+              "part_number": "BASE-FIXTURE",
+              "pins": [],
+              "sourcing_offers": [],
+              "unit_price": 5.0
+            },
+            {
+              "category": "Mechanical",
+              "description": "",
+              "dimensions_mm": {},
+              "electrical_specs": {},
+              "name": "Fixture top",
+              "part_definition_id": "PART_TOP_FIXTURE",
+              "part_number": "TOP-FIXTURE",
+              "pins": [],
+              "sourcing_offers": [],
+              "unit_price": 5.0
+            }
+          ]
+        },
+        {
+          "items": [
+            {
+              "meta": {
+                "attribute": "components",
+                "category": "Mechanical",
+                "index": 0,
+                "item_id": "BASE",
+                "item_kind": "component",
+                "label": "Fixture base",
+                "namespace": "product.electrical",
+                "part_number": "BASE-FIXTURE",
+                "ref_des": "BASE",
+                "source_path": "product.electrical.components[0]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "configuration": {},
+                "name": "Fixture base",
+                "part_definition_id": "PART_BASE_FIXTURE",
+                "part_number": "BASE-FIXTURE",
+                "pins": [],
+                "rationale": "Deterministic spatial import fixture",
+                "ref_des": "BASE",
+                "sourcing_url": null,
+                "unit_price": 5.0
+              }
+            },
+            {
+              "meta": {
+                "attribute": "components",
+                "category": "Mechanical",
+                "index": 1,
+                "item_id": "TOP",
+                "item_kind": "component",
+                "label": "Fixture top",
+                "namespace": "product.electrical",
+                "part_number": "TOP-FIXTURE",
+                "ref_des": "TOP",
+                "source_path": "product.electrical.components[1]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "configuration": {},
+                "name": "Fixture top",
+                "part_definition_id": "PART_TOP_FIXTURE",
+                "part_number": "TOP-FIXTURE",
+                "pins": [],
+                "rationale": "Deterministic spatial import fixture",
+                "ref_des": "TOP",
+                "sourcing_url": null,
+                "unit_price": 5.0
+              }
+            }
+          ],
+          "meta": {
+            "attribute": "components",
+            "item_count": 2,
+            "item_kind": "component",
+            "label": "Components",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.components",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": [
+            {
+              "category": "Mechanical",
+              "configuration": {},
+              "name": "Fixture base",
+              "part_definition_id": "PART_BASE_FIXTURE",
+              "part_number": "BASE-FIXTURE",
+              "pins": [],
+              "rationale": "Deterministic spatial import fixture",
+              "ref_des": "BASE",
+              "sourcing_url": null,
+              "unit_price": 5.0
+            },
+            {
+              "category": "Mechanical",
+              "configuration": {},
+              "name": "Fixture top",
+              "part_definition_id": "PART_TOP_FIXTURE",
+              "part_number": "TOP-FIXTURE",
+              "pins": [],
+              "rationale": "Deterministic spatial import fixture",
+              "ref_des": "TOP",
+              "sourcing_url": null,
+              "unit_price": 5.0
+            }
+          ]
+        },
+        {
+          "items": [
+            {
+              "meta": {
+                "attribute": "bom",
+                "category": "Mechanical",
+                "index": 0,
+                "item_id": "BASE-FIXTURE",
+                "item_kind": "item",
+                "label": "Fixture base",
+                "namespace": "product.electrical",
+                "part_number": "BASE-FIXTURE",
+                "ref_des": null,
+                "source_path": "product.electrical.bom[0]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "extended_price": 5.0,
+                "instance_refs": [
+                  "BASE"
+                ],
+                "line_id": "BOM_PART_BASE_FIXTURE",
+                "name": "Fixture base",
+                "part_definition_id": "PART_BASE_FIXTURE",
+                "part_number": "BASE-FIXTURE",
+                "quantity": 1,
+                "rationale": "Deterministic spatial import fixture",
+                "unit_price": 5.0
+              }
+            },
+            {
+              "meta": {
+                "attribute": "bom",
+                "category": "Mechanical",
+                "index": 1,
+                "item_id": "TOP-FIXTURE",
+                "item_kind": "item",
+                "label": "Fixture top",
+                "namespace": "product.electrical",
+                "part_number": "TOP-FIXTURE",
+                "ref_des": null,
+                "source_path": "product.electrical.bom[1]",
+                "value_type": "object"
+              },
+              "value": {
+                "category": "Mechanical",
+                "extended_price": 5.0,
+                "instance_refs": [
+                  "TOP"
+                ],
+                "line_id": "BOM_PART_TOP_FIXTURE",
+                "name": "Fixture top",
+                "part_definition_id": "PART_TOP_FIXTURE",
+                "part_number": "TOP-FIXTURE",
+                "quantity": 1,
+                "rationale": "Deterministic spatial import fixture",
+                "unit_price": 5.0
+              }
+            }
+          ],
+          "meta": {
+            "attribute": "bom",
+            "item_count": 2,
+            "item_kind": "item",
+            "label": "Bom",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.bom",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": [
+            {
+              "category": "Mechanical",
+              "extended_price": 5.0,
+              "instance_refs": [
+                "BASE"
+              ],
+              "line_id": "BOM_PART_BASE_FIXTURE",
+              "name": "Fixture base",
+              "part_definition_id": "PART_BASE_FIXTURE",
+              "part_number": "BASE-FIXTURE",
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "unit_price": 5.0
+            },
+            {
+              "category": "Mechanical",
+              "extended_price": 5.0,
+              "instance_refs": [
+                "TOP"
+              ],
+              "line_id": "BOM_PART_TOP_FIXTURE",
+              "name": "Fixture top",
+              "part_definition_id": "PART_TOP_FIXTURE",
+              "part_number": "TOP-FIXTURE",
+              "quantity": 1,
+              "rationale": "Deterministic spatial import fixture",
+              "unit_price": 5.0
+            }
+          ]
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "nets",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Nets",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.nets",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "buses",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Buses",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.buses",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "pin_mappings",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Pin Mappings",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.pin_mappings",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "power_rails",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Power Rails",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.power_rails",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "estimated_current_draw_ma",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Estimated Current Draw Ma",
+            "namespace": "product.electrical",
+            "source_path": "product.electrical.estimated_current_draw_ma",
+            "value_type": "number",
+            "version": 1
+          },
+          "value": 0.0
+        }
+      ],
+      "description": "Components, nets, buses, pin mappings, power rails, and electrical calculations.",
+      "label": "Product Electrical",
+      "name": "product.electrical",
+      "payload": {
+        "bom": [
+          {
+            "category": "Mechanical",
+            "extended_price": 5.0,
+            "instance_refs": [
+              "BASE"
+            ],
+            "line_id": "BOM_PART_BASE_FIXTURE",
+            "name": "Fixture base",
+            "part_definition_id": "PART_BASE_FIXTURE",
+            "part_number": "BASE-FIXTURE",
+            "quantity": 1,
+            "rationale": "Deterministic spatial import fixture",
+            "unit_price": 5.0
+          },
+          {
+            "category": "Mechanical",
+            "extended_price": 5.0,
+            "instance_refs": [
+              "TOP"
+            ],
+            "line_id": "BOM_PART_TOP_FIXTURE",
+            "name": "Fixture top",
+            "part_definition_id": "PART_TOP_FIXTURE",
+            "part_number": "TOP-FIXTURE",
+            "quantity": 1,
+            "rationale": "Deterministic spatial import fixture",
+            "unit_price": 5.0
+          }
+        ],
+        "buses": [],
+        "components": [
+          {
+            "category": "Mechanical",
+            "configuration": {},
+            "name": "Fixture base",
+            "part_definition_id": "PART_BASE_FIXTURE",
+            "part_number": "BASE-FIXTURE",
+            "pins": [],
+            "rationale": "Deterministic spatial import fixture",
+            "ref_des": "BASE",
+            "sourcing_url": null,
+            "unit_price": 5.0
+          },
+          {
+            "category": "Mechanical",
+            "configuration": {},
+            "name": "Fixture top",
+            "part_definition_id": "PART_TOP_FIXTURE",
+            "part_number": "TOP-FIXTURE",
+            "pins": [],
+            "rationale": "Deterministic spatial import fixture",
+            "ref_des": "TOP",
+            "sourcing_url": null,
+            "unit_price": 5.0
+          }
+        ],
+        "estimated_current_draw_ma": 0.0,
+        "nets": [],
+        "part_definitions": [
+          {
+            "category": "Mechanical",
+            "description": "",
+            "dimensions_mm": {},
+            "electrical_specs": {},
+            "name": "Fixture base",
+            "part_definition_id": "PART_BASE_FIXTURE",
+            "part_number": "BASE-FIXTURE",
+            "pins": [],
+            "sourcing_offers": [],
+            "unit_price": 5.0
+          },
+          {
+            "category": "Mechanical",
+            "description": "",
+            "dimensions_mm": {},
+            "electrical_specs": {},
+            "name": "Fixture top",
+            "part_definition_id": "PART_TOP_FIXTURE",
+            "part_number": "TOP-FIXTURE",
+            "pins": [],
+            "sourcing_offers": [],
+            "unit_price": 5.0
+          }
+        ],
+        "pin_mappings": [],
+        "power_rails": []
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "pin_mappings",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Pin Mappings",
+            "namespace": "product.firmware",
+            "source_path": "product.firmware.pin_mappings",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "buses",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Buses",
+            "namespace": "product.firmware",
+            "source_path": "product.firmware.buses",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "firmware_notes",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Firmware Notes",
+            "namespace": "product.firmware",
+            "source_path": "product.firmware.firmware_notes",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "control_logic",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Control Logic",
+            "namespace": "product.firmware",
+            "source_path": "product.firmware.control_logic",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        }
+      ],
+      "description": "Firmware notes, pin behavior, control logic, and embedded software artifacts.",
+      "label": "Product Firmware",
+      "name": "product.firmware",
+      "payload": {
+        "buses": [],
+        "control_logic": [],
+        "firmware_notes": [],
+        "pin_mappings": []
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "mechanical",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Mechanical",
+            "namespace": "product.mech",
+            "source_path": "product.mech.mechanical",
+            "value_type": "object",
+            "version": 1
+          },
+          "value": {
+            "cad_operations": [],
+            "cad_sources": [],
+            "component_placements": [
+              {
+                "label": "Fixture base",
+                "layer": "electrical",
+                "orientation_deg": {
+                  "x_deg": 0.0,
+                  "y_deg": 0.0,
+                  "z_deg": 0.0
+                },
+                "position": {
+                  "x_mm": 0.0,
+                  "y_mm": 0.0,
+                  "z_mm": 10.0
+                },
+                "ref_des": "BASE",
+                "size": {
+                  "x_mm": 100.0,
+                  "y_mm": 60.0,
+                  "z_mm": 20.0
+                }
+              },
+              {
+                "label": "Fixture top",
+                "layer": "electrical",
+                "orientation_deg": {
+                  "x_deg": 0.0,
+                  "y_deg": 0.0,
+                  "z_deg": 0.0
+                },
+                "position": {
+                  "x_mm": 0.0,
+                  "y_mm": 0.0,
+                  "z_mm": 30.0
+                },
+                "ref_des": "TOP",
+                "size": {
+                  "x_mm": 60.0,
+                  "y_mm": 40.0,
+                  "z_mm": 20.0
+                }
+              }
+            ],
+            "enclosure_type": "Test fixture",
+            "fabrication_cost_estimate_usd": 0.0,
+            "fabrication_details": [],
+            "manufacturability_rating": "Unverified",
+            "motion_intents": [],
+            "mounting_guidance": "Review only",
+            "physical_form": "Unspecified",
+            "render_dimensions": {
+              "x_mm": 100.0,
+              "y_mm": 60.0,
+              "z_mm": 40.0
+            },
+            "spatial_relationships": []
+          }
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "cad_model",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Cad Model",
+            "namespace": "product.mech",
+            "source_path": "product.mech.cad_model",
+            "value_type": "string",
+            "version": 1
+          },
+          "value": "models/block.step"
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "fabrication_notes",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Fabrication Notes",
+            "namespace": "product.mech",
+            "source_path": "product.mech.fabrication_notes",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "render_dimensions",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Render Dimensions",
+            "namespace": "product.mech",
+            "source_path": "product.mech.render_dimensions",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "component_placement_count",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Component Placement Count",
+            "namespace": "product.mech",
+            "source_path": "product.mech.component_placement_count",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "spatial_relationship_count",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Spatial Relationship Count",
+            "namespace": "product.mech",
+            "source_path": "product.mech.spatial_relationship_count",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        }
+      ],
+      "description": "Enclosure, CAD/fabrication sources, dimensions, placements, and mechanical constraints.",
+      "label": "Product Mechanical",
+      "name": "product.mech",
+      "payload": {
+        "cad_model": "models/block.step",
+        "component_placement_count": null,
+        "fabrication_notes": [],
+        "mechanical": {
+          "cad_operations": [],
+          "cad_sources": [],
+          "component_placements": [
+            {
+              "label": "Fixture base",
+              "layer": "electrical",
+              "orientation_deg": {
+                "x_deg": 0.0,
+                "y_deg": 0.0,
+                "z_deg": 0.0
+              },
+              "position": {
+                "x_mm": 0.0,
+                "y_mm": 0.0,
+                "z_mm": 10.0
+              },
+              "ref_des": "BASE",
+              "size": {
+                "x_mm": 100.0,
+                "y_mm": 60.0,
+                "z_mm": 20.0
+              }
+            },
+            {
+              "label": "Fixture top",
+              "layer": "electrical",
+              "orientation_deg": {
+                "x_deg": 0.0,
+                "y_deg": 0.0,
+                "z_deg": 0.0
+              },
+              "position": {
+                "x_mm": 0.0,
+                "y_mm": 0.0,
+                "z_mm": 30.0
+              },
+              "ref_des": "TOP",
+              "size": {
+                "x_mm": 60.0,
+                "y_mm": 40.0,
+                "z_mm": 20.0
+              }
+            }
+          ],
+          "enclosure_type": "Test fixture",
+          "fabrication_cost_estimate_usd": 0.0,
+          "fabrication_details": [],
+          "manufacturability_rating": "Unverified",
+          "motion_intents": [],
+          "mounting_guidance": "Review only",
+          "physical_form": "Unspecified",
+          "render_dimensions": {
+            "x_mm": 100.0,
+            "y_mm": 60.0,
+            "z_mm": 40.0
+          },
+          "spatial_relationships": []
+        },
+        "render_dimensions": null,
+        "spatial_relationship_count": null
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "overview",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Overview",
+            "namespace": "product.overview",
+            "source_path": "product.overview.overview",
+            "value_type": "object",
+            "version": 1
+          },
+          "value": {
+            "category": "Laboratory",
+            "description": "Authored test geometry; no physical design claims",
+            "difficulty": "Beginner",
+            "estimated_cost": 0.0,
+            "title": "Opencode workflow fixture"
+          }
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "requirements",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Requirements",
+            "namespace": "product.overview",
+            "source_path": "product.overview.requirements",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "constraints",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Constraints",
+            "namespace": "product.overview",
+            "source_path": "product.overview.constraints",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        }
+      ],
+      "description": "Product intent, requirements, constraints, and top-level description.",
+      "label": "Product Overview",
+      "name": "product.overview",
+      "payload": {
+        "constraints": [],
+        "overview": {
+          "category": "Laboratory",
+          "description": "Authored test geometry; no physical design claims",
+          "difficulty": "Beginner",
+          "estimated_cost": 0.0,
+          "title": "Opencode workflow fixture"
+        },
+        "requirements": null
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "validation",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Validation",
+            "namespace": "product.validation",
+            "source_path": "product.validation.validation",
+            "value_type": "object",
+            "version": 1
+          },
+          "value": {
+            "critical": [],
+            "info": [],
+            "warning": []
+          }
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "is_valid",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Is Valid",
+            "namespace": "product.validation",
+            "source_path": "product.validation.is_valid",
+            "value_type": "boolean",
+            "version": 1
+          },
+          "value": true
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "operation_statuses",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Operation Statuses",
+            "namespace": "product.validation",
+            "source_path": "product.validation.operation_statuses",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "operation_summary",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Operation Summary",
+            "namespace": "product.validation",
+            "source_path": "product.validation.operation_summary",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        }
+      ],
+      "description": "Circuit validation, safety checks, and operation statuses.",
+      "label": "Product Validation",
+      "name": "product.validation",
+      "payload": {
+        "is_valid": true,
+        "operation_statuses": [],
+        "operation_summary": null,
+        "validation": {
+          "critical": [],
+          "info": [],
+          "warning": []
+        }
+      },
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [],
+      "description": "Generated product imagery, render metadata, visual sequences, and presentation assets.",
+      "label": "Product Visuals",
+      "name": "product.visuals",
+      "payload": {},
+      "scope": "product",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "assembly",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Assembly",
+            "namespace": "project.docs",
+            "source_path": "project.docs.assembly",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "fabrication_notes",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Fabrication Notes",
+            "namespace": "project.docs",
+            "source_path": "project.docs.fabrication_notes",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "constraints",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Constraints",
+            "namespace": "project.docs",
+            "source_path": "project.docs.constraints",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "validation",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Validation",
+            "namespace": "project.docs",
+            "source_path": "project.docs.validation",
+            "value_type": "object",
+            "version": 1
+          },
+          "value": {
+            "critical": [],
+            "info": [],
+            "warning": []
+          }
+        }
+      ],
+      "description": "Build docs, assembly text, validation report, fabrication notes, and exported guidance.",
+      "label": "Project Documentation",
+      "name": "project.docs",
+      "payload": {
+        "assembly": [],
+        "constraints": [],
+        "fabrication_notes": [],
+        "validation": {
+          "critical": [],
+          "info": [],
+          "warning": []
+        }
+      },
+      "scope": "project",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "project_version_history",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Project Version History",
+            "namespace": "project.history",
+            "source_path": "project.history.project_version_history",
+            "value_type": "array",
+            "version": 1
+          },
+          "value": []
+        }
+      ],
+      "description": "Version history, iteration decisions, and revision lineage.",
+      "label": "Project History",
+      "name": "project.history",
+      "payload": {
+        "project_version_history": []
+      },
+      "scope": "project",
+      "version": 1
+    },
+    {
+      "attributes": [
+        {
+          "items": [],
+          "meta": {
+            "attribute": "hardware_ir_version",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Hardware Ir Version",
+            "namespace": "project.meta",
+            "source_path": "project.meta.hardware_ir_version",
+            "value_type": "string",
+            "version": 1
+          },
+          "value": "0.2"
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "assembly_metadata",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Assembly Metadata",
+            "namespace": "project.meta",
+            "source_path": "project.meta.assembly_metadata",
+            "value_type": "object",
+            "version": 1
+          },
+          "value": {
+            "authoring_agent": "opencode",
+            "cad_generation": {
+              "adapter": "forma-opencad",
+              "required": false,
+              "status": "provided"
+            },
+            "chat_id": null,
+            "compile_revision": 1,
+            "compiled_by": "forma.compile_project",
+            "created_at": "2026-09-29T00:00:00Z",
+            "project_id": "10000000-0000-4000-8000-000000000001",
+            "source_prompt": "Opencode workflow fixture"
+          }
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "project_id",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Project Id",
+            "namespace": "project.meta",
+            "source_path": "project.meta.project_id",
+            "value_type": "string",
+            "version": 1
+          },
+          "value": "10000000-0000-4000-8000-000000000001"
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "revision",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Revision",
+            "namespace": "project.meta",
+            "source_path": "project.meta.revision",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "workflow",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Workflow",
+            "namespace": "project.meta",
+            "source_path": "project.meta.workflow",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        },
+        {
+          "items": [],
+          "meta": {
+            "attribute": "source_usage",
+            "item_count": 0,
+            "item_kind": null,
+            "label": "Source Usage",
+            "namespace": "project.meta",
+            "source_path": "project.meta.source_usage",
+            "value_type": "null",
+            "version": 1
+          },
+          "value": null
+        }
+      ],
+      "description": "Object identity, runtime metadata, source usage, and workspace-level state.",
+      "label": "Project Metadata",
+      "name": "project.meta",
+      "payload": {
+        "assembly_metadata": {
+          "authoring_agent": "opencode",
+          "cad_generation": {
+            "adapter": "forma-opencad",
+            "required": false,
+            "status": "provided"
+          },
+          "chat_id": null,
+          "compile_revision": 1,
+          "compiled_by": "forma.compile_project",
+          "created_at": "2026-09-29T00:00:00Z",
+          "project_id": "10000000-0000-4000-8000-000000000001",
+          "source_prompt": "Opencode workflow fixture"
+        },
+        "hardware_ir_version": "0.2",
+        "project_id": "10000000-0000-4000-8000-000000000001",
+        "revision": null,
+        "source_usage": null,
+        "workflow": null
+      },
+      "scope": "project",
+      "version": 1
+    }
+  ],
+  "object_id": "10000000-0000-4000-8000-000000000001",
+  "object_type": "forma.project",
+  "version": 1
+}

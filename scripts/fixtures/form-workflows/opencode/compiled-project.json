@@ -1,0 +1,202 @@
+{
+  "chat_id": null,
+  "is_valid": true,
+  "mermaid_code": "graph LR\n  BASE[\"<b>BASE</b><br/>Fixture base<br/><small>BASE-FIXTURE</small>\"]\n  TOP[\"<b>TOP</b><br/>Fixture top<br/><small>TOP-FIXTURE</small>\"]",
+  "persisted": true,
+  "project_id": "10000000-0000-4000-8000-000000000001",
+  "project_ir": {
+    "assembly": [],
+    "assembly_metadata": {
+      "authoring_agent": "opencode",
+      "cad_generation": {
+        "adapter": "forma-opencad",
+        "required": false,
+        "status": "provided"
+      },
+      "chat_id": null,
+      "compile_revision": 1,
+      "compiled_by": "forma.compile_project",
+      "created_at": "2026-09-29T00:00:00Z",
+      "project_id": "10000000-0000-4000-8000-000000000001",
+      "source_prompt": "Opencode workflow fixture"
+    },
+    "bom": [
+      {
+        "category": "Mechanical",
+        "extended_price": 5.0,
+        "instance_refs": [
+          "BASE"
+        ],
+        "line_id": "BOM_PART_BASE_FIXTURE",
+        "manufacturer": null,
+        "name": "Fixture base",
+        "part_definition_id": "PART_BASE_FIXTURE",
+        "part_number": "BASE-FIXTURE",
+        "quantity": 1,
+        "rationale": "Deterministic spatial import fixture",
+        "sourcing_url": null,
+        "unit_price": 5.0
+      },
+      {
+        "category": "Mechanical",
+        "extended_price": 5.0,
+        "instance_refs": [
+          "TOP"
+        ],
+        "line_id": "BOM_PART_TOP_FIXTURE",
+        "manufacturer": null,
+        "name": "Fixture top",
+        "part_definition_id": "PART_TOP_FIXTURE",
+        "part_number": "TOP-FIXTURE",
+        "quantity": 1,
+        "rationale": "Deterministic spatial import fixture",
+        "sourcing_url": null,
+        "unit_price": 5.0
+      }
+    ],
+    "buses": [],
+    "cad_model": "models/block.step",
+    "components": [
+      {
+        "configuration": {},
+        "part_definition_id": "PART_BASE_FIXTURE",
+        "rationale": "Deterministic spatial import fixture",
+        "ref_des": "BASE"
+      },
+      {
+        "configuration": {},
+        "part_definition_id": "PART_TOP_FIXTURE",
+        "rationale": "Deterministic spatial import fixture",
+        "ref_des": "TOP"
+      }
+    ],
+    "constraints": [],
+    "estimated_current_draw_ma": 0.0,
+    "fabrication_notes": [],
+    "hardware_ir_version": "0.2",
+    "is_valid": true,
+    "mechanical": {
+      "cad_operations": [],
+      "cad_sources": [],
+      "component_placements": [
+        {
+          "category": null,
+          "label": "Fixture base",
+          "layer": "electrical",
+          "mounting_face": null,
+          "notes": null,
+          "orientation_deg": {
+            "x_deg": 0.0,
+            "y_deg": 0.0,
+            "z_deg": 0.0
+          },
+          "position": {
+            "x_mm": 0.0,
+            "y_mm": 0.0,
+            "z_mm": 10.0
+          },
+          "ref_des": "BASE",
+          "size": {
+            "x_mm": 100.0,
+            "y_mm": 60.0,
+            "z_mm": 20.0
+          }
+        },
+        {
+          "category": null,
+          "label": "Fixture top",
+          "layer": "electrical",
+          "mounting_face": null,
+          "notes": null,
+          "orientation_deg": {
+            "x_deg": 0.0,
+            "y_deg": 0.0,
+            "z_deg": 0.0
+          },
+          "position": {
+            "x_mm": 0.0,
+            "y_mm": 0.0,
+            "z_mm": 30.0
+          },
+          "ref_des": "TOP",
+          "size": {
+            "x_mm": 60.0,
+            "y_mm": 40.0,
+            "z_mm": 20.0
+          }
+        }
+      ],
+      "enclosure_type": "Test fixture",
+      "fabrication_cost_estimate_usd": 0.0,
+      "fabrication_details": [],
+      "manufacturability_rating": "Unverified",
+      "mechanism_benchmark": null,
+      "motion_intents": [],
+      "mounting_guidance": "Review only",
+      "physical_form": "Unspecified",
+      "render_dimensions": {
+        "x_mm": 100.0,
+        "y_mm": 60.0,
+        "z_mm": 40.0
+      },
+      "spatial_relationships": []
+    },
+    "nets": [],
+    "overview": {
+      "category": "Laboratory",
+      "description": "Authored test geometry; no physical design claims",
+      "difficulty": "Beginner",
+      "estimated_cost": 0.0,
+      "title": "Opencode workflow fixture"
+    },
+    "part_definitions": [
+      {
+        "category": "Mechanical",
+        "datasheet_url": null,
+        "description": "",
+        "dimensions_mm": {},
+        "electrical_specs": {},
+        "manufacturer": null,
+        "name": "Fixture base",
+        "part_definition_id": "PART_BASE_FIXTURE",
+        "part_number": "BASE-FIXTURE",
+        "pins": [],
+        "sourcing_offers": [],
+        "sourcing_url": null,
+        "unit_price": 5.0
+      },
+      {
+        "category": "Mechanical",
+        "datasheet_url": null,
+        "description": "",
+        "dimensions_mm": {},
+        "electrical_specs": {},
+        "manufacturer": null,
+        "name": "Fixture top",
+        "part_definition_id": "PART_TOP_FIXTURE",
+        "part_number": "TOP-FIXTURE",
+        "pins": [],
+        "sourcing_offers": [],
+        "sourcing_url": null,
+        "unit_price": 5.0
+      }
+    ],
+    "pin_mappings": [],
+    "power_rails": [],
+    "project_version_history": [],
+    "requirements": null,
+    "system_architecture": null,
+    "validation": {
+      "critical": [],
+      "info": [],
+      "warning": []
+    }
+  },
+  "svg_schematic": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' width='100%' height='100%'>\n  <!-- Grid Background -->\n  <defs>\n    <pattern id='grid' width='20' height='20' patternUnits='userSpaceOnUse'>\n      <path d='M 20 0 L 0 0 0 20' fill='none' stroke='#f0f2f5' stroke-width='1'/>\n    </pattern>\n  </defs>\n  <rect width='100%' height='100%' fill='url(#grid)' />\n  <rect width='100%' height='100%' fill='none' stroke='#cbd5e1' stroke-width='2' />\n  <text x='25' y='35' font-family='sans-serif' font-size='18' font-weight='bold' fill='#0f172a'>Electrical Assembly Schematic</text>\n  <text x='25' y='55' font-family='sans-serif' font-size='12' fill='#64748b'>Opencode workflow fixture</text>\n  <!-- Wires / Connections -->\n  <!-- Components -->\n  <g id='comp-BASE'>\n    <rect x='390' y='390' width='220' height='120' rx='8' ry='8' fill='#f8fafc' stroke='#475569' stroke-width='2' filter='drop-shadow(0 2px 4px rgba(0,0,0,0.05))'/>\n    <rect x='402' y='402' width='100' height='18' rx='4' ry='4' fill='#e2e8f0' />\n    <text x='452' y='415' font-family='sans-serif' font-size='9' font-weight='bold' fill='#1e293b' text-anchor='middle'>MECHANICAL</text>\n    <text x='595' y='416' font-family='sans-serif' font-size='14' font-weight='bold' fill='#0f172a' text-anchor='end'>BASE</text>\n    <text x='402' y='445' font-family='sans-serif' font-size='12' font-weight='bold' fill='#0f172a'>Fixture base</text>\n    <text x='402' y='465' font-family='sans-serif' font-size='10' fill='#64748b'>BASE-FIXTURE</text>\n    <text x='402' y='492' font-family='sans-serif' font-size='10' font-weight='600' fill='#475569'>Est: $5.00</text>\n    <text x='598' y='492' font-family='sans-serif' font-size='10' fill='#64748b' text-anchor='end'>0 Physical Pins</text>\n    <circle cx='390' cy='450' r='5' fill='#ffffff' stroke='#475569' stroke-width='2' />\n    <circle cx='610' cy='450' r='5' fill='#ffffff' stroke='#475569' stroke-width='2' />\n  </g>\n  <g id='comp-TOP'>\n    <rect x='390' y='390' width='220' height='120' rx='8' ry='8' fill='#f8fafc' stroke='#475569' stroke-width='2' filter='drop-shadow(0 2px 4px rgba(0,0,0,0.05))'/>\n    <rect x='402' y='402' width='100' height='18' rx='4' ry='4' fill='#e2e8f0' />\n    <text x='452' y='415' font-family='sans-serif' font-size='9' font-weight='bold' fill='#1e293b' text-anchor='middle'>MECHANICAL</text>\n    <text x='595' y='416' font-family='sans-serif' font-size='14' font-weight='bold' fill='#0f172a' text-anchor='end'>TOP</text>\n    <text x='402' y='445' font-family='sans-serif' font-size='12' font-weight='bold' fill='#0f172a'>Fixture top</text>\n    <text x='402' y='465' font-family='sans-serif' font-size='10' fill='#64748b'>TOP-FIXTURE</text>\n    <text x='402' y='492' font-family='sans-serif' font-size='10' font-weight='600' fill='#475569'>Est: $5.00</text>\n    <text x='598' y='492' font-family='sans-serif' font-size='10' fill='#64748b' text-anchor='end'>0 Physical Pins</text>\n    <circle cx='390' cy='450' r='5' fill='#ffffff' stroke='#475569' stroke-width='2' />\n    <circle cx='610' cy='450' r='5' fill='#ffffff' stroke='#475569' stroke-width='2' />\n  </g>\n</svg>",
+  "validation": {
+    "critical": [],
+    "info": [],
+    "warning": []
+  },
+  "visibility": "public"
+}

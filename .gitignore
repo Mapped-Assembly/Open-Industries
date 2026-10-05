@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.venv/
+.env
+.env.local
+.env.*.local
+.vercel/
+.astra/
+demo/
+public/vendor/
+test-results/
+playwright-report/
+*.log
+__pycache__/
