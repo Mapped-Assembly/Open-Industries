@@ -5,7 +5,7 @@ const uuid = { type: 'string', pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0
 const nullable = schema => ({ anyOf: [schema, { type: 'null' }] });
 const integer = maximum => ({ type: 'integer', minimum: 0, maximum });
 const array = (items, maxItems) => ({ type: 'array', items, maxItems });
-const version = { const: 1 };
+const version = { const: 2 };
 const mass = { copper_g: integer(10000), hdpe_g: integer(10000), dirt_g: integer(10000) };
 const observation = object({ id: uuid, sensor: { const: 'cable-assay-v1' }, ...mass });
 const machine = object({ id: uuid, kind: { const: 'cable-separator' }, status: { enum: ['ready', 'destroyed'] },
@@ -40,9 +40,9 @@ const actions = {
   abandon_match: {},
 };
 export const gameContract = {
-  version: 1, contract: 'city-dump-runtime-v1', balance_version: 'dump-v1',
-  transport: 'stdio', authentication: 'verified-supabase-user-session', persistence: 'postgres',
-  scheduler: 'pg_cron', snapshot_scope: 'participant-public-state-and-own-private-state',
+  version: 2, contract: 'city-dump-runtime-v2', balance_version: 'dump-v1',
+  transport: 'stdio', authentication: 'openindustries-sqlite-session', persistence: 'sqlite-wal',
+  scheduler: 'independent-runtime-service', snapshot_scope: 'participant-public-state-and-own-private-state',
   retry_policy: 'same-command-id-and-identical-payload-returns-original-receipt',
   polling: 'full-snapshot-replaces-local-state', ready_for_full_game: false,
   supported: ['two-player-invite', 'private-deposit-assay', 'finite-collection', 'durable-cable-processing',
@@ -50,9 +50,9 @@ export const gameContract = {
   unsupported: ['moving-robots', 'combat', 'capture', 'victory', 'property-certification', 'recharging', 'events'],
 };
 export const gameTools = [
-  { name: 'astra.game_describe', description: 'Discover city-dump runtime v1 scope and authority requirements. This static contract does not assert deployment readiness or full-game support.',
+  { name: 'astra.game_describe', description: 'Discover city-dump runtime v2 scope and authority requirements. This static contract does not assert deployment readiness or full-game support.',
     inputSchema: object({ version }), outputSchema: object(Object.fromEntries(Object.entries(gameContract).map(([key, value]) => [key, { const: value }]))) },
-  { name: 'astra.game_create_match', description: 'Create a waiting two-player city-dump match. Requires ASTRA_GAME_TOOLS_ENABLED=true, verified CLI login, migrated Postgres and a healthy independent scheduler. Returns a one-use invite code for deliberate sharing.',
+  { name: 'astra.game_create_match', description: 'Create a waiting two-player city-dump match. Requires ASTRA_GAME_TOOLS_ENABLED=true, an OpenIndustries game session and the independent SQLite runtime service. Returns a one-use invite code for deliberate sharing.',
     inputSchema: object({ version, command_id: uuid }), outputSchema: object({ ...snapshotResult, command_id: uuid, invite_code: uuid }) },
   { name: 'astra.game_join_match', description: 'Consume the host’s invite code as the second distinct authenticated participant. No caller-supplied player identity. An identical command retry returns the original receipt.',
     inputSchema: object({ version, command_id: uuid, match_id: uuid, invite_code: uuid }), outputSchema: commandResult },
@@ -66,14 +66,14 @@ export class GameToolError extends Error {
   constructor(code, message) { super(message); this.name = 'GameToolError'; this.code = code; }
 }
 export const gameErrors = {
-  AUTH_REQUIRED: 'A verified user session and public Supabase configuration are required. Run astra auth login.',
+  AUTH_REQUIRED: 'Sign in to the OpenIndustries game service with your own account.',
   INVALID_REQUEST: 'Arguments do not match the published game contract.',
-  DISABLED: 'Set ASTRA_GAME_TOOLS_ENABLED=true after configuring authentication, migrations and the database scheduler.',
+  DISABLED: 'Set ASTRA_GAME_TOOLS_ENABLED=true after starting the SQLite game service.',
   NOT_AVAILABLE: 'Match, invitation or object is unavailable to this account.',
   CONFLICT: 'Match revision changed. Read a fresh snapshot, reconcile, then use a new command_id.',
   COMMAND_ID_REUSED: 'This command_id already names another payload. Use a new ID for a different command.',
   LIMIT_REACHED: 'The account or match reached the documented runtime limit.',
-  SCHEDULER_UNAVAILABLE: 'The database scheduler is not healthy. Have the deployment owner configure or repair it.',
+  SCHEDULER_UNAVAILABLE: 'The game scheduler is not healthy. Restart or repair the independent runtime service.',
   MATCH_INACTIVE: 'This operation requires an active two-player match.',
   DEPOSIT_EMPTY: 'This deposit has already been collected.',
   INSPECTION_REQUIRED: 'A server-issued inspection is required before collection or processing.',
@@ -81,9 +81,13 @@ export const gameErrors = {
   NOT_READY: 'The batch, machine or job is not ready for this operation. Read the current snapshot.',
   INVARIANT_FAILED: 'The operation was rolled back because stored game state was inconsistent.',
   OUTCOME_UNKNOWN: 'The operation may have committed. Retry the identical command_id and payload, then read the match.',
-  UNAVAILABLE: 'Game runtime is unavailable. Check database migrations, authentication and configuration.',
+  UNAVAILABLE: 'Game runtime is unavailable. Check the SQLite service and session configuration.',
   INVALID_RESULT: 'The runtime returned an unsupported result. Retry the identical command before issuing new work.',
 };
+// Structured errors are part of the published output contract, including for SDKs
+// that validate structuredContent on isError responses.
+const errorSchema = object({ error: object({ code: { enum: Object.keys(gameErrors) }, message: { type: 'string', maxLength: 256 } }) });
+for (const tool of gameTools) tool.outputSchema = { type: 'object', oneOf: [tool.outputSchema, errorSchema] };
 const ajv = new Ajv({ strict: false, allErrors: false });
 const validators = new Map(gameTools.map(tool => [tool.name, { input: ajv.compile(tool.inputSchema), output: ajv.compile(tool.outputSchema) }]));
 export function gameFail(code) { throw new GameToolError(code, gameErrors[code] ?? gameErrors.UNAVAILABLE); }

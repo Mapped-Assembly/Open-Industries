@@ -8,7 +8,6 @@
   },
   "scripts": {
     "test:mcp-game": "node --import tsx scripts/mcp-game-test.ts",
-    "test:game-postgres": "node scripts/game-postgres-test.mjs",
     "test:project-files": "node --import tsx scripts/project-files-test.ts",
     "test:project-files-browser": "node --import tsx scripts/project-files-browser-test.ts",
     "test:room-transitions": "node --import tsx scripts/room-transitions-test.ts",
@@ -47,7 +46,8 @@
     "test:mcp-agent-workflows-browser": "node --import tsx scripts/mcp-agent-workflows-test.ts --browser",
     "demo:mcp-scene": "node scripts/replay-scene-workflow.mjs",
     "test:form-workflows": "node --import tsx scripts/form-workflows-test.ts",
-    "test:form-workflows-browser": "node --import tsx scripts/form-workflows-browser-test.ts"
+    "test:form-workflows-browser": "node --import tsx scripts/form-workflows-browser-test.ts",
+    "game:server": "node --env-file-if-exists=.env server/game-service.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
