@@ -12,3 +12,7 @@ test-results/
 playwright-report/
 *.log
 __pycache__/
+
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

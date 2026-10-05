@@ -1,246 +1,166 @@
 import assert from 'node:assert/strict';
+import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { randomUUID } from 'node:crypto';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import Ajv from 'ajv';
-import { gameTestService } from './lib/game-test-service.ts';
+import { DatabaseSync } from 'node:sqlite';
+import { GameDatabase, cablePlan } from '../server/game-sqlite.mjs';
 import { startClient } from './lib/mcp-scene-workflows.mjs';
 
-const root = await mkdtemp(join(tmpdir(), 'oi-game-'));
-const database = join(root, 'db');
-let service = await gameTestService(database);
-const alice = randomUUID(), bob = randomUUID(), outsider = randomUUID();
+const root = await mkdtemp(join(tmpdir(), 'oi-sqlite-test-'));
+const credentials = (username: string) => ({ username, password: 'only-a-test-password-123' });
+const command = () => ({ version: 2, command_id: randomUUID() });
+const tool = (name: string) => 'astra.game_' + name;
+const code = (expected: string) => (error: any) => error?.code === expected;
+const delay = (ms: number) => new Promise(done => setTimeout(done, ms));
+let clock = 1000000;
+let db = new GameDatabase(join(root, 'unit.sqlite'), { clock: () => clock });
+try {
+  const a = await db.authenticate(credentials('alice'), true), b = await db.authenticate(credentials('bob'), true), c = await db.authenticate(credentials('outsider'), true);
+  await assert.rejects(db.authenticate({ ...credentials('alice'), password: 'wrong-password-123' }), code('AUTH_REQUIRED'));
+  const stored = db.db.prepare('SELECT * FROM accounts').all();
+  assert(!JSON.stringify(stored).includes(credentials('alice').password));
+  assert(!JSON.stringify(db.db.prepare('SELECT * FROM sessions').all()).includes(a.token));
+  assert.throws(() => db.dispatch(a.token, tool('create_match'), command()), code('SCHEDULER_UNAVAILABLE'));
+  db.tick();
+  const creation = command();
+  const created = db.dispatch(a.token, tool('create_match'), creation), id = created.snapshot.match_id;
+  assert.deepEqual(db.dispatch(a.token, tool('create_match'), creation), created);
+  assert.equal(created.snapshot.deposits[0].observation, null);
+  const joinArgs = { ...command(), match_id: id, invite_code: created.invite_code };
+  const joined = db.dispatch(b.token, tool('join_match'), joinArgs);
+  assert.deepEqual(db.dispatch(b.token, tool('join_match'), joinArgs), joined);
+  assert.throws(() => db.dispatch(c.token, tool('join_match'), { ...joinArgs, ...command() }), code('NOT_AVAILABLE'));
+  assert.throws(() => db.dispatch(c.token, tool('read_match'), { version: 2, match_id: id }), code('NOT_AVAILABLE'));
+  assert.throws(() => db.dispatch(a.token, tool('create_match'), { ...command(), owner_id: db.identity(b.token) }), code('INVALID_REQUEST'));
+  const read = () => db.dispatch(a.token, tool('read_match'), { version: 2, match_id: id }).snapshot;
+  const act = (action: string, targets = {}) => db.dispatch(a.token, tool('command'), { ...command(), match_id: id, expected_revision: read().revision, action, ...targets });
+  const deposit = created.snapshot.deposits[0].id, machine = created.snapshot.machines[0].id;
+  assert.throws(() => act('collect_deposit', { deposit_id: deposit }), code('INSPECTION_REQUIRED'));
+  assert.throws(() => act('inspect_deposit', { deposit_id: joined.snapshot.deposits[0].id }), code('NOT_AVAILABLE'));
+  const observed = act('inspect_deposit', { deposit_id: deposit });
+  const collect = { ...command(), match_id: id, expected_revision: observed.snapshot.revision, action: 'collect_deposit', deposit_id: deposit };
+  const collected = db.dispatch(a.token, tool('command'), collect);
+  assert.deepEqual(db.dispatch(a.token, tool('command'), { ...collect }), collected);
+  assert.throws(() => db.dispatch(a.token, tool('command'), { ...collect, action: 'inspect_deposit' }), code('COMMAND_ID_REUSED'));
+  assert.throws(() => db.dispatch(a.token, tool('command'), { ...collect, ...command() }), code('CONFLICT'));
+  const batch = collected.snapshot.batches[0].id;
+  let started = act('start_processing', { batch_id: batch, machine_id: machine });
+  let job = started.snapshot.jobs[0].id;
+  clock += 5000; db.tick();
+  const paused = act('pause_job', { job_id: job });
+  assert.equal(paused.snapshot.jobs[0].work_ms, 5000);
+  clock += 10000; db.tick();
+  assert.equal(read().jobs[0].work_ms, 5000);
+  act('resume_job', { job_id: job });
+  clock += 5000; db.tick();
+  act('cancel_job', { job_id: job });
+  assert.equal(read().machines[0].energy_mj, 15000000);
+  assert.equal(read().batches[0].state, 'available');
+  // The result and reservation must roll back together on a real SQLite write fault.
+  db.db.exec("CREATE TRIGGER fail_receipt BEFORE INSERT ON receipts BEGIN SELECT RAISE(ABORT,'injected fault'); END;");
+  assert.throws(() => act('start_processing', { batch_id: batch, machine_id: machine }));
+  assert.equal(read().batches[0].state, 'available');
+  assert.equal(read().jobs.length, 1);
+  db.db.exec('DROP TRIGGER fail_receipt');
+  started = act('start_processing', { batch_id: batch, machine_id: machine }); job = started.snapshot.jobs[1].id;
+  clock += 1000; db.tick();
+  db.close(); db = new GameDatabase(join(root, 'unit.sqlite'), { clock: () => clock });
+  clock += 19000; db.tick();
+  const completed = read();
+  assert.equal(completed.jobs[1].state, 'completed');
+  assert.equal(completed.batches.length, 4);
+  assert.equal(completed.machines[0].energy_mj, 5000000);
+  clock += 30000; db.tick();
+  assert.equal(read().batches.length, 4);
+  assert.equal(read().machines[0].energy_mj, 5000000);
+  for (const key of ['copper_g', 'hdpe_g', 'dirt_g']) assert.equal(completed.batches.filter((v: any) => v.state !== 'consumed').reduce((sum: number, v: any) => sum + v[key], 0), observed.snapshot.deposits[0].observation[key]);
+  assert(!JSON.stringify(completed).includes(joined.snapshot.deposits[0].id));
+  clock -= 20000; db.tick(); assert.equal(read().machines[0].energy_mj, 5000000);
+  act('dismantle_machine', { machine_id: machine });
+  assert.equal(read().machines[0].dissipated_mj, 5000000);
+  act('abandon_match'); assert.equal(read().status, 'abandoned');
+  db.logout(a.token); assert.throws(() => read(), code('AUTH_REQUIRED'));
+  for (let i = 0; i < 256; i++) {
+    const input = { copper_g: 5000 + i * 8, hdpe_g: 4500 - i * 8, dirt_g: 500 };
+    for (const key of ['copper_g', 'hdpe_g', 'dirt_g']) assert.equal(cablePlan(input).outputs.reduce((sum: number, v: any) => sum + v[key], 0), input[key]);
+  }
+  // Stale scheduler blocks new work; expired invites and sessions cannot revive.
+  clock += 16000;
+  assert.throws(() => db.dispatch(b.token, tool('create_match'), command()), code('SCHEDULER_UNAVAILABLE'));
+  db.tick(); const waiting = db.dispatch(b.token, tool('create_match'), command());
+  clock += 3600001; db.tick();
+  assert.throws(() => db.dispatch(c.token, tool('join_match'), { ...command(), match_id: waiting.snapshot.match_id, invite_code: waiting.invite_code }), code('NOT_AVAILABLE'));
+  clock += 8 * 3600000; db.tick(); assert.throws(() => db.identity(b.token), code('AUTH_REQUIRED'));
+  console.log('PASS SQLite transactions, privacy, ownership, retries, rollback, restart, mass/energy accounting, session expiry and 256 material partitions');
+} finally { db.close(); }
+
+const database = join(root, 'service.sqlite');
+let worker: ReturnType<typeof spawn> | undefined;
+let origin = '';
 const clients: ReturnType<typeof startClient>[] = [];
-const validators = new Map<string, any>();
-const command = () => ({ version: 1, command_id: randomUUID() });
-async function connect(owner: string, env: Record<string, string> = {}) {
-  const config = join(root, owner + '.json');
-  await writeFile(config, JSON.stringify(await service.account(owner)));
-  const client = startClient({ client: 'game-test', request_ids: 'number' }, { root, timeoutMs: 15000, env: {
-    ASTRA_CLI_CONFIG: config, ASTRA_GAME_TOOLS_ENABLED: 'true', VITE_SUPABASE_URL: service.origin,
-    VITE_SUPABASE_PUBLISHABLE_KEY: 'fixture-public-key', ...env,
-  } });
+async function start() {
+  worker = spawn(process.execPath, ['server/game-service.mjs'], { env: { ...process.env, ASTRA_GAME_DB: database, ASTRA_GAME_PORT: '0', ASTRA_GAME_ALLOW_SIGNUP: 'true' }, stdio: ['ignore', 'pipe', 'pipe'] });
+  worker.stderr?.on('data', () => {});
+  origin = await new Promise<string>((done, reject) => {
+    const timeout = setTimeout(() => reject(new Error('service startup timeout')), 10000);
+    worker!.once('exit', () => { clearTimeout(timeout); reject(new Error('service exited')); });
+    worker!.stdout?.on('data', chunk => { const match = /http:\/\/127\.0\.0\.1:\d+/.exec(chunk.toString()); if (match) { clearTimeout(timeout); done(match[0]); } });
+  });
+}
+async function stop() { if (worker && worker.exitCode === null) { const exited = once(worker, 'exit'); worker.kill('SIGKILL'); await exited; } }
+async function account(username: string) {
+  const response = await fetch(origin + '/auth/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(credentials(username)) });
+  assert(response.ok); return (await response.json()).token as string;
+}
+function connect(token: string) {
+  const client = startClient({ client: 'sqlite-runtime-test', request_ids: 'number' }, { root, timeoutMs: 15000,
+    env: { ASTRA_GAME_TOOLS_ENABLED: 'true', ASTRA_GAME_SERVICE_URL: origin, ASTRA_GAME_SESSION: token } });
   clients.push(client); return client;
 }
 async function ok(client: any, name: string, args: unknown) {
-  const result = await client.call('game_' + name, args);
-  assert(!result.isError, JSON.stringify(result)); const data = result.structuredContent;
-  const validate = validators.get(name); assert(validate(data), JSON.stringify(validate.errors));
-  assert.deepEqual(JSON.parse(result.content[0].text), data); return data;
-}
-async function bad(client: any, name: string, args: unknown, code: string) {
-  const result = await client.call('game_' + name, args);
-  assert.equal(result.isError, true, JSON.stringify(result));
-  assert.deepEqual(Object.keys(result.structuredContent.error).sort(), ['code', 'message']);
-  assert.equal(result.structuredContent.error.code, code, JSON.stringify(result));
-  return result;
-}
-const read = async (client: any, match_id: string) => (await ok(client, 'read_match', { version: 1, match_id })).snapshot;
-async function action(client: any, match_id: string, action: string, target = {}) {
-  const snapshot = await read(client, match_id);
-  return ok(client, 'command', { ...command(), match_id, expected_revision: snapshot.revision, action, ...target });
-}
-const advance = async (milliseconds: number) => {
-  await service.sql('update game_test_clock set ms=ms+$1', [milliseconds]); await service.tick();
-};
-async function conservation(match: string) {
-  // Consumed inputs are historical records, not inventory. Deposits count once.
-  const material = (await service.sql(
-    "select p.owner_id,(select coalesce(sum(d.copper_g),0) from game_private.deposits d where d.match_id=p.match_id and d.owner_id=p.owner_id) as initial_copper," +
-    "(select coalesce(sum(d.hdpe_g),0) from game_private.deposits d where d.match_id=p.match_id and d.owner_id=p.owner_id) as initial_hdpe," +
-    "(select coalesce(sum(d.dirt_g),0) from game_private.deposits d where d.match_id=p.match_id and d.owner_id=p.owner_id) as initial_dirt," +
-    "(select coalesce(sum(copper_g),0) from (select copper_g from game_private.deposits where match_id=p.match_id and owner_id=p.owner_id and not collected union all select copper_g from game_private.batches where match_id=p.match_id and owner_id=p.owner_id and state<>'consumed') x) as copper," +
-    "(select coalesce(sum(hdpe_g),0) from (select hdpe_g from game_private.deposits where match_id=p.match_id and owner_id=p.owner_id and not collected union all select hdpe_g from game_private.batches where match_id=p.match_id and owner_id=p.owner_id and state<>'consumed') x) as hdpe," +
-    "(select coalesce(sum(dirt_g),0) from (select dirt_g from game_private.deposits where match_id=p.match_id and owner_id=p.owner_id and not collected union all select dirt_g from game_private.batches where match_id=p.match_id and owner_id=p.owner_id and state<>'consumed') x) as dirt from game_private.players p where match_id=$1", [match])).rows;
-  for (const row of material) {
-    assert.equal(row.copper, row.initial_copper); assert.equal(row.hdpe, row.initial_hdpe); assert.equal(row.dirt, row.initial_dirt);
-  }
-  for (const row of (await service.sql(
-    'select x.energy_mj+x.dissipated_mj+coalesce(sum(j.energy_mj),0) as accounted from game_private.machines x left join game_private.jobs j on j.machine_id=x.id where x.match_id=$1 group by x.id', [match])).rows) {
-    assert.equal(Number(row.accounted), 20000000);
-  }
+  const result = await client.call('game_' + name, args); assert(!result.isError, JSON.stringify(result)); return result.structuredContent;
 }
 try {
-  let a = await connect(alice), b = await connect(bob); const other = await connect(outsider);
-  const tools = (await a.rpc('tools/list')).tools; const ajv = new Ajv({ strict: false });
-  for (const tool of tools.filter((t: any) => t.name.startsWith('astra.game_'))) {
-    // MCP requires an object root even when JSON Schema's oneOf supplies fields.
-    assert.equal(tool.inputSchema.type, 'object'); assert.equal(tool.outputSchema.type, 'object');
-    validators.set(tool.name.replace('astra.game_', ''), ajv.compile(tool.outputSchema));
-  }
-  assert.equal(validators.size, 5);
-  assert.equal((await a.rpc('initialize')).capabilities.tools instanceof Object, true);
-  const contract = await ok(a, 'describe', { version: 1 });
-  assert.equal(contract.ready_for_full_game, false); assert(contract.unsupported.includes('combat'));
-  await bad(await connect(randomUUID(), { ASTRA_GAME_TOOLS_ENABLED: 'false' }), 'create_match', command(), 'DISABLED');
-  await bad(await connect(randomUUID(), { ASTRA_CLI_CONFIG: join(root, 'missing.json') }), 'create_match', command(), 'AUTH_REQUIRED');
-  await bad(await connect(randomUUID(), { VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_secret_fixture' }), 'create_match', command(), 'AUTH_REQUIRED');
-  await bad(a, 'create_match', command(), 'SCHEDULER_UNAVAILABLE');
-  assert.equal(Number((await service.sql('select count(*) as n from game_private.matches')).rows[0].n), 0);
-  // Only test-admin SQL controls this clock. It is not in any API or production migration.
-  await service.sql('create table game_test_clock(ms bigint);');
-  await service.sql('insert into game_test_clock values(1000000)');
-  await service.sql("create or replace function game_private.now_ms() returns bigint language sql volatile set search_path='' as $$ select ms from public.game_test_clock $$");
-  await service.tick();
-  for (const value of [{ ...command(), owner_id: outsider }, { ...command(), version: 2 }, { ...command(), command_id: null }, { ...command(), time: 0 }]) {
-    await bad(a, 'create_match', value, 'INVALID_REQUEST');
-  }
-  const create = command(); const created = await ok(a, 'create_match', create); const id = created.snapshot.match_id;
-  assert.deepEqual(await ok(a, 'create_match', create), created);
-  assert.equal(created.snapshot.players.length, 1);
-  assert.equal(created.snapshot.deposits[0].observation, null);
-  const invite = { ...command(), match_id: id, invite_code: created.invite_code };
-  await bad(a, 'join_match', invite, 'NOT_AVAILABLE');
-  await bad(b, 'join_match', { ...invite, invite_code: randomUUID() }, 'NOT_AVAILABLE');
-  const joined = await ok(b, 'join_match', invite); assert.equal(joined.snapshot.status, 'active');
-  assert.deepEqual(await ok(b, 'join_match', invite), joined);
-  await bad(other, 'join_match', { ...invite, ...command() }, 'NOT_AVAILABLE');
-  await bad(other, 'read_match', { version: 1, match_id: id }, 'NOT_AVAILABLE');
-  await bad(other, 'read_match', { version: 1, match_id: randomUUID() }, 'NOT_AVAILABLE');
-  const ad = created.snapshot.deposits[0].id, bd = joined.snapshot.deposits[0].id;
-  const am = created.snapshot.machines[0].id, bm = joined.snapshot.machines[0].id;
-  await bad(a, 'command', { ...command(), match_id: id, expected_revision: 1, action: 'inspect_deposit', deposit_id: ad }, 'CONFLICT');
-  let snapshot = await read(a, id);
-  await bad(a, 'command', { ...command(), match_id: id, expected_revision: snapshot.revision, action: 'inspect_deposit', deposit_id: bd }, 'NOT_AVAILABLE');
-  await bad(a, 'command', { ...command(), match_id: id, expected_revision: snapshot.revision, action: 'collect_deposit', deposit_id: ad }, 'INSPECTION_REQUIRED');
-  const inspected = await action(a, id, 'inspect_deposit', { deposit_id: ad });
-  assert.equal(inspected.snapshot.deposits[0].observation.sensor, 'cable-assay-v1');
-  // Separate MCP processes race at the same revision. PGlite serializes database
-  // transactions; game-postgres-test also exercises real concurrent connections.
-  const secondAlice = await connect(alice);
-  const collectRequests = [command(), command()].map(cmd => ({ ...cmd, match_id: id,
-    expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: ad }));
-  const collectResults = await Promise.all([a, secondAlice].map((client, i) => client.call('game_command', collectRequests[i])));
-  assert.equal(collectResults.filter(result => !result.isError).length, 1);
-  assert.equal(collectResults.filter(result => result.structuredContent.error?.code === 'CONFLICT').length, 1);
-  const winner = collectResults.findIndex(result => !result.isError);
-  const collected = collectResults[winner].structuredContent;
-  assert.deepEqual(await ok(a, 'command', collectRequests[winner]), collected);
-  assert.equal(collected.snapshot.batches.length, 1);
-  const ab = collected.snapshot.batches[0].id;
-  await bad(a, 'command', { ...command(), match_id: id, expected_revision: collected.snapshot.revision, action: 'collect_deposit', deposit_id: ad }, 'DEPOSIT_EMPTY');
-  await action(b, id, 'inspect_deposit', { deposit_id: bd }); await action(b, id, 'collect_deposit', { deposit_id: bd });
-  snapshot = await read(a, id);
-  assert(!JSON.stringify(snapshot).includes(bd)); assert(!JSON.stringify(snapshot).includes(bm)); assert(!JSON.stringify(snapshot).includes(bob));
-  const start = { ...command(), match_id: id, expected_revision: snapshot.revision, action: 'start_processing', batch_id: ab, machine_id: am };
-  for (const extra of [{ grade: 'copper' }, { power_w: 0 }, { outputs: [] }, { owner_id: bob }, { work_ms: 20000 }]) {
-    await bad(a, 'command', { ...start, ...extra }, 'INVALID_REQUEST');
-    const { action: operation, ...request } = { ...start, ...extra };
-    await assert.rejects(service.rpc(alice, operation, request), /OI_GAME:INVALID_REQUEST/);
-  }
-  await bad(a, 'command', { ...start, machine_id: bm }, 'NOT_AVAILABLE');
-  service.loseNextResponse();
-  await bad(a, 'command', start, 'OUTCOME_UNKNOWN');
-  const started = await ok(a, 'command', start); const firstJob = started.snapshot.jobs[0].id;
-  assert.equal(started.snapshot.batches[0].state, 'reserved');
-  assert.deepEqual(await ok(a, 'command', start), started);
-  await bad(a, 'command', { ...start, expected_revision: start.expected_revision + 1 }, 'COMMAND_ID_REUSED');
-  const changed = { ...command(), match_id: id, expected_revision: started.snapshot.revision, action: 'start_processing', batch_id: ab, machine_id: am };
-  await bad(a, 'command', changed, 'NOT_READY');
-  await advance(4000); await conservation(id);
-  const paused = await action(a, id, 'pause_job', { job_id: firstJob });
-  assert.equal(paused.snapshot.jobs[0].work_ms, 4000);
-  // Resume across a backwards wall-clock correction must not re-credit time.
-  await service.sql('update game_test_clock set ms=ms-1000');
-  await action(a, id, 'resume_job', { job_id: firstJob });
-  await advance(1000); assert.equal((await read(a, id)).jobs[0].work_ms, 4000);
-  await action(a, id, 'pause_job', { job_id: firstJob });
-  await advance(5000); assert.equal((await read(a, id)).jobs[0].work_ms, 4000);
-  await action(a, id, 'resume_job', { job_id: firstJob }); await advance(2000);
-  const cancelled = await action(a, id, 'cancel_job', { job_id: firstJob });
-  assert.equal(cancelled.snapshot.jobs[0].energy_mj, 3000000);
-  assert.equal(cancelled.snapshot.batches[0].state, 'available'); await conservation(id);
-  // Dismantling a running machine releases input and accounts for all battery energy.
-  const bs = await read(b, id);
-  const bj = (await action(b, id, 'start_processing', { batch_id: bs.batches[0].id, machine_id: bm })).snapshot.jobs[0].id;
-  await advance(1000);
-  const dismantled = await action(b, id, 'dismantle_machine', { machine_id: bm });
-  assert.equal(dismantled.snapshot.jobs[0].cancellation_reason, 'machine_destroyed');
-  assert.equal(dismantled.snapshot.jobs[0].id, bj);
-  assert.equal(dismantled.snapshot.machines[0].energy_mj, 0);
-  assert.equal(dismantled.snapshot.machines[0].dissipated_mj, 19500000); await conservation(id);
-  const secondStart = { ...command(), match_id: id, expected_revision: (await read(a, id)).revision,
-    action: 'start_processing', batch_id: ab, machine_id: am };
-  const second = await ok(a, 'command', secondStart);
-  const secondJob = second.snapshot.jobs.find((j: any) => j.state === 'running').id;
-  // Stop all actual MCP processes, close the DB, then reopen the same durable directory.
-  await Promise.all(clients.splice(0).map(c => c.close()));
-  await service.close(); service = await gameTestService(database);
-  await advance(60000); // Same production scheduler entry point, no connected clients.
-  const persisted = (await service.sql('select state,energy_mj from game_private.jobs where id=$1', [secondJob])).rows[0];
-  assert.equal(persisted.state, 'completed'); assert.equal(Number(persisted.energy_mj), 10000000);
-  a = await connect(alice); b = await connect(bob);
-  const complete = await read(a, id);
-  assert.equal(complete.batches.filter((x: any) => x.state === 'available').length, 3);
-  assert(complete.batches.filter((x: any) => x.form !== 'cable').every((x: any) => x.grade === 'recovered-ungraded'));
-  assert.deepEqual(await ok(a, 'command', secondStart), second); // Old receipt never reexecutes.
-  await advance(60000); await conservation(id);
-  assert.equal((await read(a, id)).batches.length, 4);
-  // A changed login is verified again on the same MCP connection.
-  await writeFile(join(root, alice + '.json'), JSON.stringify(await service.account(bob)));
-  assert.equal((await read(a, id)).machines[0].id, bm);
-  await writeFile(join(root, alice + '.json'), JSON.stringify(await service.account(alice)));
-  assert.equal((await read(a, id)).machines[0].id, am);
-  // Direct RPC callers cannot escape MCP validation or ownership.
-  await assert.rejects(service.rpc(null, 'read', { version: 1, match_id: id }), /permission denied/);
-  await assert.rejects(service.rpc(outsider, 'read', { version: 1, match_id: id }), /OI_GAME:NOT_AVAILABLE/);
-  for (const request of [null, { version: 1, match_id: id, grade: 'certified' }, { version: '1', match_id: id }]) {
-    await assert.rejects(service.rpc(alice, 'read', request), /OI_GAME:INVALID_REQUEST/);
-  }
-  const acl = (await service.sql(
-    "select has_table_privilege('authenticated','game_private.batches','INSERT') mint," +
-    "has_table_privilege('authenticated','game_private.deposits','SELECT') hidden," +
-    "has_function_privilege('authenticated','game_private.tick()','EXECUTE') tick," +
-    "has_function_privilege('anon','public.game_runtime(text,jsonb)','EXECUTE') anon," +
-    "has_function_privilege('service_role','public.game_runtime(text,jsonb)','EXECUTE') service"
-  )).rows[0];
-  assert.deepEqual(acl, { mint: false, hidden: false, tick: false, anon: false, service: false });
-  assert.equal(Number((await service.sql("select count(*) n from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='game_private' and c.relkind='r' and not c.relrowsecurity")).rows[0].n), 0);
-  const reference = (await service.sql('select game_private.plan_cable(6000,3500,500) as plan')).rows[0].plan;
-  assert.equal(reference.outputs[0].copper_g, 5700); assert.equal(reference.outputs[1].hdpe_g, 3000);
-  assert.equal(reference.outputs[2].copper_g + reference.outputs[2].hdpe_g + reference.outputs[2].dirt_g, 1300);
-  for (const row of (await service.sql(
-    'select c,h,500 d,game_private.plan_cable(c,h,500) plan from (select 5000+n*8 c,4500-n*8 h from generate_series(0,255) n) inputs'
-  )).rows) {
-    for (const [key, expected] of [['copper_g', row.c], ['hdpe_g', row.h], ['dirt_g', row.d]] as const) {
-      assert.equal(row.plan.outputs.reduce((n: number, o: any) => n + o[key], 0), expected);
-      assert(row.plan.outputs.every((o: any) => Number.isInteger(o[key]) && o[key] >= 0));
-    }
-  }
-  // Power depletion: two cancelled attempts spend 18 kJ; last 2 kJ cannot finish.
-  const next = await ok(a, 'create_match', command()); const nid = next.snapshot.match_id;
-  await ok(b, 'join_match', { ...command(), match_id: nid, invite_code: next.invite_code });
-  const nd = next.snapshot.deposits[0].id, nm = next.snapshot.machines[0].id;
-  await action(a, nid, 'inspect_deposit', { deposit_id: nd });
-  const nb = (await action(a, nid, 'collect_deposit', { deposit_id: nd })).snapshot.batches[0].id;
-  for (let i = 0; i < 2; i++) {
-    const job = (await action(a, nid, 'start_processing', { batch_id: nb, machine_id: nm })).snapshot.jobs.find((j: any) => j.state === 'running');
-    await advance(18000); await action(a, nid, 'cancel_job', { job_id: job.id });
-  }
-  await action(a, nid, 'start_processing', { batch_id: nb, machine_id: nm }); await advance(30000);
-  const starved = (await read(a, nid)).jobs.find((j: any) => j.state === 'paused');
-  assert.equal(starved.pause_reason, 'power'); assert.equal(starved.work_ms, 4000);
-  await conservation(nid);
-  const abandoned = await action(a, nid, 'abandon_match');
-  assert.equal(abandoned.snapshot.status, 'abandoned'); assert(!('winner' in abandoned.snapshot));
-  assert.equal(abandoned.snapshot.batches[0].state, 'available'); await conservation(nid);
-  // Expired invites do not admit another player or consume an open-match slot.
-  const expired = await ok(a, 'create_match', command());
-  await service.sql("update game_private.matches set invite_expires_at=clock_timestamp()-interval '1 second' where id=$1", [expired.snapshot.match_id]);
-  await bad(b, 'join_match', { ...command(), match_id: expired.snapshot.match_id, invite_code: expired.invite_code }, 'NOT_AVAILABLE');
-  await service.tick(); assert.equal((await read(a, expired.snapshot.match_id)).status, 'abandoned');
-  const waiting = await ok(a, 'create_match', command());
-  await ok(a, 'create_match', command()); // Original active match + two waiting = 3.
-  await bad(a, 'create_match', command(), 'LIMIT_REACHED');
-  await action(a, waiting.snapshot.match_id, 'abandon_match');
-  // Backwards database wall-clock changes never create negative progress/energy.
-  await service.sql('update game_test_clock set ms=ms-10000'); await service.tick(); await conservation(id);
-  await service.sql('update game_private.runtime set last_tick_ms=0');
-  await bad(a, 'create_match', command(), 'SCHEDULER_UNAVAILABLE');
-  assert.equal((await read(a, id)).scheduler_healthy, false);
-  console.log('PASS game MCP: discovery, verified-session boundary, two participants, private inspection, finite collection, atomic retries/lost response, version conflicts, pause/resume/cancel/destruction, durable reopen, conserved constituents/energy, power exhaustion, grants/RLS and 256 recipe partitions.');
+  await start();
+  const aToken = await account('alice'), bToken = await account('bob');
+  let a = connect(aToken), b = connect(bToken), a2 = connect(aToken);
+  const contract = await ok(a, 'describe', { version: 2 });
+  assert.equal(contract.persistence, 'sqlite-wal'); assert.equal(contract.ready_for_full_game, false);
+  assert.equal((await a.rpc('tools/list')).tools.filter((t: any) => t.name.startsWith('astra.game_')).length, 5);
+  const create = command();
+  const pair = await Promise.all([ok(a, 'create_match', create), ok(a2, 'create_match', create)]);
+  assert.deepEqual(pair[0], pair[1]);
+  const created = pair[0], id = created.snapshot.match_id;
+  await ok(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
+  const read = async () => (await ok(a, 'read_match', { version: 2, match_id: id })).snapshot;
+  const inspected = await ok(a, 'command', { ...command(), match_id: id, expected_revision: (await read()).revision, action: 'inspect_deposit', deposit_id: created.snapshot.deposits[0].id });
+  const args = { version: 2, match_id: id, expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: created.snapshot.deposits[0].id };
+  const race = await Promise.all([a, a2].map(c => c.call('game_command', { ...args, command_id: randomUUID() })));
+  assert.equal(race.filter(r => !r.isError).length, 1);
+  assert.equal(race.find(r => r.isError).structuredContent.error.code, 'CONFLICT');
+  const current = await read();
+  await ok(a, 'command', { ...command(), match_id: id, expected_revision: current.revision, action: 'start_processing', batch_id: current.batches[0].id, machine_id: current.machines[0].id });
+  await Promise.all(clients.map(c => c.close())); clients.length = 0;
+  await delay(1200);
+  const inspectDB = new DatabaseSync(database, { readOnly: true });
+  const progressed = JSON.parse(inspectDB.prepare('SELECT state FROM matches WHERE id=?').get(id)!.state as string);
+  inspectDB.close();
+  assert(progressed.players[0].jobs[0].work_ms > 0, 'independent scheduler must advance without clients');
+  await stop(); await start();
+  // Real service process restart, durable sessions and autonomous completion.
+  await delay(20000);
+  a = connect(aToken); b = connect(bToken);
+  const finished = await read();
+  assert.equal(finished.jobs[0].state, 'completed'); assert.equal(finished.batches.length, 4);
+  assert.equal(finished.machines[0].energy_mj, 10000000);
+  assert.equal((await read()).batches.length, 4);
+  assert.deepEqual(await ok(a, 'create_match', create), created, 'receipt survives process restart');
+  await fetch(origin + '/auth/logout', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${aToken}` }, body: '{}' });
+  const revoked = await a.call('game_read_match', { version: 2, match_id: id }); assert.equal(revoked.structuredContent.error.code, 'AUTH_REQUIRED');
+  console.log('PASS real SQLite service + MCP: isolated sessions, duplicate commands, concurrent collection, autonomous scheduling, process kill/restart, exactly-once outputs and revocation');
 } finally {
-  await Promise.all(clients.map(c => c.close()));
-  await service.close(); await rm(root, { recursive: true, force: true });
+  await Promise.all(clients.map(c => c.close())); await stop(); await rm(root, { recursive: true, force: true });
 }
