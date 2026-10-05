@@ -7,6 +7,8 @@
     "astra": "cli/astra.mjs"
   },
   "scripts": {
+    "test:mcp-game": "node --import tsx scripts/mcp-game-test.ts",
+    "test:game-postgres": "node scripts/game-postgres-test.mjs",
     "test:project-files": "node --import tsx scripts/project-files-test.ts",
     "test:project-files-browser": "node --import tsx scripts/project-files-browser-test.ts",
     "test:room-transitions": "node --import tsx scripts/room-transitions-test.ts",

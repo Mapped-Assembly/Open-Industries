@@ -3,12 +3,18 @@ import { existsSync, readFileSync, readdirSync, mkdirSync, writeFileSync } from 
 import { dirname, relative, resolve } from 'node:path';
 import { callRoomTool, roomTools } from './mcp-rooms.mjs';
 import { sceneTools } from './mcp-scene-contract.mjs';
+import { gameTools } from './mcp-game-contract.mjs';
 import { scrubPortableData as scrub } from '../src/lib/portable-data.mjs';
 
 let sceneRuntime;
+let gameRuntime;
 async function sceneModule() {
   sceneRuntime ??= import('tsx/esm/api').then(({ tsImport }) => tsImport('./mcp-scenes.ts', import.meta.url));
   return sceneRuntime;
+}
+async function gameModule() {
+  gameRuntime ??= import('tsx/esm/api').then(({ tsImport }) => tsImport('./mcp-game.ts', import.meta.url));
+  return gameRuntime;
 }
 
 const root = resolve(process.env.ASTRA_ROOT || process.cwd());
@@ -24,6 +30,7 @@ const textResult = value => { const clean = scrub(value); return { content: [{ t
 const tools = [
   ...roomTools,
   ...sceneTools,
+  ...gameTools,
   { name: 'astra.read_animation_feedback', description: 'Read the latest scrubbed Mergence authored-animation review for Form iteration.', inputSchema: { type: 'object', properties: {} } },
   { name: 'astra.read_form_project', description: 'Read a local compiled Form project manifest from the Mergence checkout.', inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'Checkout-relative path, usually demo/form-project.json.' } } } },
   { name: 'astra.save_form_project', description: 'Save a Form MCP project_ir back into an existing compiled project manifest.', inputSchema: { type: 'object', properties: { path: { type: 'string' }, project_ir: { type: 'object' } }, required: ['path', 'project_ir'] } },
@@ -32,6 +39,7 @@ const tools = [
 ];
 
 async function callTool(name, args = {}) {
+  if (gameTools.some(tool => tool.name === name)) return (await gameModule()).callGameTool(root, name, args);
   if (sceneTools.some(tool => tool.name === name)) return (await sceneModule()).callSceneTool(root, name, args);
   if (roomTools.some(tool => tool.name === name)) return callRoomTool(root, name, args);
   if (name === 'astra.read_animation_feedback') {
@@ -76,6 +84,11 @@ async function handle(request) {
   if (request.method === 'tools/call') {
     try { return response(request.id, textResult(await callTool(request.params?.name, request.params?.arguments))); }
     catch (error) {
+      if (gameTools.some(tool => tool.name === request.params?.name)) {
+        const known = error?.name === 'GameToolError';
+        return response(request.id, { ...textResult({ error: { code: known ? error.code : 'UNAVAILABLE',
+          message: known ? error.message : 'Game runtime could not start. Check installation and configuration.' } }), isError: true });
+      }
       if (sceneTools.some(tool => tool.name === request.params?.name)) {
         const known = error?.name === 'SceneToolError';
         return response(request.id, { ...textResult({ error: { code: known ? error.code : 'OPERATION_FAILED', message: known ? error.message : 'Scene tool could not start. Check local installation and configuration.', ...(known ? error.details : {}) } }), isError: true });
