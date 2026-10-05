@@ -11,7 +11,7 @@ import { startClient } from './lib/mcp-scene-workflows.mjs';
 
 const root = await mkdtemp(join(tmpdir(), 'oi-sqlite-test-'));
 const credentials = (username: string) => ({ username, password: 'only-a-test-password-123' });
-const command = () => ({ version: 2, command_id: randomUUID() });
+const command = () => ({ version: 3, command_id: randomUUID() });
 const tool = (name: string) => 'astra.game_' + name;
 const code = (expected: string) => (error: any) => error?.code === expected;
 const delay = (ms: number) => new Promise(done => setTimeout(done, ms));
@@ -33,9 +33,9 @@ try {
   const joined = db.dispatch(b.token, tool('join_match'), joinArgs);
   assert.deepEqual(db.dispatch(b.token, tool('join_match'), joinArgs), joined);
   assert.throws(() => db.dispatch(c.token, tool('join_match'), { ...joinArgs, ...command() }), code('NOT_AVAILABLE'));
-  assert.throws(() => db.dispatch(c.token, tool('read_match'), { version: 2, match_id: id }), code('NOT_AVAILABLE'));
+  assert.throws(() => db.dispatch(c.token, tool('read_match'), { version: 3, match_id: id }), code('NOT_AVAILABLE'));
   assert.throws(() => db.dispatch(a.token, tool('create_match'), { ...command(), owner_id: db.identity(b.token) }), code('INVALID_REQUEST'));
-  const read = () => db.dispatch(a.token, tool('read_match'), { version: 2, match_id: id }).snapshot;
+  const read = () => db.dispatch(a.token, tool('read_match'), { version: 3, match_id: id }).snapshot;
   const act = (action: string, targets = {}) => db.dispatch(a.token, tool('command'), { ...command(), match_id: id, expected_revision: read().revision, action, ...targets });
   const deposit = created.snapshot.deposits[0].id, machine = created.snapshot.machines[0].id;
   assert.throws(() => act('collect_deposit', { deposit_id: deposit }), code('INSPECTION_REQUIRED'));
@@ -57,7 +57,7 @@ try {
   act('resume_job', { job_id: job });
   clock += 5000; db.tick();
   act('cancel_job', { job_id: job });
-  assert.equal(read().machines[0].energy_mj, 15000000);
+  assert.equal(read().machines[0].energy_mj, 17000000);
   assert.equal(read().batches[0].state, 'available');
   // The result and reservation must roll back together on a real SQLite write fault.
   db.db.exec("CREATE TRIGGER fail_receipt BEFORE INSERT ON receipts BEGIN SELECT RAISE(ABORT,'injected fault'); END;");
@@ -72,16 +72,18 @@ try {
   const completed = read();
   assert.equal(completed.jobs[1].state, 'completed');
   assert.equal(completed.batches.length, 4);
-  assert.equal(completed.machines[0].energy_mj, 5000000);
+  assert.equal(completed.machines[0].energy_mj, 9000000);
   clock += 30000; db.tick();
   assert.equal(read().batches.length, 4);
-  assert.equal(read().machines[0].energy_mj, 5000000);
+  assert.equal(read().machines[0].energy_mj, 12000000);
   for (const key of ['copper_g', 'hdpe_g', 'dirt_g']) assert.equal(completed.batches.filter((v: any) => v.state !== 'consumed').reduce((sum: number, v: any) => sum + v[key], 0), observed.snapshot.deposits[0].observation[key]);
-  assert(!JSON.stringify(completed).includes(joined.snapshot.deposits[0].id));
-  clock -= 20000; db.tick(); assert.equal(read().machines[0].energy_mj, 5000000);
+  assert.equal(completed.deposits.length, 1);
+  assert(!JSON.stringify(completed).includes('seed'));
+  assert(!JSON.stringify(completed).includes('truth'));
+  clock -= 20000; db.tick(); assert.equal(read().machines[0].energy_mj, 12000000);
   act('dismantle_machine', { machine_id: machine });
-  assert.equal(read().machines[0].dissipated_mj, 5000000);
-  act('abandon_match'); assert.equal(read().status, 'abandoned');
+  assert.equal(read().machines[0].dissipated_mj, 12000000);
+  act('abandon_match'); assert.equal(read().status, 'completed');
   db.logout(a.token); assert.throws(() => read(), code('AUTH_REQUIRED'));
   for (let i = 0; i < 256; i++) {
     const input = { copper_g: 5000 + i * 8, hdpe_g: 4500 - i * 8, dirt_g: 500 };
@@ -127,17 +129,17 @@ try {
   await start();
   const aToken = await account('alice'), bToken = await account('bob');
   let a = connect(aToken), b = connect(bToken), a2 = connect(aToken);
-  const contract = await ok(a, 'describe', { version: 2 });
+  const contract = await ok(a, 'describe', { version: 3 });
   assert.equal(contract.persistence, 'sqlite-wal'); assert.equal(contract.ready_for_full_game, false);
-  assert.equal((await a.rpc('tools/list')).tools.filter((t: any) => t.name.startsWith('astra.game_')).length, 5);
+  assert.equal((await a.rpc('tools/list')).tools.filter((t: any) => t.name.startsWith('astra.game_')).length, 6);
   const create = command();
   const pair = await Promise.all([ok(a, 'create_match', create), ok(a2, 'create_match', create)]);
   assert.deepEqual(pair[0], pair[1]);
   const created = pair[0], id = created.snapshot.match_id;
   await ok(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
-  const read = async () => (await ok(a, 'read_match', { version: 2, match_id: id })).snapshot;
+  const read = async () => (await ok(a, 'read_match', { version: 3, match_id: id })).snapshot;
   const inspected = await ok(a, 'command', { ...command(), match_id: id, expected_revision: (await read()).revision, action: 'inspect_deposit', deposit_id: created.snapshot.deposits[0].id });
-  const args = { version: 2, match_id: id, expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: created.snapshot.deposits[0].id };
+  const args = { version: 3, match_id: id, expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: created.snapshot.deposits[0].id };
   const race = await Promise.all([a, a2].map(c => c.call('game_command', { ...args, command_id: randomUUID() })));
   assert.equal(race.filter(r => !r.isError).length, 1);
   assert.equal(race.find(r => r.isError).structuredContent.error.code, 'CONFLICT');
@@ -155,11 +157,12 @@ try {
   a = connect(aToken); b = connect(bToken);
   const finished = await read();
   assert.equal(finished.jobs[0].state, 'completed'); assert.equal(finished.batches.length, 4);
-  assert.equal(finished.machines[0].energy_mj, 10000000);
+  assert.equal(finished.jobs[0].energy_mj, 10000000);
+  assert(finished.machines[0].energy_mj >= 12000000);
   assert.equal((await read()).batches.length, 4);
   assert.deepEqual(await ok(a, 'create_match', create), created, 'receipt survives process restart');
   await fetch(origin + '/auth/logout', { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${aToken}` }, body: '{}' });
-  const revoked = await a.call('game_read_match', { version: 2, match_id: id }); assert.equal(revoked.structuredContent.error.code, 'AUTH_REQUIRED');
+  const revoked = await a.call('game_read_match', { version: 3, match_id: id }); assert.equal(revoked.structuredContent.error.code, 'AUTH_REQUIRED');
   console.log('PASS real SQLite service + MCP: isolated sessions, duplicate commands, concurrent collection, autonomous scheduling, process kill/restart, exactly-once outputs and revocation');
 } finally {
   await Promise.all(clients.map(c => c.close())); await stop(); await rm(root, { recursive: true, force: true });

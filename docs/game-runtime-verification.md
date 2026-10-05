@@ -1,12 +1,12 @@
 # SQLite runtime verification
 
-The v2 runtime removes the game stack's Supabase dependency. Tests create actual local accounts and sessions in SQLite; no authentication facade or fixture JWT is involved.
+The SQLite runtime removes the game stack's Supabase dependency. Tests create actual local accounts and sessions in SQLite; no authentication facade or fixture JWT is involved.
 
 `npm run test:mcp-game` covers:
 
 - Account password hashing, session token hashing, failed login, expiry and revocation.
 - Exactly two distinct participants, invitation reuse/expiry, owner checks and private projections.
-- Strict published v2 schemas and rejection of caller-supplied identity.
+- Strict published v3 schemas and rejection of caller-supplied identity.
 - Immutable receipt replay, ID reuse errors and two concurrent MCP collection requests.
 - Real SQLite trigger-induced write failure and transaction rollback.
 - Pause/resume/cancel, input reservations, finite deposits and spent-energy accounting.
@@ -16,3 +16,7 @@ The v2 runtime removes the game stack's Supabase dependency. Tests create actual
 `npm run build`, `npm run test:mcp` and `npm run test:mcp-scenes` check compatibility with the existing application and scene tools. CI's Linux/Windows game jobs now exercise SQLite rather than provisioning Postgres or Supabase.
 
 The matching tower-defense PR verifies its actual MCP SDK adapter, HTTP boundary and desktop/mobile browsers against this service. Full gameplay, real robot/sensor behavior, manufacturing and combat remain unimplemented. No external production rollout is claimed.
+
+## Finite-world v3 verification
+
+`test:mcp-game` also runs `scripts/game-world-test.ts`: seven mirrored deposit categories, map/outposts/roads, per-base component allocations, private truth/observation checks, invite rotation and invalidation, owner-only paginated match listing, both 20-second recovery loops, bounded solar/storage/spill accounting, durable depletion after restart, mutual completion without a combat winner, and one-time migration preserving v2 material and jobs. The existing real service/MCP suite still exercises concurrent collection, process kill/restart, immutable receipts and revocation. The downstream browser suite exercises actual controls, including a committed response deliberately lost before identical-command retry.

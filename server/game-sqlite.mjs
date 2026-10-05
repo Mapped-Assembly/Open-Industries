@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
 import { gameFail, validateGameRequest, validateGameResult } from './mcp-game-contract.mjs';
+import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game-world.mjs';
 
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -26,15 +27,6 @@ export function cablePlan(input) {
   ] };
 }
 
-function player(owner, slot) {
-  const copper = 5000 + randomBytes(1)[0] * 8;
-  return { owner, slot,
-    deposit: { id: randomUUID(), collected: false, observation: null, copper_g: copper, hdpe_g: 9500 - copper, dirt_g: 500 },
-    machine: { id: randomUUID(), kind: 'cable-separator', status: 'ready', power_w: 500, energy_mj: 20000000, dissipated_mj: 0 },
-    batches: [], jobs: [],
-  };
-}
-
 /** No external IO inside transactions. SQLite serializes writers across processes. */
 export class GameDatabase {
   constructor(path, { clock = Date.now } = {}) {
@@ -44,7 +36,7 @@ export class GameDatabase {
     if (path !== ':memory:' && process.platform !== 'win32') chmodSync(path, 0o600);
     this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
     const version = this.db.prepare('PRAGMA user_version').get().user_version;
-    if (version !== 0 && version !== 1) { this.db.close(); throw new Error('UNSUPPORTED_SQLITE_SCHEMA'); }
+    if (![0, 1, 2].includes(version)) { this.db.close(); throw new Error('UNSUPPORTED_SQLITE_SCHEMA'); }
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS accounts(id TEXT PRIMARY KEY, username TEXT NOT NULL UNIQUE, salt TEXT NOT NULL, password_hash TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, owner TEXT NOT NULL REFERENCES accounts(id), expires INTEGER NOT NULL);
@@ -57,8 +49,29 @@ export class GameDatabase {
       CREATE INDEX IF NOT EXISTS receipts_match ON receipts(match_id,owner);
       CREATE TABLE IF NOT EXISTS runtime(id INTEGER PRIMARY KEY CHECK(id=1), heartbeat INTEGER);
       INSERT OR IGNORE INTO runtime VALUES(1,NULL);
-      PRAGMA user_version=1;
+
     `);
+    // One transaction upgrades persisted v2 matches without rerolling their cable,
+    // resetting energy/work or deleting immutable receipts. New grants are ledgered.
+    if (version < 2) this.transaction(() => {
+      for (const row of this.db.prepare('SELECT state FROM matches').all()) {
+        const match = JSON.parse(row.state);
+        match.world = makeWorld(match.players);
+        match.completion = match.status === 'abandoned' ? { reason: 'abandoned', winner_slot: null } : null;
+        if (match.completion) match.status = 'completed';
+        for (const p of match.players) {
+          p.base = starterBase(p.slot, p.machine.id, match.world.towers.find(t => t.slot === p.slot).id);
+          p.base.assets.find(a => a.id === p.machine.id).status = p.machine.status;
+          p.base.power.solar_w = 0;
+        }
+        // Settle pre-upgrade elapsed work under the original no-solar rules.
+        this.advance(match);
+        for (const p of match.players) p.base.power.solar_w = 100;
+        match.revision++;
+        this.save(match);
+      }
+      this.db.exec('PRAGMA user_version=2');
+    });
   }
   transaction(fn) {
     this.db.exec('BEGIN IMMEDIATE');
@@ -111,8 +124,11 @@ export class GameDatabase {
           + p.batches.filter(b => b.state !== 'consumed').reduce((sum, b) => sum + b[constituent], 0);
         if (total !== p.deposit[constituent]) gameFail('INVARIANT_FAILED');
       }
-      if (p.machine.energy_mj < 0 || p.machine.energy_mj + p.machine.dissipated_mj
-        + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== 20000000) gameFail('INVARIANT_FAILED');
+      if (p.machine.energy_mj < 0 || p.machine.energy_mj > p.base.power.capacity_mj || p.machine.energy_mj + p.machine.dissipated_mj
+        + p.base.power.spilled_mj + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== p.base.power.initial_mj + p.base.power.generated_mj) gameFail('INVARIANT_FAILED');
+      const allocations = [...p.base.assets.flatMap(a => a.components.map(c => ({ ...c, allocation_id: a.id }))), ...p.base.inventory.map(c => ({ ...c, allocation_id: 'store' }))];
+      if (canonical(allocations) !== canonical(p.base.starter_ledger) || p.base.assets.filter(a => a.kind === 'tower').length !== 1
+        || p.base.assets.filter(a => a.kind === 'robot').length !== 2) gameFail('INVARIANT_FAILED');
     }
     this.db.prepare('UPDATE matches SET status=?,last_tick=?,state=? WHERE id=?').run(match.status, match.last_advanced_ms, JSON.stringify(match), match.id);
   }
@@ -122,27 +138,41 @@ export class GameDatabase {
     if (!batch || batch.state !== 'reserved') gameFail('INVARIANT_FAILED');
     batch.state = 'available'; job.state = 'cancelled'; job.pause_reason = null; job.cancellation_reason = reason;
   }
+  complete(match, reason) {
+    match.status = 'completed'; match.completion = { reason, winner_slot: null }; match.invite_hash = null;
+  }
   advance(match) {
     const now = Math.max(this.clock(), match.last_advanced_ms);
     if (match.status === 'waiting' && match.invite_expires <= now) {
-      match.status = 'abandoned'; match.invite_hash = null; match.revision++;
+      this.complete(match, 'invite-expired'); match.revision++;
     }
     let changed = false;
-    if (match.status === 'active') for (const p of match.players) for (const job of p.jobs.filter(j => j.state === 'running')) {
-      const delta = Math.min(job.duration_ms - job.work_ms, Math.max(0, now - job.last_tick_ms), Math.floor(p.machine.energy_mj / 500));
-      job.work_ms += delta; job.energy_mj += delta * 500; p.machine.energy_mj -= delta * 500;
-      job.last_tick_ms = Math.max(job.last_tick_ms, now); changed ||= delta > 0;
-      if (job.work_ms === job.duration_ms) {
-        const input = p.batches.find(b => b.id === job.input_batch_id);
-        if (!input || input.state !== 'reserved') gameFail('INVARIANT_FAILED');
-        input.state = 'consumed'; job.state = 'completed'; changed = true;
-        for (const output of job.outputs) if (output.copper_g + output.hdpe_g + output.dirt_g > 0) {
-          if (p.batches.some(b => b.source_job_id === job.id && b.output_role === output.output_role)) gameFail('INVARIANT_FAILED');
-          p.batches.push({ id: randomUUID(), state: 'available', ...output, observation_id: null, source_job_id: job.id, grade: 'recovered-ungraded' });
+    if (match.status === 'active') for (const p of match.players) {
+      const elapsed = now - match.last_advanced_ms;
+      const solar = p.machine.status === 'ready' ? p.base.power.solar_w : 0;
+      const generated = elapsed * solar;
+      let spent = 0;
+      for (const job of p.jobs.filter(j => j.state === 'running')) {
+        const requested = Math.min(job.duration_ms - job.work_ms, Math.max(0, now - job.last_tick_ms));
+        const delta = Math.min(requested, Math.floor(p.machine.energy_mj / (500 - solar)));
+        job.work_ms += delta; job.energy_mj += delta * 500; spent += delta * 500;
+        job.last_tick_ms = Math.max(job.last_tick_ms, now);
+        if (job.work_ms === job.duration_ms) {
+          const input = p.batches.find(b => b.id === job.input_batch_id);
+          if (!input || input.state !== 'reserved') gameFail('INVARIANT_FAILED');
+          input.state = 'consumed'; job.state = 'completed'; changed = true;
+          for (const output of job.outputs) if (output.copper_g + output.hdpe_g + output.dirt_g > 0) {
+            if (p.batches.some(b => b.source_job_id === job.id && b.output_role === output.output_role)) gameFail('INVARIANT_FAILED');
+            p.batches.push({ id: randomUUID(), state: 'available', ...output, observation_id: null, source_job_id: job.id, grade: 'recovered-ungraded' });
+          }
+        } else if (delta < requested) {
+          job.state = 'paused'; job.pause_reason = 'power'; changed = true;
         }
-      } else if (p.machine.energy_mj < 500) {
-        job.state = 'paused'; job.pause_reason = 'power'; changed = true;
       }
+      const energy = p.machine.energy_mj + generated - spent;
+      p.base.power.generated_mj += generated;
+      p.base.power.spilled_mj += Math.max(0, energy - p.base.power.capacity_mj);
+      p.machine.energy_mj = Math.min(p.base.power.capacity_mj, energy);
     }
     if (changed) match.revision++;
     match.last_advanced_ms = now;
@@ -150,7 +180,8 @@ export class GameDatabase {
   snapshot(match, owner) {
     const p = match.players.find(p => p.owner === owner);
     if (!p) gameFail('NOT_AVAILABLE');
-    return { match_id: match.id, revision: match.revision, status: match.status,
+    return { match_id: match.id, revision: match.revision, status: match.status, completion: match.completion,
+      world: worldProjection(match), base: p.base, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
       server_time_ms: Math.max(this.clock(), match.last_advanced_ms), scheduler_healthy: this.healthy(),
       players: match.players.map(p => ({ slot: p.slot, you: p.owner === owner })),
       deposits: [{ id: p.deposit.id, collected: p.deposit.collected, observation: p.deposit.observation
@@ -178,6 +209,11 @@ export class GameDatabase {
     return this.transaction(() => {
       const owner = this.identity(token), operation = name.replace('astra.game_', '');
       const request = canonical({ name, arguments: args });
+      if (operation === 'list_matches') {
+        const rows = this.db.prepare('SELECT m.state,m.created,p.slot FROM matches m JOIN members p ON p.match_id=m.id WHERE p.owner=? AND (? IS NULL OR m.id>?) ORDER BY m.id LIMIT 21').all(owner, args.cursor, args.cursor);
+        const matches = rows.slice(0, 20).map(row => { const m = JSON.parse(row.state); this.advance(m); this.save(m); return { match_id: m.id, status: m.status, slot: row.slot, created_at_ms: row.created }; });
+        return validateGameResult(name, { version: 3, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
+      }
       if (operation !== 'read_match') {
         const receipt = this.db.prepare('SELECT * FROM receipts WHERE owner=? AND command_id=?').get(owner, args.command_id);
         if (receipt) { if (receipt.request !== request) gameFail('COMMAND_ID_REUSED'); return JSON.parse(receipt.result); }
@@ -188,7 +224,8 @@ export class GameDatabase {
         if (!this.healthy()) gameFail('SCHEDULER_UNAVAILABLE');
         invite = randomUUID();
         match = { id: randomUUID(), revision: 1, status: 'waiting', invite_hash: hash(invite), invite_expires: this.clock() + 3600000,
-          last_advanced_ms: this.clock(), players: [player(owner, 1)] };
+          last_advanced_ms: this.clock(), completion: null, world: makeWorld(), players: [] };
+        match.players.push(provisionPlayer(owner, 1, match.world));
         this.db.prepare('INSERT INTO matches VALUES(?,?,?,?,?,?)').run(match.id, owner, match.status, this.clock(), match.last_advanced_ms, JSON.stringify(match));
         this.db.prepare('INSERT INTO members VALUES(?,?,1)').run(match.id, owner);
       } else {
@@ -204,20 +241,23 @@ export class GameDatabase {
         this.advance(match);
         if (operation !== 'read_match') {
           const action = operation === 'command' ? args.action : operation;
-          if (action !== 'join_match' && action !== 'abandon_match' && match.status !== 'active') gameFail('MATCH_INACTIVE');
-          if (action === 'abandon_match' && match.status === 'abandoned') gameFail('MATCH_INACTIVE');
+          if (!['join_match', 'abandon_match', 'rotate_invite'].includes(action) && match.status !== 'active') gameFail('MATCH_INACTIVE');
+          if (action === 'abandon_match' && match.status === 'completed') gameFail('MATCH_INACTIVE');
           if (action !== 'abandon_match' && this.db.prepare('SELECT count(*) n FROM receipts WHERE owner=? AND match_id=?').get(owner, match.id).n >= 256) gameFail('LIMIT_REACHED');
           if (!['pause_job', 'cancel_job', 'dismantle_machine', 'abandon_match'].includes(action) && !this.healthy()) gameFail('SCHEDULER_UNAVAILABLE');
           if (action === 'join_match') {
-            match.players.push(player(owner, 2)); match.status = 'active'; match.invite_hash = null;
+            match.players.push(provisionPlayer(owner, 2, match.world)); match.status = 'active'; match.invite_hash = null;
             this.db.prepare('INSERT INTO members VALUES(?,?,2)').run(match.id, owner);
+          } else if (action === 'rotate_invite') {
+            if (own.slot !== 1 || match.status !== 'waiting') gameFail('NOT_AVAILABLE');
+            invite = randomUUID(); match.invite_hash = hash(invite); match.invite_expires = this.clock() + 3600000;
           } else this.command(match, own, args);
           match.revision++;
         }
       }
       this.save(match);
-      const result = { version: 2, balance_version: 'dump-v1', snapshot: this.snapshot(match, owner),
-        ...(operation !== 'read_match' ? { command_id: args.command_id } : {}), ...(invite ? { invite_code: invite } : {}) };
+      const result = { version: 3, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
+        ...(operation !== 'read_match' ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
       validateGameResult(name, result);
       if (operation !== 'read_match') this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(owner, args.command_id, match.id, request, JSON.stringify(result));
       return result;
@@ -258,10 +298,14 @@ export class GameDatabase {
       if (p.machine.id !== args.machine_id) gameFail('NOT_AVAILABLE');
       if (p.machine.status !== 'ready') gameFail('NOT_READY');
       for (const job of p.jobs) this.cancel(p, job, 'machine_destroyed');
-      p.machine.status = 'destroyed'; p.machine.dissipated_mj += p.machine.energy_mj; p.machine.energy_mj = 0;
+      p.machine.status = 'destroyed'; p.base.assets.find(a => a.id === p.machine.id).status = 'destroyed'; p.machine.dissipated_mj += p.machine.energy_mj; p.machine.energy_mj = 0;
     } else if (action === 'abandon_match') {
       for (const player of match.players) for (const job of player.jobs) this.cancel(player, job, 'match_abandoned');
-      match.status = 'abandoned'; match.invite_hash = null;
+      this.complete(match, 'abandoned');
+    } else if (action === 'finish_recovery') {
+      if (!p.jobs.some(j => j.state === 'completed') || p.jobs.some(live)) gameFail('NOT_READY');
+      p.base.ready_to_finish = true;
+      if (match.players.every(player => player.base.ready_to_finish)) this.complete(match, 'recovery-complete');
     } else gameFail('INVALID_REQUEST');
   }
   close() { this.db.close(); }
