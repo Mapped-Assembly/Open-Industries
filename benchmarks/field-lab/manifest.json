@@ -1,0 +1,47 @@
+{
+  "schema": "field-lab-benchmark/manifest/v1",
+  "benchmarkId": "FIELD-LAB-01",
+  "version": "1.0.0",
+  "title": "Scarcity benchmark for a small field laboratory",
+  "sourceRepository": "https://github.com/Mapped-Assembly/Open-Industries",
+  "sourceRevision": "810f182e40011288e6f3280cd34926521481697b",
+  "sourceArchive": {
+    "filename": "field-lab-benchmark.zip",
+    "sha256": "6408f77dc55e2493789a6e28b833420ce3e7a42319cafc1c8a1b3230841f0ebc",
+    "description": "User-delivered FIELD-LAB-01 audit bundle used to author this versioned fixture."
+  },
+  "baseline": {
+    "start": "08:00",
+    "end": "16:00",
+    "minutes": 480,
+    "stepMinutes": 15,
+    "jobs": 24,
+    "units": {
+      "energy": "Wh",
+      "water": "L",
+      "time": "minutes"
+    }
+  },
+  "supported": {
+    "minutes": [480],
+    "stepMinutes": [15],
+    "maxJobs": 24,
+    "reason": "The one-day, 15-minute baseline is intentionally fixed until an extended model is versioned."
+  },
+  "inputs": {
+    "scenarios": "inputs/scenarios.json",
+    "expected": "expected/results.json",
+    "portableScene": "fixtures/field-lab.oi.json",
+    "formFixture": "fixtures/field-lab-pipette.form.json",
+    "stepFixture": "fixtures/field-lab-pipette.step",
+    "stepRecipe": "export-cad.py"
+  },
+  "provenance": {
+    "geometry": "Scenario-authored conceptual parametric geometry; not surveyed or manufacture-ready.",
+    "form": "Scenario-authored fixture retained to exercise the production Form adapter; not live provider output.",
+    "simulation": "Synthetic resource accounting; not assay, thermal, fluid, robot-physics or validated laboratory capacity evidence.",
+    "render": "Open-Industries world, workspace and animation functions with benchmark-specific camera, lighting and captions.",
+    "physicalEvidence": "not-tested"
+  },
+  "capabilityStates": ["passed", "failed", "blocked", "not-tested"]
+}

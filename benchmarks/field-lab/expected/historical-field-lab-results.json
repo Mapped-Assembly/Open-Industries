@@ -1,0 +1,3151 @@
+{
+  "schema": "field-lab-benchmark/v1",
+  "date": "2026-10-05",
+  "upstreamRepository": "https://github.com/Mapped-Assembly/Open-Industries",
+  "upstreamCommit": "810f182e40011288e6f3280cd34926521481697b",
+  "scope": "Synthetic resource accounting harness; not assay, thermal, fluid, robot physics or validated lab capacity.",
+  "assumptions": [
+    "Fictional rural district; no country-specific claims.",
+    "24 generic environmental-water sample jobs arrive in four batches of six.",
+    "One job per 15-minute slot; 2 tips, 1 generic assay consumable, 0.35 L water and 12 Wh per job.",
+    "Panel curve, battery, housekeeping and loads are scenario assumptions, not measured equipment specifications.",
+    "Reserve protects job admission only; critical loads may use it. Base unserved Wh is reported.",
+    "A missed delivery shifts beyond the modeled day. Resilience starts with spare stock and sheds 40 W of assumed deferrable load.",
+    "The 3D animation illustrates workflow. The numerical model is a separate reproducible harness."
+  ],
+  "results": [
+    {
+      "id": "baseline",
+      "name": "Normal supply",
+      "config": {
+        "samples": 24,
+        "minutes": 480,
+        "stepMinutes": 15,
+        "solarWh": [
+          60,
+          160,
+          280,
+          380,
+          400,
+          300,
+          180,
+          80
+        ],
+        "batteryCapacityWh": 1000,
+        "batteryWh": 650,
+        "reserveWh": 80,
+        "baseLoadW": 75,
+        "sampleWh": 12,
+        "sampleWaterL": 0.35,
+        "serviceWaterLPerHour": 0.2,
+        "waterL": 8,
+        "tips": 24,
+        "kits": 12,
+        "waterReserveL": 0.5,
+        "solarFactor": 1,
+        "deliveryMinute": 180,
+        "delivery": {
+          "tips": 24,
+          "kits": 12,
+          "waterL": 8
+        }
+      },
+      "processed": 24,
+      "requested": 24,
+      "completionPct": 100,
+      "remaining": {
+        "batteryWh": 950.25,
+        "waterL": 6.000000000000002,
+        "tips": 0,
+        "kits": 0
+      },
+      "blockedMinutes": {
+        "kits": 0,
+        "tips": 0,
+        "water": 0,
+        "energy": 0
+      },
+      "ledger": {
+        "generatedWh": 1840,
+        "spillWh": 651.75,
+        "baseServedWh": 600,
+        "baseUnservedWh": 0,
+        "processWh": 288,
+        "sampleWaterL": 8.399999999999997,
+        "serviceWaterL": 1.6000000000000008,
+        "deliveredWaterL": 8,
+        "deliveredTips": 24,
+        "deliveredKits": 12
+      },
+      "conservation": {
+        "energyErrorWh": 0,
+        "waterErrorL": 6.661338147750939e-16
+      },
+      "timeline": [
+        {
+          "minute": 15,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 1,
+          "queued": 5,
+          "batteryWh": 634.25,
+          "waterL": 7.6,
+          "tips": 22,
+          "kits": 11,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 30,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 2,
+          "queued": 4,
+          "batteryWh": 618.5,
+          "waterL": 7.2,
+          "tips": 20,
+          "kits": 10,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 45,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 3,
+          "queued": 3,
+          "batteryWh": 602.75,
+          "waterL": 6.8,
+          "tips": 18,
+          "kits": 9,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 60,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 4,
+          "queued": 2,
+          "batteryWh": 587,
+          "waterL": 6.4,
+          "tips": 16,
+          "kits": 8,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 75,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 5,
+          "queued": 1,
+          "batteryWh": 596.25,
+          "waterL": 6,
+          "tips": 14,
+          "kits": 7,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 90,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 605.5,
+          "waterL": 5.6,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 105,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 626.75,
+          "waterL": 5.55,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 120,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 648,
+          "waterL": 5.5,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 135,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 7,
+          "queued": 5,
+          "batteryWh": 687.25,
+          "waterL": 5.1,
+          "tips": 10,
+          "kits": 5,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 150,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 726.5,
+          "waterL": 4.7,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 165,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 9,
+          "queued": 3,
+          "batteryWh": 765.75,
+          "waterL": 4.3,
+          "tips": 6,
+          "kits": 3,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 180,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 10,
+          "queued": 2,
+          "batteryWh": 805,
+          "waterL": 3.9,
+          "tips": 4,
+          "kits": 2,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 195,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 11,
+          "queued": 1,
+          "batteryWh": 869.25,
+          "waterL": 11.5,
+          "tips": 26,
+          "kits": 13,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 210,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 933.5,
+          "waterL": 11.1,
+          "tips": 24,
+          "kits": 12,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 225,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 981.25,
+          "waterL": 11.05,
+          "tips": 24,
+          "kits": 12,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 240,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 981.25,
+          "waterL": 11,
+          "tips": 24,
+          "kits": 12,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 255,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 13,
+          "queued": 5,
+          "batteryWh": 969.25,
+          "waterL": 10.6,
+          "tips": 22,
+          "kits": 11,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 270,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 14,
+          "queued": 4,
+          "batteryWh": 969.25,
+          "waterL": 10.2,
+          "tips": 20,
+          "kits": 10,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 285,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 15,
+          "queued": 3,
+          "batteryWh": 969.25,
+          "waterL": 9.8,
+          "tips": 18,
+          "kits": 9,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 300,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 16,
+          "queued": 2,
+          "batteryWh": 969.25,
+          "waterL": 9.4,
+          "tips": 16,
+          "kits": 8,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 315,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 17,
+          "queued": 1,
+          "batteryWh": 969.25,
+          "waterL": 9,
+          "tips": 14,
+          "kits": 7,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 330,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 18,
+          "queued": 0,
+          "batteryWh": 969.25,
+          "waterL": 8.6,
+          "tips": 12,
+          "kits": 6,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 345,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 18,
+          "queued": 0,
+          "batteryWh": 981.25,
+          "waterL": 8.55,
+          "tips": 12,
+          "kits": 6,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 360,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 18,
+          "queued": 0,
+          "batteryWh": 981.25,
+          "waterL": 8.5,
+          "tips": 12,
+          "kits": 6,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 375,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 19,
+          "queued": 5,
+          "batteryWh": 969.25,
+          "waterL": 8.1,
+          "tips": 10,
+          "kits": 5,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 390,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 20,
+          "queued": 4,
+          "batteryWh": 969.25,
+          "waterL": 7.7,
+          "tips": 8,
+          "kits": 4,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 405,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 21,
+          "queued": 3,
+          "batteryWh": 969.25,
+          "waterL": 7.3,
+          "tips": 6,
+          "kits": 3,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 420,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 22,
+          "queued": 2,
+          "batteryWh": 969.25,
+          "waterL": 6.9,
+          "tips": 4,
+          "kits": 2,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 435,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 23,
+          "queued": 1,
+          "batteryWh": 958.5,
+          "waterL": 6.5,
+          "tips": 2,
+          "kits": 1,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 450,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 24,
+          "queued": 0,
+          "batteryWh": 947.75,
+          "waterL": 6.1,
+          "tips": 0,
+          "kits": 0,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 465,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 24,
+          "queued": 0,
+          "batteryWh": 949,
+          "waterL": 6.05,
+          "tips": 0,
+          "kits": 0,
+          "delivered": true,
+          "reasons": []
+        },
+        {
+          "minute": 480,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 24,
+          "queued": 0,
+          "batteryWh": 950.25,
+          "waterL": 6,
+          "tips": 0,
+          "kits": 0,
+          "delivered": true,
+          "reasons": []
+        }
+      ]
+    },
+    {
+      "id": "missed_delivery",
+      "name": "Missed district delivery",
+      "config": {
+        "samples": 24,
+        "minutes": 480,
+        "stepMinutes": 15,
+        "solarWh": [
+          60,
+          160,
+          280,
+          380,
+          400,
+          300,
+          180,
+          80
+        ],
+        "batteryCapacityWh": 1000,
+        "batteryWh": 650,
+        "reserveWh": 80,
+        "baseLoadW": 75,
+        "sampleWh": 12,
+        "sampleWaterL": 0.35,
+        "serviceWaterLPerHour": 0.2,
+        "waterL": 8,
+        "tips": 24,
+        "kits": 12,
+        "waterReserveL": 0.5,
+        "solarFactor": 1,
+        "deliveryMinute": null,
+        "delivery": {
+          "tips": 24,
+          "kits": 12,
+          "waterL": 8
+        }
+      },
+      "processed": 12,
+      "requested": 24,
+      "completionPct": 50,
+      "remaining": {
+        "batteryWh": 981.25,
+        "waterL": 2.2000000000000086,
+        "tips": 0,
+        "kits": 0
+      },
+      "blockedMinutes": {
+        "kits": 240,
+        "tips": 240,
+        "water": 0,
+        "energy": 0
+      },
+      "ledger": {
+        "generatedWh": 1840,
+        "spillWh": 764.75,
+        "baseServedWh": 600,
+        "baseUnservedWh": 0,
+        "processWh": 144,
+        "sampleWaterL": 4.2,
+        "serviceWaterL": 1.6000000000000008,
+        "deliveredWaterL": 0,
+        "deliveredTips": 0,
+        "deliveredKits": 0
+      },
+      "conservation": {
+        "energyErrorWh": 0,
+        "waterErrorL": -9.103828801926284e-15
+      },
+      "timeline": [
+        {
+          "minute": 15,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 1,
+          "queued": 5,
+          "batteryWh": 634.25,
+          "waterL": 7.6,
+          "tips": 22,
+          "kits": 11,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 30,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 2,
+          "queued": 4,
+          "batteryWh": 618.5,
+          "waterL": 7.2,
+          "tips": 20,
+          "kits": 10,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 45,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 3,
+          "queued": 3,
+          "batteryWh": 602.75,
+          "waterL": 6.8,
+          "tips": 18,
+          "kits": 9,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 60,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 4,
+          "queued": 2,
+          "batteryWh": 587,
+          "waterL": 6.4,
+          "tips": 16,
+          "kits": 8,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 75,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 5,
+          "queued": 1,
+          "batteryWh": 596.25,
+          "waterL": 6,
+          "tips": 14,
+          "kits": 7,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 90,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 605.5,
+          "waterL": 5.6,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 105,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 626.75,
+          "waterL": 5.55,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 120,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 648,
+          "waterL": 5.5,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 135,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 7,
+          "queued": 5,
+          "batteryWh": 687.25,
+          "waterL": 5.1,
+          "tips": 10,
+          "kits": 5,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 150,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 726.5,
+          "waterL": 4.7,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 165,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 9,
+          "queued": 3,
+          "batteryWh": 765.75,
+          "waterL": 4.3,
+          "tips": 6,
+          "kits": 3,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 180,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 10,
+          "queued": 2,
+          "batteryWh": 805,
+          "waterL": 3.9,
+          "tips": 4,
+          "kits": 2,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 195,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 11,
+          "queued": 1,
+          "batteryWh": 869.25,
+          "waterL": 3.5,
+          "tips": 2,
+          "kits": 1,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 210,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 933.5,
+          "waterL": 3.1,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 225,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 981.25,
+          "waterL": 3.05,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 240,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 981.25,
+          "waterL": 3,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 255,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.95,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 270,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.9,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 285,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.85,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 300,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.8,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 315,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.75,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 330,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.7,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 345,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.65,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 360,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 981.25,
+          "waterL": 2.6,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 375,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.55,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 390,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.5,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 405,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.45,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 420,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.4,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 435,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.35,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 450,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.3,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 465,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.25,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        },
+        {
+          "minute": 480,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 981.25,
+          "waterL": 2.2,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cloudy_power",
+      "name": "Cloudy day / low battery",
+      "config": {
+        "samples": 24,
+        "minutes": 480,
+        "stepMinutes": 15,
+        "solarWh": [
+          60,
+          160,
+          280,
+          380,
+          400,
+          300,
+          180,
+          80
+        ],
+        "batteryCapacityWh": 1000,
+        "batteryWh": 260,
+        "reserveWh": 80,
+        "baseLoadW": 75,
+        "sampleWh": 12,
+        "sampleWaterL": 0.35,
+        "serviceWaterLPerHour": 0.2,
+        "waterL": 8,
+        "tips": 24,
+        "kits": 12,
+        "waterReserveL": 0.5,
+        "solarFactor": 0.2,
+        "deliveryMinute": 180,
+        "delivery": {
+          "tips": 24,
+          "kits": 12,
+          "waterL": 8
+        }
+      },
+      "processed": 6,
+      "requested": 24,
+      "completionPct": 25,
+      "remaining": {
+        "batteryWh": 0,
+        "waterL": 12.29999999999999,
+        "tips": 36,
+        "kits": 18
+      },
+      "blockedMinutes": {
+        "kits": 0,
+        "tips": 0,
+        "water": 0,
+        "energy": 360
+      },
+      "ledger": {
+        "generatedWh": 368,
+        "spillWh": 0,
+        "baseServedWh": 556,
+        "baseUnservedWh": 44,
+        "processWh": 72,
+        "sampleWaterL": 2.1,
+        "serviceWaterL": 1.6000000000000008,
+        "deliveredWaterL": 8,
+        "deliveredTips": 24,
+        "deliveredKits": 12
+      },
+      "conservation": {
+        "energyErrorWh": 0,
+        "waterErrorL": 9.103828801926284e-15
+      },
+      "timeline": [
+        {
+          "minute": 15,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 1,
+          "queued": 5,
+          "batteryWh": 232.25,
+          "waterL": 7.6,
+          "tips": 22,
+          "kits": 11,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 30,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 2,
+          "queued": 4,
+          "batteryWh": 204.5,
+          "waterL": 7.2,
+          "tips": 20,
+          "kits": 10,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 45,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 3,
+          "queued": 3,
+          "batteryWh": 176.75,
+          "waterL": 6.8,
+          "tips": 18,
+          "kits": 9,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 60,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 4,
+          "queued": 2,
+          "batteryWh": 149,
+          "waterL": 6.4,
+          "tips": 16,
+          "kits": 8,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 75,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 5,
+          "queued": 1,
+          "batteryWh": 126.25,
+          "waterL": 6,
+          "tips": 14,
+          "kits": 7,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 90,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 103.5,
+          "waterL": 5.6,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 105,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 92.75,
+          "waterL": 5.55,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 120,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 82,
+          "waterL": 5.5,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 135,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 77.25,
+          "waterL": 5.45,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 150,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 72.5,
+          "waterL": 5.4,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 165,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 67.75,
+          "waterL": 5.35,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 180,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 63,
+          "waterL": 5.3,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 195,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 63.25,
+          "waterL": 13.25,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 210,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 63.5,
+          "waterL": 13.2,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 225,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 63.75,
+          "waterL": 13.15,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 240,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 6,
+          "queued": 6,
+          "batteryWh": 64,
+          "waterL": 13.1,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 255,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 65.25,
+          "waterL": 13.05,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 270,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 66.5,
+          "waterL": 13,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 285,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 67.75,
+          "waterL": 12.95,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 300,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 69,
+          "waterL": 12.9,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 315,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 65.25,
+          "waterL": 12.85,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 330,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 61.5,
+          "waterL": 12.8,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 345,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 57.75,
+          "waterL": 12.75,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 360,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 6,
+          "queued": 12,
+          "batteryWh": 54,
+          "waterL": 12.7,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 375,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 44.25,
+          "waterL": 12.65,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 390,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 34.5,
+          "waterL": 12.6,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 405,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 24.75,
+          "waterL": 12.55,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 420,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 15,
+          "waterL": 12.5,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 435,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 0.25,
+          "waterL": 12.45,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 450,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 0,
+          "waterL": 12.4,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 465,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 0,
+          "waterL": 12.35,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        },
+        {
+          "minute": 480,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 6,
+          "queued": 18,
+          "batteryWh": 0,
+          "waterL": 12.3,
+          "tips": 36,
+          "kits": 18,
+          "delivered": true,
+          "reasons": [
+            "energy"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "water_ration",
+      "name": "Water rationing",
+      "config": {
+        "samples": 24,
+        "minutes": 480,
+        "stepMinutes": 15,
+        "solarWh": [
+          60,
+          160,
+          280,
+          380,
+          400,
+          300,
+          180,
+          80
+        ],
+        "batteryCapacityWh": 1000,
+        "batteryWh": 650,
+        "reserveWh": 80,
+        "baseLoadW": 75,
+        "sampleWh": 12,
+        "sampleWaterL": 0.35,
+        "serviceWaterLPerHour": 0.2,
+        "waterL": 4,
+        "tips": 24,
+        "kits": 12,
+        "waterReserveL": 0.5,
+        "solarFactor": 1,
+        "deliveryMinute": 180,
+        "delivery": {
+          "tips": 24,
+          "kits": 12,
+          "waterL": 0
+        }
+      },
+      "processed": 8,
+      "requested": 24,
+      "completionPct": 33.333333333333336,
+      "remaining": {
+        "batteryWh": 981.25,
+        "waterL": 0,
+        "tips": 32,
+        "kits": 16
+      },
+      "blockedMinutes": {
+        "kits": 0,
+        "tips": 0,
+        "water": 330,
+        "energy": 0
+      },
+      "ledger": {
+        "generatedWh": 1840,
+        "spillWh": 812.75,
+        "baseServedWh": 600,
+        "baseUnservedWh": 0,
+        "processWh": 96,
+        "sampleWaterL": 2.8000000000000003,
+        "serviceWaterL": 1.2000000000000008,
+        "deliveredWaterL": 0,
+        "deliveredTips": 24,
+        "deliveredKits": 12
+      },
+      "conservation": {
+        "energyErrorWh": 0,
+        "waterErrorL": -1.1102230246251565e-15
+      },
+      "timeline": [
+        {
+          "minute": 15,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 1,
+          "queued": 5,
+          "batteryWh": 634.25,
+          "waterL": 3.6,
+          "tips": 22,
+          "kits": 11,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 30,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 2,
+          "queued": 4,
+          "batteryWh": 618.5,
+          "waterL": 3.2,
+          "tips": 20,
+          "kits": 10,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 45,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 3,
+          "queued": 3,
+          "batteryWh": 602.75,
+          "waterL": 2.8,
+          "tips": 18,
+          "kits": 9,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 60,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 4,
+          "queued": 2,
+          "batteryWh": 587,
+          "waterL": 2.4,
+          "tips": 16,
+          "kits": 8,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 75,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 5,
+          "queued": 1,
+          "batteryWh": 596.25,
+          "waterL": 2,
+          "tips": 14,
+          "kits": 7,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 90,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 605.5,
+          "waterL": 1.6,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 105,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 626.75,
+          "waterL": 1.55,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 120,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 648,
+          "waterL": 1.5,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 135,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 7,
+          "queued": 5,
+          "batteryWh": 687.25,
+          "waterL": 1.1,
+          "tips": 10,
+          "kits": 5,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 150,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 726.5,
+          "waterL": 0.7,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 165,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 777.75,
+          "waterL": 0.65,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 180,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 829,
+          "waterL": 0.6,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 195,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 905.25,
+          "waterL": 0.55,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 210,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 981.25,
+          "waterL": 0.5,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 225,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 981.25,
+          "waterL": 0.45,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 240,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 981.25,
+          "waterL": 0.4,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 255,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.35,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 270,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.3,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 285,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.25,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 300,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.2,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 315,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.15,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 330,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.1,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 345,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0.05,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 360,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 8,
+          "queued": 10,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 375,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 390,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 405,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 420,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 435,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 450,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 465,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        },
+        {
+          "minute": 480,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 8,
+          "queued": 16,
+          "batteryWh": 981.25,
+          "waterL": 0,
+          "tips": 32,
+          "kits": 16,
+          "delivered": true,
+          "reasons": [
+            "water"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "combined",
+      "name": "Combined disruption",
+      "config": {
+        "samples": 24,
+        "minutes": 480,
+        "stepMinutes": 15,
+        "solarWh": [
+          60,
+          160,
+          280,
+          380,
+          400,
+          300,
+          180,
+          80
+        ],
+        "batteryCapacityWh": 1000,
+        "batteryWh": 350,
+        "reserveWh": 80,
+        "baseLoadW": 75,
+        "sampleWh": 12,
+        "sampleWaterL": 0.35,
+        "serviceWaterLPerHour": 0.2,
+        "waterL": 6,
+        "tips": 24,
+        "kits": 12,
+        "waterReserveL": 0.5,
+        "solarFactor": 0.2,
+        "deliveryMinute": null,
+        "delivery": {
+          "tips": 24,
+          "kits": 12,
+          "waterL": 8
+        }
+      },
+      "processed": 12,
+      "requested": 24,
+      "completionPct": 50,
+      "remaining": {
+        "batteryWh": 0,
+        "waterL": 0.20000000000000318,
+        "tips": 0,
+        "kits": 0
+      },
+      "blockedMinutes": {
+        "kits": 240,
+        "tips": 240,
+        "water": 195,
+        "energy": 240
+      },
+      "ledger": {
+        "generatedWh": 368,
+        "spillWh": 0,
+        "baseServedWh": 574,
+        "baseUnservedWh": 26,
+        "processWh": 144,
+        "sampleWaterL": 4.2,
+        "serviceWaterL": 1.6000000000000008,
+        "deliveredWaterL": 0,
+        "deliveredTips": 0,
+        "deliveredKits": 0
+      },
+      "conservation": {
+        "energyErrorWh": 0,
+        "waterErrorL": -3.774758283725532e-15
+      },
+      "timeline": [
+        {
+          "minute": 15,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 1,
+          "queued": 5,
+          "batteryWh": 322.25,
+          "waterL": 5.6,
+          "tips": 22,
+          "kits": 11,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 30,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 2,
+          "queued": 4,
+          "batteryWh": 294.5,
+          "waterL": 5.2,
+          "tips": 20,
+          "kits": 10,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 45,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 3,
+          "queued": 3,
+          "batteryWh": 266.75,
+          "waterL": 4.8,
+          "tips": 18,
+          "kits": 9,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 60,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 4,
+          "queued": 2,
+          "batteryWh": 239,
+          "waterL": 4.4,
+          "tips": 16,
+          "kits": 8,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 75,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 5,
+          "queued": 1,
+          "batteryWh": 216.25,
+          "waterL": 4,
+          "tips": 14,
+          "kits": 7,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 90,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 193.5,
+          "waterL": 3.6,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 105,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 182.75,
+          "waterL": 3.55,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 120,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 172,
+          "waterL": 3.5,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 135,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 7,
+          "queued": 5,
+          "batteryWh": 155.25,
+          "waterL": 3.1,
+          "tips": 10,
+          "kits": 5,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 150,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 138.5,
+          "waterL": 2.7,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 165,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 9,
+          "queued": 3,
+          "batteryWh": 121.75,
+          "waterL": 2.3,
+          "tips": 6,
+          "kits": 3,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 180,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 10,
+          "queued": 2,
+          "batteryWh": 105,
+          "waterL": 1.9,
+          "tips": 4,
+          "kits": 2,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 195,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 11,
+          "queued": 1,
+          "batteryWh": 93.25,
+          "waterL": 1.5,
+          "tips": 2,
+          "kits": 1,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 210,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 81.5,
+          "waterL": 1.1,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 225,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 81.75,
+          "waterL": 1.05,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 240,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 82,
+          "waterL": 1,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 255,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 83.25,
+          "waterL": 0.95,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "energy"
+          ]
+        },
+        {
+          "minute": 270,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 84.5,
+          "waterL": 0.9,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "energy"
+          ]
+        },
+        {
+          "minute": 285,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 85.75,
+          "waterL": 0.85,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "energy"
+          ]
+        },
+        {
+          "minute": 300,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 87,
+          "waterL": 0.8,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 315,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 83.25,
+          "waterL": 0.75,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 330,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 79.5,
+          "waterL": 0.7,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 345,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 75.75,
+          "waterL": 0.65,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 360,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 12,
+          "queued": 6,
+          "batteryWh": 72,
+          "waterL": 0.6,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 375,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 62.25,
+          "waterL": 0.55,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 390,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 52.5,
+          "waterL": 0.5,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 405,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 42.75,
+          "waterL": 0.45,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 420,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 33,
+          "waterL": 0.4,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 435,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 18.25,
+          "waterL": 0.35,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 450,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 3.5,
+          "waterL": 0.3,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 465,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 0,
+          "waterL": 0.25,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        },
+        {
+          "minute": 480,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 12,
+          "queued": 12,
+          "batteryWh": 0,
+          "waterL": 0.2,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": [
+            "kits",
+            "tips",
+            "water",
+            "energy"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "resilience",
+      "name": "Spare stock + load shedding",
+      "config": {
+        "samples": 24,
+        "minutes": 480,
+        "stepMinutes": 15,
+        "solarWh": [
+          60,
+          160,
+          280,
+          380,
+          400,
+          300,
+          180,
+          80
+        ],
+        "batteryCapacityWh": 1000,
+        "batteryWh": 350,
+        "reserveWh": 80,
+        "baseLoadW": 35,
+        "sampleWh": 12,
+        "sampleWaterL": 0.35,
+        "serviceWaterLPerHour": 0.2,
+        "waterL": 10.5,
+        "tips": 48,
+        "kits": 24,
+        "waterReserveL": 0.5,
+        "solarFactor": 0.2,
+        "deliveryMinute": null,
+        "delivery": {
+          "tips": 24,
+          "kits": 12,
+          "waterL": 8
+        }
+      },
+      "processed": 24,
+      "requested": 24,
+      "completionPct": 100,
+      "remaining": {
+        "batteryWh": 150,
+        "waterL": 0.5000000000000034,
+        "tips": 0,
+        "kits": 0
+      },
+      "blockedMinutes": {
+        "kits": 0,
+        "tips": 0,
+        "water": 0,
+        "energy": 0
+      },
+      "ledger": {
+        "generatedWh": 368,
+        "spillWh": 0,
+        "baseServedWh": 280,
+        "baseUnservedWh": 0,
+        "processWh": 288,
+        "sampleWaterL": 8.399999999999997,
+        "serviceWaterL": 1.6000000000000008,
+        "deliveredWaterL": 0,
+        "deliveredTips": 0,
+        "deliveredKits": 0
+      },
+      "conservation": {
+        "energyErrorWh": 0,
+        "waterErrorL": -1.1102230246251565e-15
+      },
+      "timeline": [
+        {
+          "minute": 15,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 1,
+          "queued": 5,
+          "batteryWh": 332.25,
+          "waterL": 10.1,
+          "tips": 46,
+          "kits": 23,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 30,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 2,
+          "queued": 4,
+          "batteryWh": 314.5,
+          "waterL": 9.7,
+          "tips": 44,
+          "kits": 22,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 45,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 3,
+          "queued": 3,
+          "batteryWh": 296.75,
+          "waterL": 9.3,
+          "tips": 42,
+          "kits": 21,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 60,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 4,
+          "queued": 2,
+          "batteryWh": 279,
+          "waterL": 8.9,
+          "tips": 40,
+          "kits": 20,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 75,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 5,
+          "queued": 1,
+          "batteryWh": 266.25,
+          "waterL": 8.5,
+          "tips": 38,
+          "kits": 19,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 90,
+          "arrived": 6,
+          "completed": 1,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 253.5,
+          "waterL": 8.1,
+          "tips": 36,
+          "kits": 18,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 105,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 252.75,
+          "waterL": 8.05,
+          "tips": 36,
+          "kits": 18,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 120,
+          "arrived": 6,
+          "completed": 0,
+          "processed": 6,
+          "queued": 0,
+          "batteryWh": 252,
+          "waterL": 8,
+          "tips": 36,
+          "kits": 18,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 135,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 7,
+          "queued": 5,
+          "batteryWh": 245.25,
+          "waterL": 7.6,
+          "tips": 34,
+          "kits": 17,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 150,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 8,
+          "queued": 4,
+          "batteryWh": 238.5,
+          "waterL": 7.2,
+          "tips": 32,
+          "kits": 16,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 165,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 9,
+          "queued": 3,
+          "batteryWh": 231.75,
+          "waterL": 6.8,
+          "tips": 30,
+          "kits": 15,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 180,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 10,
+          "queued": 2,
+          "batteryWh": 225,
+          "waterL": 6.4,
+          "tips": 28,
+          "kits": 14,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 195,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 11,
+          "queued": 1,
+          "batteryWh": 223.25,
+          "waterL": 6,
+          "tips": 26,
+          "kits": 13,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 210,
+          "arrived": 12,
+          "completed": 1,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 221.5,
+          "waterL": 5.6,
+          "tips": 24,
+          "kits": 12,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 225,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 231.75,
+          "waterL": 5.55,
+          "tips": 24,
+          "kits": 12,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 240,
+          "arrived": 12,
+          "completed": 0,
+          "processed": 12,
+          "queued": 0,
+          "batteryWh": 242,
+          "waterL": 5.5,
+          "tips": 24,
+          "kits": 12,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 255,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 13,
+          "queued": 5,
+          "batteryWh": 241.25,
+          "waterL": 5.1,
+          "tips": 22,
+          "kits": 11,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 270,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 14,
+          "queued": 4,
+          "batteryWh": 240.5,
+          "waterL": 4.7,
+          "tips": 20,
+          "kits": 10,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 285,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 15,
+          "queued": 3,
+          "batteryWh": 239.75,
+          "waterL": 4.3,
+          "tips": 18,
+          "kits": 9,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 300,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 16,
+          "queued": 2,
+          "batteryWh": 239,
+          "waterL": 3.9,
+          "tips": 16,
+          "kits": 8,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 315,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 17,
+          "queued": 1,
+          "batteryWh": 233.25,
+          "waterL": 3.5,
+          "tips": 14,
+          "kits": 7,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 330,
+          "arrived": 18,
+          "completed": 1,
+          "processed": 18,
+          "queued": 0,
+          "batteryWh": 227.5,
+          "waterL": 3.1,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 345,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 18,
+          "queued": 0,
+          "batteryWh": 233.75,
+          "waterL": 3.05,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 360,
+          "arrived": 18,
+          "completed": 0,
+          "processed": 18,
+          "queued": 0,
+          "batteryWh": 240,
+          "waterL": 3,
+          "tips": 12,
+          "kits": 6,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 375,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 19,
+          "queued": 5,
+          "batteryWh": 228.25,
+          "waterL": 2.6,
+          "tips": 10,
+          "kits": 5,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 390,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 20,
+          "queued": 4,
+          "batteryWh": 216.5,
+          "waterL": 2.2,
+          "tips": 8,
+          "kits": 4,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 405,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 21,
+          "queued": 3,
+          "batteryWh": 204.75,
+          "waterL": 1.8,
+          "tips": 6,
+          "kits": 3,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 420,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 22,
+          "queued": 2,
+          "batteryWh": 193,
+          "waterL": 1.4,
+          "tips": 4,
+          "kits": 2,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 435,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 23,
+          "queued": 1,
+          "batteryWh": 176.25,
+          "waterL": 1,
+          "tips": 2,
+          "kits": 1,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 450,
+          "arrived": 24,
+          "completed": 1,
+          "processed": 24,
+          "queued": 0,
+          "batteryWh": 159.5,
+          "waterL": 0.6,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 465,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 24,
+          "queued": 0,
+          "batteryWh": 154.75,
+          "waterL": 0.55,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        },
+        {
+          "minute": 480,
+          "arrived": 24,
+          "completed": 0,
+          "processed": 24,
+          "queued": 0,
+          "batteryWh": 150,
+          "waterL": 0.5,
+          "tips": 0,
+          "kits": 0,
+          "delivered": false,
+          "reasons": []
+        }
+      ]
+    }
+  ]
+}

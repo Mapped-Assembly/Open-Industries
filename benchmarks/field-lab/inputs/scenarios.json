@@ -1,0 +1,31 @@
+{
+  "schema": "field-lab-benchmark/inputs/v1",
+  "baseline": {
+    "samples": 24,
+    "minutes": 480,
+    "stepMinutes": 15,
+    "solarWh": [60, 160, 280, 380, 400, 300, 180, 80],
+    "batteryCapacityWh": 1000,
+    "batteryWh": 650,
+    "reserveWh": 80,
+    "baseLoadW": 75,
+    "sampleWh": 12,
+    "sampleWaterL": 0.35,
+    "serviceWaterLPerHour": 0.2,
+    "waterL": 8,
+    "tips": 24,
+    "kits": 12,
+    "waterReserveL": 0.5,
+    "solarFactor": 1,
+    "deliveryMinute": 180,
+    "delivery": {"tips": 24, "kits": 12, "waterL": 8}
+  },
+  "scenarios": [
+    {"id": "baseline", "name": "Normal supply", "changes": {}},
+    {"id": "missed_delivery", "name": "Missed district delivery", "changes": {"deliveryMinute": null}},
+    {"id": "cloudy_power", "name": "Cloudy day / low battery", "changes": {"solarFactor": 0.2, "batteryWh": 260}},
+    {"id": "water_ration", "name": "Water rationing", "changes": {"waterL": 4, "delivery": {"tips": 24, "kits": 12, "waterL": 0}}},
+    {"id": "combined", "name": "Combined supply, water and energy disruption", "changes": {"deliveryMinute": null, "solarFactor": 0.2, "batteryWh": 350, "waterL": 6}},
+    {"id": "resilience", "name": "Prepositioned stock + water + deferred loads", "changes": {"deliveryMinute": null, "solarFactor": 0.2, "batteryWh": 350, "waterL": 10.5, "tips": 48, "kits": 24, "baseLoadW": 35}}
+  ]
+}
