@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -13,6 +13,11 @@ const outputArg = args.find((arg) => !arg.startsWith('--'));
 const output = resolve(outputArg ?? join(repoRoot, 'deliverables', 'field-lab'));
 const logs = join(output, 'logs');
 mkdirSync(logs, { recursive: true });
+for (const relative of ['manifest.json', 'inputs/scenarios.json', 'expected/results.json', 'fixtures/SHA256SUMS.json']) {
+  const destination = join(output, relative);
+  mkdirSync(dirname(destination), { recursive: true });
+  copyFileSync(join(here, relative), destination);
+}
 
 const steps = [];
 function run(name, command, commandArgs) {
