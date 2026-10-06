@@ -1,6 +1,6 @@
 import { chromium } from '@playwright/test';
 import { createServer } from 'vite';
-import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,8 @@ const mode = process.argv[3] ?? 'preview';
 const port = Number(process.env.FIELD_LAB_CAPTURE_PORT ?? 4191);
 const host = process.env.FIELD_LAB_HOST ?? '127.0.0.1';
 const publicRoot = join(out, '.vite-public');
+await mkdir(publicRoot, { recursive: true });
+await cp(join(repoRoot, 'public'), publicRoot, { recursive: true, force: true });
 const publicAssets = join(publicRoot, 'field-lab-assets');
 await mkdir(publicAssets, { recursive: true });
 for (const file of ['field-lab.oi.json', 'field-lab-results.json']) await copyFile(join(out, file), join(publicAssets, file));

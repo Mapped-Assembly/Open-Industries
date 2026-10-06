@@ -1,6 +1,6 @@
 import { createServer } from 'vite';
 import { chromium, expect } from '@playwright/test';
-import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, cp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,6 +16,8 @@ const stepPath = existsSync(join(out, 'field-lab-pipette.step'))
   ? join(out, 'field-lab-pipette.step')
   : join(here, 'fixtures', 'field-lab-pipette.step');
 const publicRoot = join(out, '.vite-public');
+await mkdir(publicRoot, { recursive: true });
+await cp(join(repoRoot, 'public'), publicRoot, { recursive: true, force: true });
 const publicAssets = join(publicRoot, 'field-lab-assets');
 await mkdir(publicAssets, { recursive: true });
 await copyFile(stepPath, join(publicAssets, 'field-lab-pipette.step'));
@@ -23,6 +25,7 @@ await copyFile(stepPath, join(publicAssets, 'field-lab-pipette.step'));
 const server = await createServer({ root: repoRoot, publicDir: publicRoot, server: { host, port, strictPort: true } });
 await server.listen();
 let browser;
+let page;
 const errors = [];
 const reportPath = join(out, 'capability-report.json');
 const readJson = async (path) => JSON.parse(await readFile(path, 'utf8'));
@@ -50,7 +53,7 @@ try {
     throw new Error(`Expected 21 scene instances and 8 animation tracks; found ${scene.instances?.length ?? 0} and ${scene.animation?.tracks?.length ?? 0}.`);
   }
   browser = await launchBrowser();
-  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on('pageerror', (error) => errors.push(String(error)));
   await page.goto(`http://${host}:${port}`);
   await expect(page.getByRole('button', { name: /Drop files or browse/ })).toBeEnabled();
@@ -91,6 +94,16 @@ try {
   console.log('PASS native workbench import / no missing geometry / eight animation tracks / actual STEP worker conversion');
   console.log('Form health:', JSON.stringify(health));
 } catch (error) {
+  if (page) {
+    try {
+      await page.screenshot({ path: join(out, 'native-import-error.png'), fullPage: true });
+      const body = await page.locator('body').innerText();
+      await writeFile(join(out, 'native-import-error.txt'), body);
+      console.error(`Page body at native import failure:\n${body.slice(-12000)}`);
+    } catch (diagnosticError) {
+      console.error(`Could not write native import diagnostics: ${diagnosticError}`);
+    }
+  }
   await writeCapability({ nativeUiImport: { status: 'failed', detail: String(error), evidence: ['integration-checks.json'] } });
   console.error(error);
   throw error;
