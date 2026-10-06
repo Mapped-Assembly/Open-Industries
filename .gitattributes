@@ -1,0 +1,3 @@
+# FIELD-LAB-01 hashes are part of the benchmark contract. Keep the STEP fixture byte-stable on Windows.
+benchmarks/field-lab/fixtures/field-lab-pipette.step -text
+benchmarks/field-lab/fixtures/*.json text eol=lf
