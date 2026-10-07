@@ -1,0 +1,16 @@
+{
+	"name": "@openindustries/material-science",
+	"version": "0.2.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./schema": "./dist/schema.js",
+		"./catalog": "./dist/catalog.js",
+		"./engine": "./dist/engine.js",
+		"./fixtures": "./dist/fixtures.js",
+		"./protocol": "./dist/protocol.js"
+	},
+	"dependencies": {
+		"zod": "4.6.5"
+	}
+}

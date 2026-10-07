@@ -19,5 +19,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run build:materials
+      - run: git diff --exit-code -- packages/material-science/dist
+      - run: npm run test:materials
       - run: npm run test:mcp-game
       - run: npm run test:mcp

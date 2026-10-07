@@ -47,7 +47,9 @@
     "demo:mcp-scene": "node scripts/replay-scene-workflow.mjs",
     "test:form-workflows": "node --import tsx scripts/form-workflows-test.ts",
     "test:form-workflows-browser": "node --import tsx scripts/form-workflows-browser-test.ts",
-    "game:server": "node --env-file-if-exists=.env server/game-service.mjs"
+    "game:server": "node --env-file-if-exists=.env server/game-service.mjs",
+    "build:materials": "tsc -p packages/material-science/tsconfig.json",
+    "test:materials": "node --import tsx --test packages/material-science/tests/*.test.ts && node --import tsx scripts/game-materials-test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
@@ -59,7 +61,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.180.0",
-    "tsx": "^4.20.0"
+    "tsx": "^4.20.0",
+    "@openindustries/material-science": "file:packages/material-science"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
