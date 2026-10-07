@@ -1,0 +1,12 @@
+{
+  "sourceArchive": {
+    "filename": "field-lab-benchmark.zip",
+    "sha256": "6408f77dc55e2493789a6e28b833420ce3e7a42319cafc1c8a1b3230841f0ebc"
+  },
+  "files": {
+    "field-lab.oi.json": "66a9e38818587254cfd90617b5f6817b88f3e20b52756d946557b98bad206605",
+    "field-lab-pipette.form.json": "aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f",
+    "field-lab-pipette.step": "08331419c323af7b3dd4a2e972a43d75ced72501bf008478b62cf99196a67a4a",
+    "pipette-geometry-spec.json": "699b586d76884ddc40c4435933e04189bcb66ba6b4d9f99d05a2bb576b4c1bf8"
+  }
+}

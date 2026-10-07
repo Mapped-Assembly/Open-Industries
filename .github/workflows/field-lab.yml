@@ -1,0 +1,54 @@
+name: FIELD-LAB-01 benchmark
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    name: Replay (${{ matrix.os }})
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Replay FIELD-LAB-01
+        run: node benchmarks/field-lab/run.mjs deliverables/field-lab
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: field-lab-replay-${{ matrix.os }}
+          path: deliverables/field-lab
+          if-no-files-found: warn
+
+  render:
+    name: Native import and render evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Replay and render FIELD-LAB-01
+        run: node benchmarks/field-lab/run.mjs deliverables/field-lab --render
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: field-lab-render-evidence
+          path: deliverables/field-lab
+          if-no-files-found: warn

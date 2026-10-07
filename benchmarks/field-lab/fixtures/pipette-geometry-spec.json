@@ -1,0 +1,1072 @@
+[
+  {
+    "type": "box",
+    "position": [
+      0,
+      0.055,
+      0
+    ],
+    "size": [
+      1.12,
+      0.11,
+      0.76
+    ],
+    "color": "#eeeee2",
+    "name": "base",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      -0.5,
+      0.38,
+      -0.3
+    ],
+    "size": [
+      0.045,
+      0.65,
+      0.045
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      -0.5,
+      0.38,
+      0.3
+    ],
+    "size": [
+      0.045,
+      0.65,
+      0.045
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0.5,
+      0.38,
+      -0.3
+    ],
+    "size": [
+      0.045,
+      0.65,
+      0.045
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0.5,
+      0.38,
+      0.3
+    ],
+    "size": [
+      0.045,
+      0.65,
+      0.045
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0,
+      0.7,
+      -0.3
+    ],
+    "size": [
+      1.08,
+      0.045,
+      0.045
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0,
+      0.7,
+      0.3
+    ],
+    "size": [
+      1.08,
+      0.045,
+      0.045
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      -0.5,
+      0.7,
+      0
+    ],
+    "size": [
+      0.045,
+      0.045,
+      0.65
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0.5,
+      0.7,
+      0
+    ],
+    "size": [
+      0.045,
+      0.045,
+      0.65
+    ],
+    "color": "#9eaeb0",
+    "name": "frame",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0,
+      0.69,
+      0
+    ],
+    "size": [
+      0.075,
+      0.075,
+      0.63
+    ],
+    "color": "#2d4148",
+    "name": "gantry",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0,
+      0.605,
+      0.03
+    ],
+    "size": [
+      0.12,
+      0.15,
+      0.13
+    ],
+    "color": "#e59145",
+    "name": "head",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0,
+      0.442,
+      0.03
+    ],
+    "radius": 0.025,
+    "topRadius": 0.025,
+    "height": 0.18,
+    "color": "#eeeee2",
+    "name": "pipette",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0,
+      0.322,
+      0.03
+    ],
+    "radius": 0.014,
+    "topRadius": 0.003,
+    "height": 0.06,
+    "color": "#e59145",
+    "name": "tip",
+    "rotation": []
+  },
+  {
+    "type": "box",
+    "position": [
+      0.08,
+      0.5,
+      0.085
+    ],
+    "size": [
+      0.08,
+      0.055,
+      0.055
+    ],
+    "color": "#2d4148",
+    "name": "camera",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.08,
+      0.462,
+      0.085
+    ],
+    "radius": 0.017,
+    "topRadius": 0.017,
+    "height": 0.025,
+    "color": "#629caa",
+    "name": "camera-lens",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      -0.27,
+      0.135,
+      0.04
+    ],
+    "size": [
+      0.27,
+      0.055,
+      0.42
+    ],
+    "color": "#48779c",
+    "name": "rack",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      0.29,
+      0.125,
+      0.04
+    ],
+    "size": [
+      0.32,
+      0.032,
+      0.45
+    ],
+    "color": "#417b7c",
+    "name": "plate",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.36,
+      0.195,
+      -0.1
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.36,
+      0.25,
+      -0.1
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.2,
+      0.149,
+      -0.1
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.36,
+      0.195,
+      -0.03
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.36,
+      0.25,
+      -0.03
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.2,
+      0.149,
+      -0.03
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.36,
+      0.195,
+      0.04000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.36,
+      0.25,
+      0.04000000000000001
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.2,
+      0.149,
+      0.04000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.36,
+      0.195,
+      0.11000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.36,
+      0.25,
+      0.11000000000000001
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.2,
+      0.149,
+      0.11000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.36,
+      0.195,
+      0.18000000000000002
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.36,
+      0.25,
+      0.18000000000000002
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.2,
+      0.149,
+      0.18000000000000002
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.27,
+      0.195,
+      -0.1
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.27,
+      0.25,
+      -0.1
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.28500000000000003,
+      0.149,
+      -0.1
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.27,
+      0.195,
+      -0.03
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.27,
+      0.25,
+      -0.03
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.28500000000000003,
+      0.149,
+      -0.03
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.27,
+      0.195,
+      0.04000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.27,
+      0.25,
+      0.04000000000000001
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.28500000000000003,
+      0.149,
+      0.04000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.27,
+      0.195,
+      0.11000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.27,
+      0.25,
+      0.11000000000000001
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.28500000000000003,
+      0.149,
+      0.11000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.27,
+      0.195,
+      0.18000000000000002
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.27,
+      0.25,
+      0.18000000000000002
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.28500000000000003,
+      0.149,
+      0.18000000000000002
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.18,
+      0.195,
+      -0.1
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.18,
+      0.25,
+      -0.1
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.37,
+      0.149,
+      -0.1
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.18,
+      0.195,
+      -0.03
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.18,
+      0.25,
+      -0.03
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.37,
+      0.149,
+      -0.03
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.18,
+      0.195,
+      0.04000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.18,
+      0.25,
+      0.04000000000000001
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.37,
+      0.149,
+      0.04000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.18,
+      0.195,
+      0.11000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.18,
+      0.25,
+      0.11000000000000001
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.37,
+      0.149,
+      0.11000000000000001
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      -0.18,
+      0.195,
+      0.18000000000000002
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.095,
+    "color": "#eeeee2",
+    "name": "sample-tubes",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "torus",
+    "position": [
+      -0.18,
+      0.25,
+      0.18000000000000002
+    ],
+    "radius": 0.02,
+    "tube": 0.004,
+    "color": "#e59145",
+    "name": "tube-rims"
+  },
+  {
+    "type": "cylinder",
+    "position": [
+      0.37,
+      0.149,
+      0.18000000000000002
+    ],
+    "radius": 0.022,
+    "topRadius": 0.022,
+    "height": 0.016,
+    "color": "#2d4148",
+    "name": "plate-wells",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  },
+  {
+    "type": "box",
+    "position": [
+      -0.44,
+      0.16,
+      -0.26
+    ],
+    "size": [
+      0.14,
+      0.18,
+      0.13
+    ],
+    "color": "#2d4148",
+    "name": "electronics",
+    "rotation": [
+      0,
+      0,
+      0
+    ]
+  }
+]

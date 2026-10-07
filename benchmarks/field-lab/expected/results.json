@@ -1,0 +1,12 @@
+{
+  "schema": "field-lab-benchmark/expected/v1",
+  "tolerance": 0.000001,
+  "results": [
+    {"id": "baseline", "processed": 24, "baseUnservedWh": 0, "remaining": {"batteryWh": 950.25, "waterL": 6, "tips": 0, "kits": 0}},
+    {"id": "missed_delivery", "processed": 12, "baseUnservedWh": 0, "remaining": {"batteryWh": 981.25, "waterL": 2.2, "tips": 0, "kits": 0}},
+    {"id": "cloudy_power", "processed": 6, "baseUnservedWh": 44, "remaining": {"batteryWh": 0, "waterL": 12.3, "tips": 36, "kits": 18}},
+    {"id": "water_ration", "processed": 8, "baseUnservedWh": 0, "remaining": {"batteryWh": 981.25, "waterL": 0, "tips": 32, "kits": 16}},
+    {"id": "combined", "processed": 12, "baseUnservedWh": 26, "remaining": {"batteryWh": 0, "waterL": 0.2, "tips": 0, "kits": 0}},
+    {"id": "resilience", "processed": 24, "baseUnservedWh": 0, "remaining": {"batteryWh": 150, "waterL": 0.5, "tips": 0, "kits": 0}}
+  ]
+}
