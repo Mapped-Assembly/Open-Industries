@@ -1,0 +1,69 @@
+name: OI geospatial interoperability
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Geometry, binding and geographic contract tests
+        run: python -m unittest discover -s tools/geospatial -p test_export.py -v
+
+  interoperability:
+    strategy:
+      matrix:
+        include:
+          - site: brooklyn
+            longitude: '-73.977'
+            latitude: '40.684'
+            height: '30'
+            heading: '0'
+          - site: tokyo
+            longitude: '139.767'
+            latitude: '35.681'
+            height: '50'
+            heading: '90'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: tools/geospatial
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tools/geospatial/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Export conceptual demonstration
+        run: python export_scene.py ../../benchmarks/field-lab/fixtures/field-lab.oi.json public/export --longitude=${{ matrix.longitude }} --latitude=${{ matrix.latitude }} --height=${{ matrix.height }} --heading=${{ matrix.heading }} --license-note="Existing FIELD-LAB fixture; redistribution permission unresolved"
+      - name: Validate GLB and 3D Tiles including metadata
+        run: npm run validate
+      - name: Verify CesiumJS and independent Three.js renderer
+        run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: geospatial-${{ matrix.site }}
+          path: |
+            tools/geospatial/evidence
+            tools/geospatial/public/export
+            tools/geospatial/package-lock.json

@@ -1,0 +1,20 @@
+:root { color-scheme: dark; font: 14px/1.5 system-ui, sans-serif; color: #dfebe7; background: #101b20; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { display: grid; grid-template-columns: 330px 1fr; height: 100vh; }
+aside { padding: 28px 24px; overflow: auto; border-right: 1px solid #314047; background: #14242b; z-index: 2; }
+.brand { font-size: 11px; letter-spacing: 2px; color: #86d7c5; }
+h1 { font-size: 25px; line-height: 1.2; margin: 16px 0 10px; }
+p, .hint, footer { color: #a9bebc; }
+nav { display: flex; gap: 15px; margin: 20px 0; }
+a { color: #94dfce; }
+.notice { padding: 12px; border: 1px solid #6c6550; background: #343126; color: #e1d4ad; font-size: 12px; }
+#status { margin: 18px 0; color: #9bdfbf; }
+label { display: block; }
+select, button { width: 100%; margin: 7px 0; padding: 10px; color: #e9f5f1; background: #243b43; border: 1px solid #51666b; border-radius: 4px; }
+button { cursor: pointer; }
+pre { padding: 12px; background: #0c1920; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; min-height: 170px; }
+footer { font-size: 11px; margin-top: 24px; }
+#view { position: relative; min-width: 0; }
+#view canvas { display: block; width: 100%; height: 100%; }
+@media (max-width: 700px) { main { grid-template-columns: 240px 1fr; } aside { padding: 18px 14px; } h1 { font-size: 21px; } }

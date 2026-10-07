@@ -1,0 +1,182 @@
+{
+  "format": "astra.scene",
+  "version": 1,
+  "units": "m",
+  "upAxis": "Y",
+  "room": [
+    8,
+    6,
+    3
+  ],
+  "assets": [
+    {
+      "id": "open-workbench",
+      "name": "Open workbench envelope",
+      "source": {
+        "kind": "generated",
+        "filename": "open-equipment.oi.json",
+        "generator": "form-industries",
+        "digest": "4d6122c5cfcd368416dac918a48136f8bd8e55eb232c648787ea4e2ef9072f0d"
+      },
+      "dimensions": [
+        2,
+        1,
+        1
+      ]
+    }
+  ],
+  "instances": [
+    {
+      "id": "bench-a",
+      "name": "Workbench A",
+      "assetId": "open-workbench",
+      "position": [
+        -1.5,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "visible": true
+    },
+    {
+      "id": "bench-b",
+      "name": "Workbench B",
+      "assetId": "open-workbench",
+      "position": [
+        1.5,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        90,
+        0
+      ],
+      "visible": true
+    }
+  ],
+  "bundledAssets": [
+    {
+      "schemaVersion": 1,
+      "id": "open-workbench",
+      "name": "Open workbench envelope",
+      "units": "m",
+      "upAxis": "Y",
+      "originOffset": [
+        0,
+        0,
+        0
+      ],
+      "dimensions": [
+        2,
+        1,
+        1
+      ],
+      "source": {
+        "kind": "generated",
+        "filename": "open-equipment.oi.json",
+        "generator": "form-industries",
+        "digest": "4d6122c5cfcd368416dac918a48136f8bd8e55eb232c648787ea4e2ef9072f0d"
+      },
+      "parts": [
+        {
+          "id": "bench-body",
+          "name": "New conceptual workbench envelope",
+          "vertices": [
+            -1,
+            0,
+            -0.5,
+            1,
+            0,
+            -0.5,
+            1,
+            1,
+            -0.5,
+            -1,
+            1,
+            -0.5,
+            -1,
+            0,
+            0.5,
+            1,
+            0,
+            0.5,
+            1,
+            1,
+            0.5,
+            -1,
+            1,
+            0.5
+          ],
+          "indices": [
+            0,
+            2,
+            1,
+            0,
+            3,
+            2,
+            4,
+            5,
+            6,
+            4,
+            6,
+            7,
+            0,
+            1,
+            5,
+            0,
+            5,
+            4,
+            3,
+            7,
+            6,
+            3,
+            6,
+            2,
+            0,
+            4,
+            7,
+            0,
+            7,
+            3,
+            1,
+            2,
+            6,
+            1,
+            6,
+            5
+          ],
+          "color": [
+            0.2,
+            0.55,
+            0.5
+          ],
+          "metadata": {
+            "representation": "New MIT-licensed conceptual box; not CAD or engineering validation"
+          }
+        }
+      ],
+      "hierarchy": {
+        "id": "bench-root",
+        "name": "Workbench",
+        "partIds": [
+          "bench-body"
+        ],
+        "children": []
+      },
+      "warnings": [
+        "Conceptual envelope only; authored for this interchange fixture."
+      ]
+    }
+  ],
+  "bundledVersions": [],
+  "animation": {
+    "duration": 1,
+    "loop": false,
+    "tracks": []
+  }
+}

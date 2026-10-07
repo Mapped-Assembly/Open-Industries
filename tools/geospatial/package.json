@@ -1,0 +1,25 @@
+{
+  "name": "oi-geospatial-evidence",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node validate.mjs",
+    "prepare:viewer": "node prepare.mjs",
+    "serve": "node prepare.mjs && vite --host 127.0.0.1 --port 4194",
+    "test:browser": "node browser-test.mjs"
+  },
+  "dependencies": {
+    "cesium": "1.146.0",
+    "three": "0.180.0",
+    "3d-tiles-renderer": "0.5.3"
+  },
+  "overrides": {
+    "sharp": "0.34.5"
+  },
+  "devDependencies": {
+    "3d-tiles-validator": "0.6.1",
+    "gltf-validator": "2.0.0-dev.3.10",
+    "playwright": "1.55.1",
+    "vite": "6.4.1"
+  }
+}
