@@ -159,6 +159,7 @@ Live cloud tests need a dedicated Supabase test project and test-only credential
 ## Documentation
 
 - [Workspace guide](docs/workspace.md) — editing, animation, persistence, missing-geometry recovery, and the inspector.
+- [Geospatial interchange](tools/geospatial/README.md) — static OI scenes to 3D Tiles 1.1, CesiumJS and an independent Three.js viewer, with geographic placement and provenance checks.
 - [Form handoff contract](docs/form-handoff.md) — compiled artifacts, supported formats, provenance, and CAD resolution.
 - [Revision history and restore](docs/scene-history.md) — compare saved versions, restore a new head, and preserve exact geometry bindings.
 - [Cross-agent walkthrough](docs/mcp-agent-workflows.md) — deterministic Grok/ChatGPT/Codex fixtures, local agent setup, and create/update/reopen commands.
