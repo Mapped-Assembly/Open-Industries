@@ -175,4 +175,17 @@ Live cloud tests need a dedicated Supabase test project and test-only credential
 Form OSS / Form Core is used under **MPL-2.0**; preserve applicable notices and obligations when reusing upstream code. STEP conversion uses `occt-import-js` and its OpenCascade/WebAssembly distribution; retain their bundled license notices. GIF encoding uses `gifenc` (MIT), and the test decoder is `omggif` (MIT).
 
 The cleanroom robot and workbench source projects declare their mechanical CAD under **CERN-OHL-S-2.0**; see the [example provenance notes](public/examples/cleanroom/README.md). Upstream STEP test geometry is fetched by the smoke test rather than bundled in this repository.
-- [Geospatial interchange](tools/geospatial/README.md) — static OI scenes to 3D Tiles 1.1, CesiumJS and an independent Three.js viewer, with geographic placement and provenance checks.
+
+## Citation
+
+If you use OpenIndustries / Mergence in research, publications, or other academic work, please cite the project:
+
+```bibtex
+@software{mapped_assembly_open_industries_2026,
+  author = {{Mapped Assembly}},
+  title = {OpenIndustries (Mergence): Spatial workbench for hardware and manufacturing-system planning},
+  year = {2026},
+  url = {https://github.com/Mapped-Assembly/Open-Industries},
+  note = {Open-source software}
+}
+```
