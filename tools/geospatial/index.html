@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mapped Assembly · Geospatial evidence</title>
+  <link rel="stylesheet" href="/vendor/cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href="./viewer.css">
+  <script>window.CESIUM_BASE_URL = '/vendor/cesium/';</script>
+  <script src="/vendor/cesium/Cesium.js"></script>
+</head>
+<body>
+  <main>
+    <aside>
+      <div class="brand">MAPPED ASSEMBLY</div>
+      <h1>Equipment in site context</h1>
+      <p>FIELD-LAB-01 · static interchange evidence</p>
+      <nav aria-label="Viewer"><a href="/?viewer=cesium">CesiumJS</a><a href="/?viewer=three">Three.js / 3D Tiles</a></nav>
+      <div class="notice"><strong>Conceptual scene</strong><br>Demonstration anchor, not a surveyed or deployed lab. Resource results are synthetic. No physical validation.</div>
+      <div id="status" role="status">Loading tileset…</div>
+      <label for="equipment">Equipment</label>
+      <select id="equipment"></select>
+      <button id="inspect">Inspect identity</button>
+      <p class="hint">Click geometry to inspect its source and identity.</p>
+      <pre id="details">Select an equipment instance.</pre>
+      <footer>Local tileset · no account or ion token<br><a href="/export/export-report.json">Export evidence</a> · <a href="/export/provenance.json">Provenance</a></footer>
+    </aside>
+    <section id="view" aria-label="Georeferenced equipment viewer"></section>
+  </main>
+  <script type="module" src="./viewer.mjs"></script>
+</body>
+</html>
