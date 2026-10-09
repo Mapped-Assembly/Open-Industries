@@ -1,6 +1,8 @@
 node_modules/
 dist/
 .venv/
+.venv-release/
+python-dist/
 .env
 .env.local
 .env.*.local
@@ -12,6 +14,8 @@ test-results/
 playwright-report/
 *.log
 __pycache__/
+*.egg-info/
+build/
 
 *.sqlite
 *.sqlite-wal

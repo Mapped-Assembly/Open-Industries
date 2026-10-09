@@ -1,7 +1,22 @@
 {
   "name": "mergence",
   "version": "0.1.0",
-  "private": true,
+  "description": "Spatial workbench for hardware and manufacturing-system planning",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mapped-Assembly/Open-Industries.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mapped-Assembly/Open-Industries/issues"
+  },
+  "homepage": "https://github.com/Mapped-Assembly/Open-Industries#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "bin": {
     "astra": "cli/astra.mjs"
