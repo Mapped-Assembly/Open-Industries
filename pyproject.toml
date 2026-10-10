@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "open-industries"
-version = "0.1.0"
+version = "0.1.1"
 description = "Static Open Industries scene exporter for georeferenced 3D Tiles"
 readme = {file = "tools/geospatial/README.md", content-type = "text/markdown"}
 license = {file = "tools/geospatial/LICENSE"}
