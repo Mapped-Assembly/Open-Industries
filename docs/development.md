@@ -20,7 +20,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements-form.txt
 ```
 
-Form is installed through `caid-forma-core==0.3.5`; no Form source checkout is required for this bridge. The distribution provides the `forma-oss` and `forma-core` commands. Mergence invokes `python -m forma_core` from this environment. Set `FORM_PYTHON` in `.env` if you need a different Python executable.
+Form is installed through `caid-forma-core==0.3.5`; no Form source checkout is required for this bridge. The distribution provides the `forma-oss` and `forma-core` commands. OpenIndustries invokes `python -m forma_core` from this environment. Set `FORM_PYTHON` in `.env` if you need a different Python executable.
 
 Start `npm run dev`, open <http://127.0.0.1:5173>, and use **Generate Forma project → Build with Form → Deterministic demo → Build and import** to verify creation and import without provider credentials. Keep `VITE_FORM_GENERATION_ENABLED=true`. The panel checks `/api/health`; if Python/Form is missing, install it and click **Check again**.
 
@@ -30,7 +30,7 @@ For live generation, configure the appropriate provider environment variables in
 
 ## Optional Form MCP demo
 
-The repository includes a project-local OpenCode configuration for the Form OSS MCP server. It is local-only and does not affect the Vercel build or browser bundle. Mergence's file import and existing local generation bridge continue to work when Form MCP is not installed or running.
+The repository includes a project-local OpenCode configuration for the Form OSS MCP server. It is local-only and does not affect the Vercel build or browser bundle. OpenIndustries' file import and existing local generation bridge continue to work when Form MCP is not installed or running.
 
 The commands below run inside a separate [Form OSS checkout](https://github.com/caid-technologies/Forma-OSS), using its documented setup:
 
@@ -39,16 +39,16 @@ py -3 .\scripts\development\setup-opencode.py --root . --workspace "$HOME\form-w
 .\scripts\development\dev.ps1
 ```
 
-The Form backend must be available at `http://127.0.0.1:8000/mcp`. Then, from this Mergence checkout:
+The Form backend must be available at `http://127.0.0.1:8000/mcp`. Then, from this OpenIndustries checkout:
 
 ```powershell
 opencode mcp list
 opencode
 ```
 
-Use the `/form-demo` command in OpenCode. It compiles a validated project to `demo/form-project.json`; import that file into Mergence with **Import project**. The generated `demo/` directory is ignored by Git. Restart OpenCode after changing `opencode.json` because project configuration is loaded at startup.
+Use the `/form-demo` command in OpenCode. It compiles a validated project to `demo/form-project.json`; import that file into OpenIndustries with **Import project**. The generated `demo/` directory is ignored by Git. Restart OpenCode after changing `opencode.json` because project configuration is loaded at startup.
 
-OpenCode now connects to both local servers: Form provides equipment authoring and validation, while Mergence exposes room creation, animation feedback, compiled-artifact handoff, and space-brief tools. Verify both with `opencode mcp list` before starting the demo.
+OpenCode now connects to both local servers: Form provides equipment authoring and validation, while OpenIndustries exposes room creation, animation feedback, compiled-artifact handoff, and space-brief tools. Verify both with `opencode mcp list` before starting the demo.
 
 For typed scene creation and revision updates with private local-workbench URLs, see [external-agent scene authoring](mcp-scenes.md). The empty local-file tools below remain available independently.
 
@@ -73,11 +73,11 @@ If the MCP server is unavailable, use the deterministic Form demo or import an e
 
 ## Animation feedback loop
 
-Render **Authored timeline animation** in GIF studio, enter feedback such as a clearance or motion change, and choose **Send feedback to Form**. Mergence saves a scrubbed review package to `.astra/feedback/latest.json`; it contains the room manifest, sampled frame poses, animation tracks, and the instruction, but not credentials or geometry secrets.
+Render **Authored timeline animation** in GIF studio, enter feedback such as a clearance or motion change, and choose **Send feedback to Form**. OpenIndustries saves a scrubbed review package to `.astra/feedback/latest.json`; it contains the room manifest, sampled frame poses, animation tracks, and the instruction, but not credentials or geometry secrets.
 
-In OpenCode, run `/form-feedback`. It reads the review, updates the Form project through `form.opencode.update_project`, and writes the revised compiled manifest back to `demo/form-project.json`. Reimport that manifest into Mergence and render the animation again. This is intentionally a human-reviewed loop; Mergence never silently changes electrical or mechanical design data.
+In OpenCode, run `/form-feedback`. It reads the review, updates the Form project through `form.opencode.update_project`, and writes the revised compiled manifest back to `demo/form-project.json`. Reimport that manifest into OpenIndustries and render the animation again. This is intentionally a human-reviewed loop; OpenIndustries never silently changes electrical or mechanical design data.
 
-## Mergence CLI
+## OpenIndustries CLI
 
 Install the local CLI from this checkout:
 
@@ -87,7 +87,7 @@ npm link
 astra auth login
 ```
 
-`astra auth login` opens GitHub and stores the Supabase session in the user's Mergence CLI config. Add `http://127.0.0.1:54331/callback` to the Supabase Auth redirect allowlist for the deployed Supabase project, or set `ASTRA_CLI_REDIRECT_URL` to an allowlisted callback. The CLI uses the same Mergence account as the browser.
+`astra auth login` opens GitHub and stores the Supabase session in the user's OpenIndustries CLI config. Add `http://127.0.0.1:54331/callback` to the Supabase Auth redirect allowlist for the deployed Supabase project, or set `ASTRA_CLI_REDIRECT_URL` to an allowlisted callback. The CLI uses the same OpenIndustries account as the browser.
 
 ```powershell
 astra rooms list
@@ -97,7 +97,7 @@ astra rooms export <room-id> .\astra-scene.json
 astra auth logout
 ```
 
-The browser workbench remains the local room editor and can import/export portable scene JSON without signing in. To view a local room, choose **Drop files or browse** and open its `.astra/rooms/<id>.json` scene. The CLI transfers those manifests to and from cloud; binary geometry is not uploaded by the CLI and can be attached from Mergence when cloud storage is enabled.
+The browser workbench remains the local room editor and can import/export portable scene JSON without signing in. To view a local room, choose **Drop files or browse** and open its `.astra/rooms/<id>.json` scene. The CLI transfers those manifests to and from cloud; binary geometry is not uploaded by the CLI and can be attached from OpenIndustries when cloud storage is enabled.
 
 ## Cleanroom example details
 
@@ -107,7 +107,7 @@ Open `/?scene=cleanroom` to load the bundled cleanroom POC example from `public/
 
 - Form: Hardware IR 0.1/0.2, `project_ir` / `hardware_ir` wrappers, `form-project` manifest v1, and `form.project` namespace objects. Object versions are revision counters. Mechanical placements and inline CAD mesh vertices use millimeters with Z up.
 - SDK/agent handoff: see [`docs/form-handoff.md`](form-handoff.md) for the canonical compiled artifact contract used by the Form SDK, OpenCode, and Codex.
-- Generated architectural assets use the `generated` source variant in bundled Mergence scenes. They are explicitly synthetic architecture, not Form-authored hardware or STEP CAD. With migration `20260929100000_generated_scene_assets.sql`, supported `form-industries` generated geometry can be uploaded and reopened through private scene URLs.
+- Generated architectural assets use the `generated` source variant in bundled OpenIndustries scenes. They are explicitly synthetic architecture, not Form-authored hardware or STEP CAD. With migration `20260929100000_generated_scene_assets.sql`, supported `form-industries` generated geometry can be uploaded and reopened through private scene URLs.
 - Select referenced STEP artifacts together with their Form JSON. Missing CAD falls back to labeled mechanical envelopes when available; otherwise the import reports an error. Remote CAD URLs and server-local paths are not fetched automatically.
 - STEP: `.step` and `.stp` Part 21 files are converted with `occt-import-js@0.0.23`. OpenCascade reads source units; the UI provides source-up-axis and scale correction. Geometry conversion runs in an isolated worker with a 120-second timeout. Successful conversions are cached for repeated imports.
 - Scene asset schema v1: stable content-derived asset/part IDs, source filename/digest/project identity, named hierarchy, indexed triangle meshes, dimensions, and warnings. All geometry is normalized to meters, Y up, centered in X/Z and floor-aligned; `originOffset` retains the original normalization offset. Metadata is allowlisted for display.
@@ -128,7 +128,7 @@ Open **GIF studio** in the viewer (also available in fullscreen). Everything in 
 1. Import your Form/STEP assets and open **Floor export**.
 2. Choose **Entire room**, **Floor section**, or **Selected asset**. A section is defined by its X/Z center and width/depth in meters, relative to the room center. Its box is highlighted in the viewport. It must fit within the room and intersect an asset; geometry outside its six boundaries is clipped in the export.
 3. Choose 320, 480, or 640 pixels square, a 2–4 second duration, and 10 or 15 fps. Click **Render GIF**; progress and cancellation are available.
-4. Inspect the animated preview, then download the GIF and its review metadata JSON. Metadata records source asset IDs, names, provenance, instance positions, units, room/section dimensions, motion mode, frame timing, and geometry approximation warnings. Supply both files to a visual-review agent to preserve spatial context. Mergence does not automatically call an LLM or apply corrections.
+4. Inspect the animated preview, then download the GIF and its review metadata JSON. Metadata records source asset IDs, names, provenance, instance positions, units, room/section dimensions, motion mode, frame timing, and geometry approximation warnings. Supply both files to a visual-review agent to preserve spatial context. OpenIndustries does not automatically call an LLM or apply corrections.
 
 **Turntable** makes one complete camera orbit around fixed geometry. Selected assets can also use **Sample lift-and-return**, a clearly labeled synthetic motion with a stationary camera. It is a preview preset, not an authored animation timeline or physics simulation. Captures use a separate renderer and never modify the active room or camera.
 
@@ -138,7 +138,7 @@ GIF timing is rounded to the format's 10 ms tick: 15 fps becomes 70 ms/frame. Me
 
 1. Select a room asset, open **Asset library**, and click **Save selected asset to library**.
 2. Render a **turntable** or **sample motion** preview from its card. The latest GIF and review metadata are saved with its geometry in IndexedDB. Saving the same asset ID updates its existing entry.
-3. Refresh or reopen Mergence on the same browser origin: library entries and previews remain. **Add to room** restores an instance without reimporting the source file. **Remove from library** deletes the stored asset and preview while leaving existing room instances intact.
+3. Refresh or reopen OpenIndustries on the same browser origin: library entries and previews remain. **Add to room** restores an instance without reimporting the source file. **Remove from library** deletes the stored asset and preview while leaving existing room instances intact.
 
 The device library is per browser/device/origin and subject to browser quota and eviction. Use the explicit Cloud files actions for private geometry/GIF transfers. Cloud scenes can be saved and reopened after reload through **Save / open scenes**; portable scene JSON also bundles geometry and animation without a cloud dependency.
 
