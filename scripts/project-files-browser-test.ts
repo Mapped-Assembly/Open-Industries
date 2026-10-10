@@ -22,7 +22,7 @@ try {
     const timer = setTimeout(() => reject(new Error('Local Forma API did not start')), 10_000);
     api.on('error', error => { clearTimeout(timer); reject(error); });
     api.on('exit', code => { clearTimeout(timer); reject(new Error(`Local API exited: ${code}`)); });
-    api.stdout!.on('data', chunk => { if (String(chunk).includes('Mergence server:')) { clearTimeout(timer); resolve(); } });
+    api.stdout!.on('data', chunk => { if (String(chunk).includes('OpenIndustries server:')) { clearTimeout(timer); resolve(); } });
     api.stderr!.resume();
   });
   await web.listen();
@@ -39,7 +39,7 @@ try {
     await page.route('**/api/generations/test-job', route => route.fulfill({ json: { status: 'succeeded', project: fixture } }));
   }
   await page.goto('http://127.0.0.1:4186');
-  await expect(page).toHaveTitle(/Mergence/);
+  await expect(page).toHaveTitle(/OpenIndustries/);
   await expect(page.getByRole('button', { name: 'Import OI project', exact: true })).toBeEnabled();
   await expect(page.locator('canvas')).toBeVisible();
   await expect(page.locator('vite-error-overlay')).toHaveCount(0);
