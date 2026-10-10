@@ -2,7 +2,7 @@
 
 ## Complete workflow
 
-1. Generate projects in Form separately, then import the compiled JSON and any companion STEP files into Mergence.
+1. Generate projects in Form separately, then import the compiled JSON and any companion STEP files into OpenIndustries.
 2. Select a scene instance. Edit its base XYZ position and rotation, rename it, duplicate it, change visibility, or delete it. Undo/redo retains up to 50 workspace edits. Reset puts that instance at the world origin with zero rotation.
 3. Choose **Animate**. Select the whole instance or a component target. Set a time, edit keyframe position/rotation and whole-instance visibility, and click **Add / update keyframe**. A key at the same time is replaced. Existing key buttons seek to their time; their delete buttons remove them.
 4. Play/pause, scrub, or reset to the base layout. **GIF studio → Authored timeline animation** exports a selected time range (up to 4 seconds), with per-frame instance visibility and instance/component transforms in the review JSON. Ordinary turntables use the currently previewed pose, or base poses when the timeline is reset.
@@ -66,10 +66,10 @@ The inspector presents labeled overview/source data, severity-tagged validation,
 
 ## Form animation feedback
 
-GIF studio's authored-animation export records the evaluated frame poses. **Send feedback to Form** stores those poses, the animation manifest, source identities, and a user instruction in `.astra/feedback/latest.json`. The local OpenCode command `/form-feedback` consumes that package and calls Form's `form.opencode.update_project` MCP tool. Mergence then reimports the revised compiled project for another animation review. The package is scrubbed for credential-like fields and is not sent to cloud automatically.
+GIF studio's authored-animation export records the evaluated frame poses. **Send feedback to Form** stores those poses, the animation manifest, source identities, and a user instruction in `.astra/feedback/latest.json`. The local OpenCode command `/form-feedback` consumes that package and calls Form's `form.opencode.update_project` MCP tool. OpenIndustries then reimports the revised compiled project for another animation review. The package is scrubbed for credential-like fields and is not sent to cloud automatically.
 
 ## CLI room transfer
 
-The `astra` CLI uses the same Supabase Auth account as the browser. `astra auth login` uses GitHub OAuth through a local callback, `astra rooms list` lists owned cloud rooms, `astra rooms export` downloads a portable manifest, `astra rooms import` saves a local manifest as a new cloud room, and `astra rooms validate` checks a local file without network access. CLI cloud transfer deliberately excludes binary geometry; geometry upload remains an authenticated Mergence browser operation through the existing storage policy.
+The `astra` CLI uses the same Supabase Auth account as the browser. `astra auth login` uses GitHub OAuth through a local callback, `astra rooms list` lists owned cloud rooms, `astra rooms export` downloads a portable manifest, `astra rooms import` saves a local manifest as a new cloud room, and `astra rooms validate` checks a local file without network access. CLI cloud transfer deliberately excludes binary geometry; geometry upload remains an authenticated OpenIndustries browser operation through the existing storage policy.
 
 `ASTRA_BASE_URL` can point the live workspace test to the deployed app. Use a dedicated test project for new deployments and never place test admin credentials in Vite environment variables.

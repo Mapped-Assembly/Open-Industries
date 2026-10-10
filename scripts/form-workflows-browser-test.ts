@@ -45,7 +45,7 @@ try {
       page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
       page.on('requestfailed', r => failed.push(r.url()));
       await page.goto('http://127.0.0.1:4180');
-      await expect(page).toHaveTitle('Mergence — Spatial Workbench');
+      await expect(page).toHaveTitle('OpenIndustries — Spatial Workbench');
       assert.equal(new URL(page.url()).pathname, '/');
       await expect(page.getByRole('button', { name: /Drop files or browse/ })).toBeEnabled();
       await page.getByRole('button', { name: 'New room', exact: true }).click();

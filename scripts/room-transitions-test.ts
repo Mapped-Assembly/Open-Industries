@@ -50,7 +50,7 @@ try {
   page.on('console', m => { if (m.type() === 'error' && !m.text().includes('Failed to load resource')) errors.push(m.text()); });
   page.on('dialog', d => { assert.equal(d.type(), 'confirm'); void d.accept(); });
   await page.goto('http://127.0.0.1:4182');
-  await expect(page).toHaveTitle('Mergence — Spatial Workbench');
+  await expect(page).toHaveTitle('OpenIndustries — Spatial Workbench');
   assert.equal(new URL(page.url()).pathname, '/');
   const manager = page.getByRole('region', { name: 'Scene persistence' });
   const prompt = page.getByRole('dialog', { name: 'Unsaved room changes' });

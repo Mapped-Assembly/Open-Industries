@@ -11,7 +11,7 @@ export function ProjectInspector({item,selectedPart,selectPart}:{item?:SceneItem
   const definitions=Array.isArray(ir.part_definitions)?ir.part_definitions.map(record):[];
   const components=Array.isArray(ir.components)?ir.components.map(record):[];
   const validation=record(ir.validation);const bom=Array.isArray(ir.bom)?ir.bom.map(record):[];
-  return <><h2>{item.name}</h2><span className="badge">{asset.source.kind.toUpperCase()}</span><h3>Layout instance</h3><p>{item.position.map(n=>n.toFixed(3)).join(' × ')} m<br/>Rotation {item.rotation.map(n=>n.toFixed(1)).join(' / ')}°</p><p className="notice">Mergence spatial edits do not alter or electrically revalidate the Form-authored design.</p><h3>Dimensions</h3><p>{asset.dimensions.map(n=>n.toFixed(3)).join(' × ')} m</p>{asset.warnings.map(w=><p className="notice" key={w}>{w}</p>)}
+  return <><h2>{item.name}</h2><span className="badge">{asset.source.kind.toUpperCase()}</span><h3>Layout instance</h3><p>{item.position.map(n=>n.toFixed(3)).join(' × ')} m<br/>Rotation {item.rotation.map(n=>n.toFixed(1)).join(' / ')}°</p><p className="notice">OpenIndustries spatial edits do not alter or electrically revalidate the Form-authored design.</p><h3>Dimensions</h3><p>{asset.dimensions.map(n=>n.toFixed(3)).join(' × ')} m</p>{asset.warnings.map(w=><p className="notice" key={w}>{w}</p>)}
     {project&&<>
       <details open><summary>Form project</summary><FieldList value={{project_id:project.projectId??'Not supplied',revision:project.revision??'Not supplied',agent:project.agent??'Not supplied',hardware_ir_version:project.hardwareIrVersion,input:project.source}}/></details>
       <details open><summary>Overview</summary><FieldList value={ir.overview}/></details>

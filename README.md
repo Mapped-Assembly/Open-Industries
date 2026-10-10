@@ -1,8 +1,8 @@
-# Mergence
+# OpenIndustries
 
 **Arrange hardware in a 3D space, animate how it moves, and share the layout for review.**
 
-Mergence is a spatial workbench that runs locally in your browser for planning fabrication shops, manufacturing spaces, and laboratories. Import equipment from [Form](https://github.com/caid-technologies/Form-OSS) or a STEP CAD file, place it in a room at real-world scale, and preview a workflow before moving physical equipment.
+OpenIndustries is a spatial workbench that runs locally in your browser for planning fabrication shops, manufacturing spaces, and laboratories. Import equipment from [Form](https://github.com/caid-technologies/Form-OSS) or a STEP CAD file, place it in a room at real-world scale, and preview a workflow before moving physical equipment.
 
 [Run locally](#run-locally) · [Try the local demo](#try-the-local-demo) · [Documentation](#documentation)
 
@@ -10,7 +10,7 @@ Mergence is a spatial workbench that runs locally in your browser for planning f
 
 A hardware model describes an individual piece of equipment. Planning a workspace also means deciding where that equipment goes, what sits around it, and how people or materials move through the room.
 
-Mergence brings those models into one editable scene. A maker can compare workbench arrangements, a manufacturing team can illustrate material flow, and a lab team can review an equipment layout or sampling route. The output is a room layout, an animation, and files that others can reopen or review.
+OpenIndustries brings those models into one editable scene. A maker can compare workbench arrangements, a manufacturing team can illustrate material flow, and a lab team can review an equipment layout or sampling route. The output is a room layout, an animation, and files that others can reopen or review.
 
 ## Try the local demo
 
@@ -19,7 +19,7 @@ Follow [Run locally](#run-locally) to install the project and start `npm run dev
 To make your own layout, open the [local workbench](http://127.0.0.1:5173):
 
 1. Choose **Space brief / local demo**, select a maker, manufacturing, or biofab space, and click **Build space layout**. This creates a preset layout with labeled equipment placeholders and a material-flow animation.
-2. Or choose **Import project** / **Drop files or browse** to open your own Form JSON, STEP model, or saved Mergence scene.
+2. Or choose **Import project** / **Drop files or browse** to open your own Form JSON, STEP model, or saved OpenIndustries scene.
 3. Adjust the room and equipment, then use **Animate**, **GIF studio**, or **Export scene JSON** to inspect and share the result.
 
 You can import, edit, animate, and export locally without signing in. Optional cloud features use GitHub sign-in and a configured Supabase backend; the workbench itself runs on your machine.
@@ -37,7 +37,7 @@ You can import, edit, animate, and export locally without signing in. Optional c
 | Save and reopen | Export portable scene JSON, restore local drafts, or save named cloud scenes with revision history, comparison, and restore. |
 | Work with agents locally | Use optional Form/MCP workflows to author equipment, create or revise saved scenes from an external agent, and return animation feedback to Form. |
 
-## How Form and Mergence work together
+## How Form and OpenIndustries work together
 
 ### Generate and transfer projects in OpenIndustries
 
@@ -48,10 +48,10 @@ You can import, edit, animate, and export locally without signing in. Optional c
 
 **Hosted generation:** the current Vercel build serves only the browser app; it does not run the Node/Python generator. It supports both project file workflows. Generation controls explain how to use the local workbench instead of silently disappearing. See [local generation setup](docs/development.md#local-form-generation).
 
-**Form authors the equipment; Mergence places and reviews it in a space.** Form OSS provides hardware generation, validation, and compiled project data. Mergence imports that output and adds room layout, instance placement, animation, and visual review.
+**Form authors the equipment; OpenIndustries places and reviews it in a space.** Form OSS provides hardware generation, validation, and compiled project data. OpenIndustries imports that output and adds room layout, instance placement, animation, and visual review.
 
 1. **Create or bring equipment.** Author and compile a project in Form, or use an existing STEP file from another CAD tool.
-2. **Import it into Mergence.** Select the Form JSON and any referenced STEP files together. Standalone STEP files also work.
+2. **Import it into OpenIndustries.** Select the Form JSON and any referenced STEP files together. Standalone STEP files also work.
 3. **Arrange and animate.** Place equipment in the room and add keyframes to illustrate its motion or a workflow.
 4. **Save or share.** Export a portable scene, render a GIF plus review metadata, or save a cloud scene.
 5. **Iterate when needed.** In the optional local agent workflow, send animation feedback to Form, review the revised design, and reimport its compiled artifact.
@@ -109,7 +109,7 @@ Copy [`.env.example`](.env.example) to `.env` when you need configuration. Resta
 | GitHub sign-in and cloud scenes | Configure Supabase Auth/Postgres and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. See [Auth/database setup](supabase/README.md). |
 | Private cloud geometry and GIFs | Apply the storage migrations and set `VITE_CLOUD_STORAGE_ENABLED=true`. See the [storage guide](docs/cloud-storage.md). |
 | Disable local generation | Set `VITE_FORM_GENERATION_ENABLED=false` for browser-only deployments. The generation panel explains local setup; import/export stays available. |
-| Local agents and CLI | See [OpenCode/MCP setup](docs/development.md#optional-form-mcp-demo), [scene authoring through MCP](docs/mcp-scenes.md), and the [Mergence CLI](docs/development.md#astra-cli). |
+| Local agents and CLI | See [OpenCode/MCP setup](docs/development.md#optional-form-mcp-demo), [scene authoring through MCP](docs/mcp-scenes.md), and the [OpenIndustries CLI](docs/development.md#astra-cli). |
 
 Only public Supabase browser configuration belongs in `VITE_` variables. Provider credentials and Supabase service-role keys must stay out of the browser bundle.
 
@@ -128,13 +128,13 @@ Only public Supabase browser configuration belongs in `VITE_` variables. Provide
 
 ## Current scope and limitations
 
-Mergence is a working prototype for spatial planning and visual review. Keep these boundaries in mind when evaluating the demo:
+OpenIndustries is a working prototype for spatial planning and visual review. Keep these boundaries in mind when evaluating the demo:
 
 - **Animation is visual.** Keyframes illustrate movement; they do not provide physics simulation, collision guarantees, electrical revalidation, or manufacturing approval.
 - **Space briefs use presets and planning envelopes.** These placeholders represent equipment positions and sizes. Replace them with Form-authored projects or CAD for detailed review.
 - **The cleanroom route is illustrative.** Its access schedule is example data, and the mostly fused robot CAD uses whole-robot approach/retract motion to approximate sampling. See the [example notes](public/examples/cleanroom/README.md).
 - **Imports have practical limits.** Equipment imports are capped at 25 MiB per file, 75 MiB per batch, and 2 million vertices per asset. Large assemblies and STEP variants still need broader validation.
-- **Companion CAD must be selected explicitly.** Mergence does not automatically fetch remote CAD URLs or server-local paths. Missing CAD uses labeled envelopes when the project provides them, or reports an error.
+- **Companion CAD must be selected explicitly.** OpenIndustries does not automatically fetch remote CAD URLs or server-local paths. Missing CAD uses labeled envelopes when the project provides them, or reports an error.
 - **Agent integration is optional and local.** The local workbench supports imports and visual review; the Form generation and feedback bridge uses the local API server. Design changes go through an explicit review and reimport loop.
 
 ## Development checks
@@ -188,12 +188,12 @@ The cleanroom robot and workbench source projects declare their mechanical CAD u
 
 ## Citation
 
-If you use OpenIndustries / Mergence in research, publications, or other academic work, please cite the project:
+If you use OpenIndustries in research, publications, or other academic work, please cite the project:
 
 ```bibtex
 @software{mapped_assembly_open_industries_2026,
   author = {{Mapped Assembly}},
-  title = {OpenIndustries (Mergence): Spatial workbench for hardware and manufacturing-system planning},
+  title = {OpenIndustries: Spatial workbench for hardware and manufacturing-system planning},
   year = {2026},
   url = {https://github.com/Mapped-Assembly/Open-Industries},
   note = {Open-source software}
