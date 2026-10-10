@@ -1,0 +1,68 @@
+name: Publish packages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install JavaScript dependencies
+        run: npm ci
+      - name: Build JavaScript application
+        run: npm run build
+      - name: Install Python build tools
+        run: python -m pip install build
+      - name: Build Python distribution
+        run: python -m build --outdir python-dist
+      - name: Check Python distribution metadata
+        run: python -m pip install twine && python -m twine check python-dist/*
+      - name: Run Python exporter tests
+        run: python -m unittest discover -s tools/geospatial -p test_export.py -v
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: python-dist/
+
+  publish-npm:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Install JavaScript dependencies
+        run: npm ci
+      - name: Publish npm package
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  publish-pypi:
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: python-dist/
+      - name: Publish Python distribution
+        uses: pypa/gh-action-pypi-publish@release/v1
