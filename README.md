@@ -160,7 +160,7 @@ Live cloud tests need a dedicated Supabase test project and test-only credential
 
 The repository publishes two distributions from a GitHub Release:
 
-- [`mergence`](https://www.npmjs.com/package/mergence) is the npm package for the browser workbench and local CLI.
+- [`open-industries`](https://www.npmjs.com/package/open-industries) is the npm package for the browser workbench and local CLI.
 - [`open-industries`](https://pypi.org/project/open-industries/) is the Python package for the static geospatial scene exporter. Its CLI is `oi-export-scene`.
 
 The `Publish packages` workflow validates both builds before publishing. Add a current npm automation token as the repository `NPM_TOKEN` secret, and configure a PyPI trusted publisher for the `pypi` environment, before creating the first release. Package versions are taken from `package.json` and `pyproject.toml`; update both together, then publish a GitHub Release for that version.
