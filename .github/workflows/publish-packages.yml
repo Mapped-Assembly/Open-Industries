@@ -66,3 +66,5 @@ jobs:
           path: python-dist/
       - name: Publish Python distribution
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python-dist/
