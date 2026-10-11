@@ -1,6 +1,6 @@
 import type { Asset } from './scene';
 import { assertSourceMatches, type VersionedAsset } from './workspace';
-import { validateScene, type MergenceScene } from './scene-manifest';
+import { validateScene, type OpenIndustriesScene } from './scene-manifest';
 import { parseCloudBundle } from './cloud-storage';
 import { scrubPortableData } from './portable-data.mjs';
 
@@ -15,13 +15,13 @@ const record=(value:unknown):value is Record<string,unknown>=>Boolean(value)&&ty
 export class DraftStorageError extends Error {
   constructor(message:string,readonly scope?:string){super(message);this.name='DraftStorageError';}
 }
-export type StoredScene={scene:MergenceScene;assets:Asset[];versionedAssets:VersionedAsset[];missingAssetIds:string[];invalidAssetIds:string[]};
+export type StoredScene={scene:OpenIndustriesScene;assets:Asset[];versionedAssets:VersionedAsset[];missingAssetIds:string[];invalidAssetIds:string[]};
 export type DraftBackup={format:'astra.draft-backup';version:1;originalKey:string;createdAt:string;record:unknown;assets:unknown[]};
 
 function openDatabase():Promise<IDBDatabase>{
   return new Promise((resolve,reject)=>{
     let settled=false;
-    const timer=setTimeout(()=>fail('Opening local drafts timed out. Close other Mergence tabs or check browser storage permissions.'),TIMEOUT);
+    const timer=setTimeout(()=>fail('Opening local drafts timed out. Close other OpenIndustries tabs or check browser storage permissions.'),TIMEOUT);
     const fail=(message:string)=>{if(!settled){settled=true;clearTimeout(timer);reject(new Error(message));}};
     try{
       const request=indexedDB.open(DATABASE,VERSION);
@@ -34,8 +34,8 @@ function openDatabase():Promise<IDBDatabase>{
         if(settled){db.close();return;}
         settled=true;clearTimeout(timer);db.onversionchange=()=>db.close();resolve(db);
       };
-      request.onerror=()=>fail('Could not open local drafts. Check browser storage permissions or close older Mergence tabs.');
-      request.onblocked=()=>fail('Local drafts are blocked by another tab. Close other Mergence tabs and retry.');
+      request.onerror=()=>fail('Could not open local drafts. Check browser storage permissions or close older OpenIndustries tabs.');
+      request.onblocked=()=>fail('Local drafts are blocked by another tab. Close other OpenIndustries tabs and retry.');
     }catch{fail('Local draft storage is unavailable in this browser.');}
   });
 }
@@ -54,7 +54,7 @@ async function transact<T>(scope:string|undefined,mode:IDBTransactionMode,work:(
     const guard=(fn:()=>void)=>()=>{if(settled)return;try{fn();}catch(e){fail(e);}};
     try{
       tx=database.transaction(['scenes','assets'],mode);
-      timer=setTimeout(()=>fail(new Error('Local draft operation timed out. Retry after closing other Mergence tabs.')),TIMEOUT);
+      timer=setTimeout(()=>fail(new Error('Local draft operation timed out. Retry after closing other OpenIndustries tabs.')),TIMEOUT);
       tx.onerror=()=>fail(new Error('Local draft storage failed. Check available browser storage and retry.'));
       tx.onabort=()=>fail(new Error('Local draft operation was interrupted. The existing record was not replaced.'));
       const result=work(tx,guard);
@@ -63,7 +63,7 @@ async function transact<T>(scope:string|undefined,mode:IDBTransactionMode,work:(
   });
 }
 
-export async function saveScene(scene:MergenceScene,assets:Asset[],scope?:string,versions:VersionedAsset[]=[]):Promise<void>{
+export async function saveScene(scene:OpenIndustriesScene,assets:Asset[],scope?:string,versions:VersionedAsset[]=[]):Promise<void>{
   const errors=validateScene(scene);if(errors.length)throw new DraftStorageError(`Scene was not saved: ${errors.slice(0,8).join(' ')}`,scope);
   await transact(scope,'readwrite',tx=>{
     tx.objectStore('scenes').put({...scene,id:sceneKey(scope)});
@@ -88,7 +88,7 @@ export async function loadScene(scope?:string):Promise<StoredScene|undefined>{
       const raw:unknown=sceneRequest.result;
       if(raw===undefined)return;
       const errors=validateScene(raw);if(errors.length)throw new Error(`Saved draft is invalid: ${errors.slice(0,8).join(' ')}`);
-      const scene=raw as MergenceScene;
+      const scene=raw as OpenIndustriesScene;
       const instances=scene.workspaceDocument?.instances??scene.instances;
       const bindings=[...new Map(instances.map(instance=>{const version='cloudVersionId' in instance&&typeof instance.cloudVersionId==='string'?instance.cloudVersionId:undefined;return [assetKey(scope,instance.assetId,version),{id:instance.assetId,version}];})).values()];
       result={scene,assets:[],versionedAssets:[],missingAssetIds:[],invalidAssetIds:[]};
@@ -133,7 +133,7 @@ export async function exportStoredDraft(scope?:string):Promise<DraftBackup>{
 }
 
 /** Backup and replace are one transaction; quota/clone failures leave the draft intact. */
-export async function backupAndResetDraft(scope:string|undefined,replacement:MergenceScene,replacementScope:string,replacementAssets:Asset[]=[],versions:VersionedAsset[]=[]):Promise<string>{
+export async function backupAndResetDraft(scope:string|undefined,replacement:OpenIndustriesScene,replacementScope:string,replacementAssets:Asset[]=[],versions:VersionedAsset[]=[]):Promise<string>{
   const errors=validateScene(replacement);if(errors.length)throw new Error('The replacement draft is invalid.');
   return transact(scope,'readwrite',(tx,guard)=>{
     const id=`recovery:${replacementScope}:${crypto.randomUUID()}`;
