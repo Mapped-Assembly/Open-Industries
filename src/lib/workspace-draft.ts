@@ -1,9 +1,9 @@
 import {backupAndResetDraft,exportStoredDraft,loadActiveRoom,loadScene,saveActiveRoom,saveScene, type DraftBackup} from './scene-storage';
-import type {MergenceScene} from './scene-manifest';
+import type {OpenIndustriesScene} from './scene-manifest';
 import {emptyWorkspace,hydrateManifest,makeManifest,missingAsset,readManifest,workspaceVersions,type Workspace} from './workspace';
 import type {SavedScene} from './scene-repository';
 
-function storedWorkspace(workspace:Workspace,owner:string|null,cloudScene:SavedScene|null):MergenceScene{
+function storedWorkspace(workspace:Workspace,owner:string|null,cloudScene:SavedScene|null):OpenIndustriesScene{
   const document=makeManifest(workspace);readManifest(document);
   return {schemaVersion:1,id:'active-scene',source:{},room:{width:workspace.room[0],depth:workspace.room[1],height:workspace.room[2]},
     instances:workspace.items.map(({id,name,asset,position,rotation,visible})=>({id,name,assetId:asset.id,position,rotation,visible})),workspaceDocument:document,activeCloudScene:cloudScene?.owner_id===owner?cloudScene:null};
@@ -32,7 +32,7 @@ export async function backupDraft(scope:string|undefined):Promise<DraftBackup>{
 export async function loadWorkspaceDraft(owner:string|null):Promise<{workspace:Workspace;scene:SavedScene|null;roomId:string}|null>{
   const loadWithTimeout=(scope?:string)=>Promise.race([
     loadScene(scope),
-    new Promise<never>((_,reject)=>setTimeout(()=>reject(new Error('Saved local workspace did not finish loading. Close other Mergence tabs and retry.')),10000)),
+    new Promise<never>((_,reject)=>setTimeout(()=>reject(new Error('Saved local workspace did not finish loading. Close other OpenIndustries tabs and retry.')),10000)),
   ]);
   const identity=owner??'guest';
   const roomId=await loadActiveRoom(identity).catch(()=>undefined) ?? 'local';
