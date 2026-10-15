@@ -6,6 +6,7 @@ import { promisify } from 'node:util';
 import { gameContract, gameFail, validateGameRequest, validateGameResult } from './mcp-game-contract.mjs';
 import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game-world.mjs';
 import { executeTransactionalCommand, SimulationCommandError } from './simulation/commands.mjs';
+import { assertResourceConservation, energyForPower, splitQuantity } from './simulation/resources.mjs';
 
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -14,13 +15,16 @@ export const canonical = value => JSON.stringify(value, function (_key, item) {
     ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item;
 });
 const live = job => job.state === 'running' || job.state === 'paused';
+/** Preserve published game errors while using exact shared accounting. */
+const accountedEnergy = (power, duration) => {try {return energyForPower(power, duration);} catch {gameFail('INVARIANT_FAILED');}};
+const conserved = (expected, actual) => {try {assertResourceConservation(expected, actual);} catch {gameFail('INVARIANT_FAILED');}};
 const mass = value => ({ copper_g: value.copper_g, hdpe_g: value.hdpe_g, dirt_g: value.dirt_g });
 
 export function cablePlan(input) {
   const { copper_g: copper, hdpe_g: hdpe, dirt_g: dirt } = input;
   if (![copper, hdpe, dirt].every(n => Number.isInteger(n) && n >= 0)
     || copper + hdpe + dirt < 1 || copper + hdpe + dirt > 10000 || copper * 2 < copper + hdpe + dirt) gameFail('INVALID_FEEDSTOCK');
-  const conductor = Math.floor(copper * 19 / 20), insulation = Math.floor(hdpe * 6 / 7);
+  const conductor = splitQuantity(copper, 19, 20).allocated, insulation = splitQuantity(hdpe, 6, 7).allocated;
   return { duration_ms: (copper + hdpe + dirt) * 2, outputs: [
     { output_role: 'conductor', form: 'wire', copper_g: conductor, hdpe_g: 0, dirt_g: 0 },
     { output_role: 'insulation', form: 'flakes', copper_g: 0, hdpe_g: insulation, dirt_g: 0 },
@@ -123,7 +127,7 @@ export class GameDatabase {
       for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
         const total = (p.deposit.collected ? 0 : p.deposit[constituent])
           + p.batches.filter(b => b.state !== 'consumed').reduce((sum, b) => sum + b[constituent], 0);
-        if (total !== p.deposit[constituent]) gameFail('INVARIANT_FAILED');
+        conserved({[constituent]:p.deposit[constituent]}, {[constituent]:total});
       }
       if (p.machine.energy_mj < 0 || p.machine.energy_mj > p.base.power.capacity_mj || p.machine.energy_mj + p.machine.dissipated_mj
         + p.base.power.spilled_mj + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== p.base.power.initial_mj + p.base.power.generated_mj) gameFail('INVARIANT_FAILED');
@@ -154,12 +158,12 @@ export class GameDatabase {
     if (match.status === 'active') for (const p of match.players) {
       const elapsed = now - match.last_advanced_ms;
       const solar = p.machine.status === 'ready' ? p.base.power.solar_w : 0;
-      const generated = elapsed * solar;
+      const generated = accountedEnergy(solar, elapsed);
       let spent = 0;
       for (const job of p.jobs.filter(j => j.state === 'running')) {
         const requested = Math.min(job.duration_ms - job.work_ms, Math.max(0, now - job.last_tick_ms));
         const delta = Math.min(requested, Math.floor(p.machine.energy_mj / (500 - solar)));
-        job.work_ms += delta; job.energy_mj += delta * 500; spent += delta * 500;
+        job.work_ms += delta; job.energy_mj += accountedEnergy(500, delta); spent += accountedEnergy(500, delta);
         job.last_tick_ms = Math.max(job.last_tick_ms, now);
         if (job.work_ms === job.duration_ms) {
           const input = p.batches.find(b => b.id === job.input_batch_id);

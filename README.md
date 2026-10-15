@@ -173,6 +173,7 @@ The `Publish packages` workflow validates both builds before publishing. Add a c
 - [Revision history and restore](docs/scene-history.md) — compare saved versions, restore a new head, and preserve exact geometry bindings.
 - [Cross-agent walkthrough](docs/mcp-agent-workflows.md) — deterministic Grok/ChatGPT/Codex fixtures, local agent setup, and create/update/reopen commands.
 - [External-agent scene authoring](docs/mcp-scenes.md) — MCP setup, typed tools, revision URLs, and the deterministic cleanroom fixture.
+- [Finite resource accounting](docs/architecture/simulation-resources.md) — shared reservation lifecycle, exact units and conserved inventories.
 - [Simulation domain boundary](docs/architecture/simulation-domain-boundary.md) — typed contracts, trusted domain modules and [transactional commands](docs/architecture/transactional-simulation-commands.md); runtime extraction remains incremental.
 - [Authoritative city-dump runtime](docs/mcp-game-runtime.md) — authenticated two-player matches, private material inspection, durable processing and database scheduler setup.
 - [Development and integration guide](docs/development.md) — local generation, MCP, CLI, import contracts, and GIF details.
