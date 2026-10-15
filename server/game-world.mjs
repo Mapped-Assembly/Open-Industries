@@ -44,7 +44,8 @@ export function worldProjection(match) {
   return { versions: w.versions, width: w.width, height: w.height, roads: w.roads, obstacles: w.obstacles, outposts: w.outposts,
     towers: w.towers.map(t => ({ ...t, occupied: match.players.some(p => p.slot === t.slot) })),
     deposits: w.deposits.map(d => ({ id: d.id, kind: d.kind, home_slot: d.home_slot, position: d.position,
-      depleted: match.players.some(p => p.deposit.id === d.id && p.deposit.collected) })),
+      depleted: d.stock ? Object.values(d.stock.remaining).every(n => n === 0) : match.players.some(p => p.deposit.id === d.id && p.deposit.collected),
+      revision: d.stock?.revision ?? 1 })),
   };
 }
 export function provisionPlayer(owner, slot, world) {

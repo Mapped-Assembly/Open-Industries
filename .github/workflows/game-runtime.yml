@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,6 +19,46 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run build:materials
+      - run: git diff --exit-code -- packages/material-science/dist
+      - run: npm run test:materials
       - run: npm run test:simulation
       - run: npm run test:mcp-game
       - run: npm run test:mcp
+  downstream-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      OI_CHECKOUT: ${{ github.workspace }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: isayahc/tower-defense
+          ref: 9fb37e7304935aea6616a1dc8c9bd6bd68e390fc
+          path: .integration/tower-defense
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            .integration/tower-defense/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: .integration/tower-defense
+      - run: npm run check:materials
+        working-directory: .integration/tower-defense
+      - run: npm run test:integration
+        working-directory: .integration/tower-defense
+      - run: npx playwright install --with-deps chromium
+        working-directory: .integration/tower-defense
+      - run: npm run test:browser
+        working-directory: .integration/tower-defense
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: adopted-runtime-desktop-mobile-evidence
+          path: .integration/tower-defense/test-results/
+          if-no-files-found: ignore
+          retention-days: 7

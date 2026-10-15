@@ -2,13 +2,14 @@ import { randomUUID } from 'node:crypto';
 import { gameContract, gameFail, validateGameRequest, validateGameResult } from './mcp-game-contract.mjs';
 import { VersionedGameDomain, gameRulePin as historyRule, canonical } from './domains/game.mjs';
 import { executeTransactionalCommand, SimulationCommandError } from './simulation/commands.mjs';
+import { copyJson } from './simulation/json.mjs';
 import { SqliteEventHistory } from './simulation/events.mjs';
 export { canonical, cablePlan } from './domains/game.mjs';
 
 /** No external IO inside transactions. SQLite serializes writers across processes. */
 export class GameDatabase extends VersionedGameDomain {
   constructor(path, { clock = Date.now } = {}) {
-    super(path,{clock,supportedVersions:[0,1,2]});
+    super(path,{clock,supportedVersions:[0,1,2,3,4]});
     const version=Number(this.db.prepare('PRAGMA user_version').get().user_version);
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS matches(id TEXT PRIMARY KEY, host TEXT NOT NULL REFERENCES accounts(id), status TEXT NOT NULL, created INTEGER NOT NULL, last_tick INTEGER NOT NULL, state TEXT NOT NULL CHECK(json_valid(state)));
@@ -20,30 +21,29 @@ export class GameDatabase extends VersionedGameDomain {
 
     `);
     this.history = new SqliteEventHistory(this.db);
-    // One transaction upgrades persisted v2 matches without rerolling their cable,
-    // resetting energy/work or deleting immutable receipts. New grants are ledgered.
-    if (version < 2) this.transaction(() => {
-      for (const row of this.db.prepare('SELECT state FROM matches').all()) {
-        const match = JSON.parse(row.state);
-        this.upgradeLegacy(match);
-        this.save(match);
-      }
-      this.db.exec('PRAGMA user_version=2');
-    });
-    // Existing saves start at an explicit cutover checkpoint, without fabricated older events.
+    // Initialize the old cutover first, then record real upgrades atomically with state.
     try { this.transaction(() => {
       for (const row of this.db.prepare('SELECT state FROM matches').all()) {
         const match = JSON.parse(row.state);
+        if (version < 2) this.upgradeLegacy(match);
         this.history.initialize({instance_id:match.id,rule:historyRule,simulation_time_ms:match.last_advanced_ms,revision:match.revision,state:match});
+        if (version < 3) this.upgradeScience(match);
+        if (version < 4) this.upgradeRobots(match);
+        this.validateCurrentState(match);
+        if (version < 4) this.save(match,{kind:'worker',id:'native-v5-upgrade',principal_id:null},'native-v5-upgrade');
       }
+      this.db.exec('PRAGMA user_version=4');
     }); } catch(error) { this.db.close();throw new Error('UNSUPPORTED_GAME_SAVE: restore a compatible backup or run the exact game module version that wrote this database.',{cause:error}); }
   }
+
   load(id) {
     const row = this.db.prepare('SELECT state FROM matches WHERE id=?').get(id);
     if (!row) gameFail('NOT_AVAILABLE');
     return JSON.parse(row.state);
   }
   save(match, source = {kind:'worker',id:'advance',principal_id:null}, action = 'advance') {
+    if (!this.db.isTransaction) return this.transaction(() => this.save(match,source,action));
+    this.prepareState(match);
     this.assertState(match);
     this.history.initialize({instance_id:match.id,rule:historyRule,simulation_time_ms:match.last_advanced_ms,revision:match.revision,state:match});
     const previous = this.history.replay(match.id);
@@ -84,11 +84,12 @@ export class GameDatabase extends VersionedGameDomain {
           const receipt = this.db.prepare('SELECT request,result FROM receipts WHERE owner=? AND command_id=?').get(principal,id);
           return receipt ? {request:receipt.request,result:JSON.parse(receipt.result)} : undefined;
         },
-        prepare: state => {this.advance(state);return state;},
+        prepare: state => {this.advance(state);this.prepareState(state);return state;},
         apply: (state,command,context) => {
           this.checkMutation(state,context.principal_id,command.action);
           if(command.action==='rotate_invite'){invite=randomUUID();this.rotate(state,context.principal_id,invite);}
           else this.command(state,this.member(state,context.principal_id),{action:command.action,...command.payload});
+          this.prepareState(state);
           return {state,events:[]};
         },
         validate: state => this.assertState(state),
@@ -102,19 +103,35 @@ export class GameDatabase extends VersionedGameDomain {
       throw error;
     }
   }
+  /** Older protocols may only replay an already committed, byte-identical native intent. */
+  legacyReceipt(token, name, raw) {
+    const args = copyJson(raw, () => gameFail('INVALID_REQUEST'));
+    if (!['astra.game_create_match','astra.game_join_match','astra.game_command'].includes(name)
+      || typeof args.command_id !== 'string') gameFail('INVALID_REQUEST');
+    return this.transaction(() => {
+      const owner = this.identity(token);
+      const receipt = this.db.prepare('SELECT * FROM receipts WHERE owner=? AND command_id=?').get(owner,args.command_id);
+      if (!receipt) gameFail('INVALID_REQUEST');
+      if (receipt.request !== canonical({name,arguments:args})) gameFail('COMMAND_ID_REUSED');
+      if (!this.member(this.load(receipt.match_id),owner)) gameFail('NOT_AVAILABLE');
+      return JSON.parse(receipt.result);
+    });
+  }
   dispatch(token, name, raw) {
+    if ([2,3,4].includes(raw?.version)) return this.legacyReceipt(token,name,raw);
     const args = validateGameRequest(name, raw);
     if (name === 'astra.game_describe') gameFail('INVALID_REQUEST');
     if (name === 'astra.game_command') return this.commandThroughCore(token,name,args);
     return this.transaction(() => {
       const owner = this.identity(token), operation = name.replace('astra.game_', '');
       const request = canonical({ name, arguments: args });
+      const readOnly = ['read_match','science_catalog','evaluate'].includes(operation);
       if (operation === 'list_matches') {
         const rows = this.db.prepare('SELECT m.state,m.created,p.slot FROM matches m JOIN members p ON p.match_id=m.id WHERE p.owner=? AND (? IS NULL OR m.id>?) ORDER BY m.id LIMIT 21').all(owner, args.cursor, args.cursor);
         const matches = rows.slice(0, 20).map(row => { const m = JSON.parse(row.state); this.advance(m); this.save(m); return { match_id: m.id, status: m.status, slot: row.slot, created_at_ms: row.created }; });
-        return validateGameResult(name, { version: 3, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
+        return validateGameResult(name, { version: gameContract.version, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
       }
-      if (operation !== 'read_match') {
+      if (!readOnly) {
         const receipt = this.db.prepare('SELECT * FROM receipts WHERE owner=? AND command_id=?').get(owner, args.command_id);
         if (receipt) { if (receipt.request !== request) gameFail('COMMAND_ID_REUSED'); return JSON.parse(receipt.result); }
       }
@@ -137,7 +154,12 @@ export class GameDatabase extends VersionedGameDomain {
           if (operation === 'command' && match.revision !== args.expected_revision) gameFail('CONFLICT');
         }
         this.advance(match);
-        if (operation !== 'read_match') {
+        if (operation === 'science_catalog' || operation === 'evaluate') {
+          const result = this.scienceRead(match,owner,operation,args);
+          this.save(match);
+          return validateGameResult(name,result);
+        }
+        if (!readOnly) {
           const action = operation === 'command' ? args.action : operation;
           this.checkMutation(match, owner, action);
           if (action === 'join_match') {
@@ -149,12 +171,12 @@ export class GameDatabase extends VersionedGameDomain {
           match.revision++;
         }
       }
-      this.save(match, operation === 'read_match' ? {kind:'worker',id:'read-advance',principal_id:null}
+      this.save(match, readOnly ? {kind:'worker',id:'read-advance',principal_id:null}
         : {kind:'command',id:args.command_id,principal_id:owner}, operation === 'command' ? args.action : operation);
-      const result = { version: 3, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
-        ...(operation !== 'read_match' ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
+      const result = { version: gameContract.version, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
+        ...(!readOnly ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
       validateGameResult(name, result);
-      if (operation !== 'read_match') this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(owner, args.command_id, match.id, request, JSON.stringify(result));
+      if (!readOnly) this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(owner, args.command_id, match.id, request, JSON.stringify(result));
       return result;
     });
   }
