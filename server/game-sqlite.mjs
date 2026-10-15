@@ -8,6 +8,9 @@ import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game
 import { executeTransactionalCommand, SimulationCommandError } from './simulation/commands.mjs';
 import { assertResourceConservation, energyForPower, splitQuantity } from './simulation/resources.mjs';
 import { authoritativeTime } from './simulation/time.mjs';
+import { SqliteEventHistory } from './simulation/events.mjs';
+
+const historyRule = { module_id: 'game-runtime', module_version: 'dump-world-v1', schema_version: 3 };
 
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -58,6 +61,7 @@ export class GameDatabase {
       INSERT OR IGNORE INTO runtime VALUES(1,NULL);
 
     `);
+    this.history = new SqliteEventHistory(this.db);
     // One transaction upgrades persisted v2 matches without rerolling their cable,
     // resetting energy/work or deleting immutable receipts. New grants are ledgered.
     if (version < 2) this.transaction(() => {
@@ -78,6 +82,13 @@ export class GameDatabase {
         this.save(match);
       }
       this.db.exec('PRAGMA user_version=2');
+    });
+    // Existing saves start at an explicit cutover checkpoint, without fabricated older events.
+    this.transaction(() => {
+      for (const row of this.db.prepare('SELECT state FROM matches').all()) {
+        const match = JSON.parse(row.state);
+        this.history.initialize({instance_id:match.id,rule:historyRule,simulation_time_ms:match.last_advanced_ms,revision:match.revision,state:match});
+      }
     });
   }
   transaction(fn) {
@@ -138,9 +149,45 @@ export class GameDatabase {
         || p.base.assets.filter(a => a.kind === 'robot').length !== 2) gameFail('INVARIANT_FAILED');
     }
   }
-  save(match) {
+  save(match, source = {kind:'worker',id:'advance',principal_id:null}, action = 'advance') {
     this.assertState(match);
+    this.history.initialize({instance_id:match.id,rule:historyRule,simulation_time_ms:match.last_advanced_ms,revision:match.revision,state:match});
+    const previous = this.history.replay(match.id);
+    const changedJobs = match.players.flatMap(p => p.jobs.filter(job => {
+      const prior = previous.state.players.find(old => old.owner === p.owner)?.jobs.find(old => old.id === job.id);
+      return !prior || canonical(prior) !== canonical(job);
+    }).map(job => job.id));
     this.db.prepare('UPDATE matches SET status=?,last_tick=?,state=? WHERE id=?').run(match.status, match.last_advanced_ms, JSON.stringify(match), match.id);
+    if (source.kind === 'command' || canonical(previous.state) !== canonical(match)) this.history.append({
+      instance_id:match.id,expected_sequence:previous.sequence,rule:historyRule,simulation_time_ms:match.last_advanced_ms,revision:match.revision,
+      source,links:{entity_ids:match.players.map(p=>p.machine.id),job_ids:changedJobs},provenance:{origin:'simulated',validity:'modeled',evidence:[]},
+      units:[{field:'simulation_time',unit:'ms'},{field:'mass',unit:'g'},{field:'energy',unit:'mJ'}],payload:{action},state:match,
+    });
+  }
+  /** Additive history transport: authenticate now, project every historical value independently. */
+  historyPage(token, request) {
+    return this.transaction(() => {
+      const owner = this.identity(token);
+      const project = (state, principal, at) => {
+        if (!state.players.some(p => p.owner === principal)) return null;
+        const {scheduler_healthy, ...snapshot} = this.snapshot(state,principal);
+        snapshot.server_time_ms = at;
+        return {...snapshot,rule:historyRule};
+      };
+      return this.history.read(request,owner,{
+        version:'game-history-v1',authorize:(state,principal)=>state.players.some(p=>p.owner===principal),
+        validateState:(state,rule)=>{if(canonical(rule)!==canonical(historyRule)) gameFail('INVARIANT_FAILED');this.assertState(state);},
+        snapshot:project,
+        event:(event,principal)=> {
+          if (event.source.kind === 'command' && event.source.principal_id !== principal) return null;
+          const snapshot = project(event.state,principal,event.simulation_time_ms);
+          if (!snapshot) return null;
+          return {id:event.id,instance_id:event.instance_id,command_id:event.source.kind==='command'?event.source.id:null,
+            kind:event.source.kind,action:event.payload.action,simulation_time_ms:event.simulation_time_ms,rule:event.rule,
+            provenance:event.provenance,units:event.units,snapshot};
+        },
+      });
+    });
   }
   cancel(p, job, reason) {
     if (!live(job)) return;
@@ -245,7 +292,7 @@ export class GameDatabase {
         validate: state => this.assertState(state),
         result: (state,command,context) => validateGameResult(name,{version:gameContract.version,balance_version:gameContract.balance_version,
           snapshot:this.snapshot(state,context.principal_id),command_id:command.command_id,invite_code:null}),
-        save: state => this.save(state),
+        save: state => this.save(state,{kind:'command',id:args.command_id,principal_id:this.identity(token)},'inspect_deposit'),
         saveReceipt: (principal,command,request,result) => this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(principal,command.command_id,command.instance_id,request,JSON.stringify(result)),
       });
     } catch(error) {
@@ -303,7 +350,8 @@ export class GameDatabase {
           match.revision++;
         }
       }
-      this.save(match);
+      this.save(match, operation === 'read_match' ? {kind:'worker',id:'read-advance',principal_id:null}
+        : {kind:'command',id:args.command_id,principal_id:owner}, operation === 'command' ? args.action : operation);
       const result = { version: 3, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
         ...(operation !== 'read_match' ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
       validateGameResult(name, result);

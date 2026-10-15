@@ -115,5 +115,5 @@ ledger still has its finite history bounds. Adapters must size worker batches ap
 and fail closed on exhausted history; compaction requires a future versioned checkpoint policy.
 This API does not install a second timer beside the existing game scheduler, migrate game
 orders/saves, or rewrite robot event-boundary logic. Production service wiring, catch-up policy
-selection and migration remain #33. Shared external event history/replay remains #32. The
+selection and migration remain #33. [Persisted history and authorized replay](simulation-events.md) are added in #32. The
 persisted internal checkpoints/ledger are not a public event stream or scientific validation.

@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/Mapped-Assembly/Open-Industries#readme",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.16.0"
   },
   "publishConfig": {
     "access": "public",
