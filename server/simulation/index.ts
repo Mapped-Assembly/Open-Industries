@@ -47,3 +47,26 @@ export {
   splitQuantity,
   assertResourceConservation,
 } from './resources.mjs';
+
+export type {
+  JobStatus,
+  JobControl,
+  JobPhase,
+  SimulationJob,
+  JobSchedule,
+  JobStepContext,
+  JobStepResult,
+  JobPolicy,
+  JobWorkerAdapter,
+} from './job-contracts.js';
+export {
+  SimulationJobError,
+  jobScheduleSchema,
+  validateJobSchedule,
+  createJobSchedule,
+  enqueueJob,
+  controlJob,
+  advanceJobSchedule,
+  runJobWorker,
+} from './jobs.js';
+export { authoritativeTime } from './time.mjs';
