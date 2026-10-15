@@ -18,7 +18,7 @@ export class CommandFixture {
     public token = 'alice-test-token',
   ) {
     this.db = new DatabaseSync(path);
-    this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=10000;
+    this.db.exec(`PRAGMA busy_timeout=10000; PRAGMA journal_mode=WAL;
       CREATE TABLE IF NOT EXISTS instances(id TEXT PRIMARY KEY,state TEXT NOT NULL CHECK(json_valid(state)));
       CREATE TABLE IF NOT EXISTS test_sessions(token TEXT PRIMARY KEY,principal TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS command_receipts(principal TEXT,command_id TEXT,instance_id TEXT,request TEXT,result TEXT CHECK(json_valid(result)),PRIMARY KEY(principal,command_id));
