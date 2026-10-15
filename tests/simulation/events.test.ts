@@ -555,18 +555,19 @@ test('production game HTTP history shares command identity, hides opponent data,
     const alice = await register('history-alice'),
       bob = await register('history-bob'),
       outsider = await register('history-outsider');
-    const creation = { version: 3, command_id: randomUUID() };
+    const creation = { version: 5, command_id: randomUUID() };
     const created = (
       await post(service.origin, '/game', alice, {
         name: 'astra.game_create_match',
         arguments: creation,
       })
     ).value;
+    const legacy = service.db.load(created.snapshot.match_id); legacy.legacy_recovery = true; service.db.save(legacy);
     const joined = (
       await post(service.origin, '/game', bob, {
         name: 'astra.game_join_match',
         arguments: {
-          version: 3,
+          version: 5,
           command_id: randomUUID(),
           match_id: created.snapshot.match_id,
           invite_code: created.invite_code,
@@ -574,7 +575,7 @@ test('production game HTTP history shares command identity, hides opponent data,
       })
     ).value;
     const command = {
-      version: 3,
+      version: 5,
       command_id: randomUUID(),
       match_id: created.snapshot.match_id,
       expected_revision: joined.snapshot.revision,

@@ -322,19 +322,20 @@ test('legacy game IDs, inventory, jobs, observations and immutable receipt bytes
       );
     runtime.tick();
     const created = runtime.dispatch(a.token, 'astra.game_create_match', {
-        version: 3,
+        version: 5,
         command_id: randomUUID(),
       }),
       id = created.snapshot.match_id;
+    const legacy = runtime.load(id); legacy.legacy_recovery = true; runtime.save(legacy);
     let result = runtime.dispatch(b.token, 'astra.game_join_match', {
-      version: 3,
+      version: 5,
       command_id: randomUUID(),
       match_id: id,
       invite_code: created.invite_code,
     });
     const action = (action: string, extra = {}) => {
       result = runtime.dispatch(a.token, 'astra.game_command', {
-        version: 3,
+        version: 5,
         command_id: randomUUID(),
         match_id: id,
         expected_revision: runtime.load(id).revision,
@@ -345,7 +346,7 @@ test('legacy game IDs, inventory, jobs, observations and immutable receipt bytes
     action('inspect_deposit', { deposit_id: created.snapshot.deposits[0].id });
     action('collect_deposit', { deposit_id: created.snapshot.deposits[0].id });
     const start = {
-      version: 3,
+      version: 5,
       command_id: randomUUID(),
       match_id: id,
       expected_revision: result.snapshot.revision,

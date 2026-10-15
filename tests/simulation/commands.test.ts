@@ -258,15 +258,16 @@ test('adopted game inspection preserves its original response, fingerprint and r
       await db.authenticate({ username: 'bobby', password: 'test-command-password' }, true)
     ).token;
     db.tick();
-    const request = () => ({ version: 3, command_id: randomUUID() });
+    const request = () => ({ version: 5, command_id: randomUUID() });
     const created = db.dispatch(a, 'astra.game_create_match', request()),
       id = created.snapshot.match_id;
+    const legacy = db.load(id); legacy.legacy_recovery = true; db.save(legacy);
     db.dispatch(b, 'astra.game_join_match', {
       ...request(),
       match_id: id,
       invite_code: created.invite_code,
     });
-    const before = db.dispatch(a, 'astra.game_read_match', { version: 3, match_id: id }).snapshot;
+    const before = db.dispatch(a, 'astra.game_read_match', { version: 5, match_id: id }).snapshot;
     const args = {
       ...request(),
       match_id: id,
@@ -281,7 +282,7 @@ test('adopted game inspection preserves its original response, fingerprint and r
     db.db.exec('DROP TRIGGER failed_receipt');
     assert.equal(db.load(id).players[0].deposit.observation, null);
     const result = db.dispatch(a, 'astra.game_command', args);
-    assert.equal(result.version, 3);
+    assert.equal(result.version, 5);
     assert.equal(result.balance_version, 'dump-world-v1');
     assert.equal(result.invite_code, null);
     assert.equal(result.snapshot.revision, before.revision + 1);
