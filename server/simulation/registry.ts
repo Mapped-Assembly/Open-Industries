@@ -1,13 +1,22 @@
+import { copyJson } from './json.mjs';
 import Ajv, { type ValidateFunction } from 'ajv';
 import type {
   DomainModule,
   DomainPin,
   EntityReference,
   JsonObject,
+  SimulationCommand,
+  TransitionProposal,
   SimulationEntity,
   SimulationInstance,
 } from './contracts.js';
-import { instanceSchema, pinSchema, referenceSchema } from './schema.js';
+import {
+  instanceSchema,
+  pinSchema,
+  referenceSchema,
+  commandSchema,
+  objectSchema,
+} from './schema.js';
 
 /** Stable boundary errors contain no domain state or validator value dumps. */
 export class SimulationContractError extends Error {
@@ -20,7 +29,9 @@ export class SimulationContractError extends Error {
       | 'INVALID_REFERENCE'
       | 'UNIT_MISMATCH'
       | 'NOT_AVAILABLE'
-      | 'INVALID_PROJECTION',
+      | 'INVALID_PROJECTION'
+      | 'INVALID_TRANSITION'
+      | 'CONFLICT',
   ) {
     super(code);
     this.name = 'SimulationContractError';
@@ -34,50 +45,19 @@ const ajv = new Ajv({ strict: true, allErrors: false, validateFormats: false });
 const validEnvelope = ajv.compile(instanceSchema);
 const validPin = ajv.compile(pinSchema);
 const validReference = ajv.compile(referenceSchema);
+const validCommand = ajv.compile(commandSchema);
+const validProposal = ajv.compile(
+  objectSchema({
+    state: { type: 'object' },
+    events: { type: 'array', maxItems: 256, items: { type: 'object' } },
+  }),
+);
 const key = (pin: DomainPin): string =>
   JSON.stringify([pin.module_id, pin.module_version, pin.schema_version]);
 
-/** Clone bounded JSON, rejecting non-JSON values rather than silently coercing them. */
+/** Clone contract data using the same JSON boundary as transactional commands. */
 function cloneJson<T>(value: T): T {
-  const visiting = new Set<object>();
-  let count = 0;
-  const inspect = (item: unknown, depth: number): void => {
-    if (++count > 100000 || depth > 64) fail('INVALID_CONTRACT');
-    if (item === null || typeof item === 'string' || typeof item === 'boolean') return;
-    if (typeof item === 'number') {
-      if (!Number.isFinite(item)) fail('INVALID_CONTRACT');
-      return;
-    }
-    if (typeof item !== 'object' || visiting.has(item)) fail('INVALID_CONTRACT');
-    if (
-      !Array.isArray(item) &&
-      Object.getPrototypeOf(item) !== Object.prototype &&
-      Object.getPrototypeOf(item) !== null
-    )
-      fail('INVALID_CONTRACT');
-    if (Object.getOwnPropertySymbols(item).length) fail('INVALID_CONTRACT');
-    visiting.add(item);
-    const descriptors = Object.getOwnPropertyDescriptors(item);
-    for (const descriptor of Object.values(descriptors))
-      if (descriptor.get || descriptor.set) fail('INVALID_CONTRACT');
-    if (Array.isArray(item)) {
-      if (Object.keys(item).some((k) => !/^(0|[1-9][0-9]*)$/.test(k))) fail('INVALID_CONTRACT');
-      for (const child of item) inspect(child, depth + 1);
-    } else {
-      for (const descriptor of Object.values(descriptors))
-        if (descriptor.enumerable) inspect(descriptor.value, depth + 1);
-    }
-    visiting.delete(item);
-  };
-  let text: string;
-  try {
-    inspect(value, 0);
-    text = JSON.stringify(value);
-  } catch {
-    return fail('INVALID_CONTRACT');
-  }
-  if (text === undefined || Buffer.byteLength(text) > 2 * 1024 * 1024) fail('INVALID_CONTRACT');
-  return JSON.parse(text) as T;
+  return copyJson(value, () => fail('INVALID_CONTRACT'));
 }
 /** Recursively freeze data handed to trusted module callbacks. */
 function freeze<T>(value: T): T {
@@ -90,6 +70,7 @@ function freeze<T>(value: T): T {
 interface Registered {
   module: DomainModule;
   state: ValidateFunction;
+  command: ValidateFunction;
   projection: ValidateFunction;
 }
 
@@ -135,7 +116,12 @@ export class DomainRegistry {
           ),
         ),
       });
-      this.modules.set(key(pin), { module, state: validators[0], projection: validators[2] });
+      this.modules.set(key(pin), {
+        module,
+        state: validators[0],
+        command: validators[1],
+        projection: validators[2],
+      });
     } catch {
       fail('INVALID_CONTRACT');
     }
@@ -261,6 +247,37 @@ export class DomainRegistry {
     )
       fail('NOT_AVAILABLE');
     return entity;
+  }
+
+  /** Propose a pure domain-state transition; storage/receipts remain the executor's responsibility. */
+  transition(raw: unknown, principal: string, input: unknown): TransitionProposal {
+    const instance = this.authorized(raw, principal);
+    const command = cloneJson(input);
+    if (!validCommand(command)) fail('INVALID_TRANSITION');
+    const value = command as SimulationCommand;
+    if (value.instance_id !== instance.id) fail('NOT_AVAILABLE');
+    if (value.expected_revision !== instance.revision) fail('CONFLICT');
+    const entry = this.modules.get(key(instance.pin))!;
+    if (!entry.command({ action: value.action, payload: value.payload }))
+      fail('INVALID_TRANSITION');
+    const context = { principal_id: principal, simulation_time_ms: instance.simulation_time_ms };
+    freeze(value);
+    freeze(context);
+    let proposal: TransitionProposal;
+    try {
+      if (entry.module.authorizeCommand(instance, value, context) !== true) fail('NOT_AVAILABLE');
+      proposal = cloneJson(entry.module.proposeTransition(instance, value, context));
+    } catch (error) {
+      if (error instanceof SimulationContractError && error.code === 'NOT_AVAILABLE') throw error;
+      return fail('INVALID_TRANSITION');
+    }
+    if (!validProposal(proposal)) fail('INVALID_TRANSITION');
+    try {
+      this.validateInstance({ ...instance, state: proposal.state });
+    } catch {
+      return fail('INVALID_TRANSITION');
+    }
+    return proposal;
   }
 
   /** Return only a module's schema-checked authorized projection, never the raw envelope. */

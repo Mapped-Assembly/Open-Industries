@@ -18,3 +18,6 @@ export type {
 } from './contracts.js';
 export { DomainRegistry, SimulationContractError } from './registry.js';
 export { commandSchema, instanceSchema, pinSchema, referenceSchema } from './schema.js';
+
+export type { CommandAdapter, CommandProposal, CommandReceipt } from './command-contracts.js';
+export { executeTransactionalCommand, SimulationCommandError } from './commands.mjs';
