@@ -1,5 +1,16 @@
 {
   "extends": "./tsconfig.json",
-  "compilerOptions": { "noEmit": true, "types": ["node"] },
-  "include": ["server/simulation/**/*.ts", "tests/simulation/**/*.ts"]
+  "compilerOptions": {
+    "noEmit": true,
+    "types": [
+      "node"
+    ],
+    "allowJs": true
+  },
+  "include": [
+    "server/simulation/**/*.ts",
+    "tests/simulation/**/*.ts",
+    "server/simulation/**/*.mjs"
+  ],
+  "exclude": []
 }

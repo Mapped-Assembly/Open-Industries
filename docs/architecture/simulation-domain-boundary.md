@@ -1,6 +1,6 @@
 # ADR: Versioned simulation contracts and trusted domain modules
 
-Status: proposed boundary, executable contract foundation. Implements #28 under epic #27.
+Status: executable contract foundation (#28), with [transactional command execution](transactional-simulation-commands.md) added in #29 under epic #27.
 
 ## Decision
 
@@ -19,7 +19,7 @@ Keep the existing Node/TypeScript stack for this extraction: the SQLite schedule
 - Game and neutral one-operator work-cell **test fixtures** using the same registry. Their command authorization refuses execution and their transition hook throws: these fixtures demonstrate the boundary, not a newly working game or laboratory engine.
 - Focused tests, a dedicated TypeScript check and Linux/Windows CI coverage.
 
-No existing service imports the registry in this PR. No live game command, scene behavior, database schema, transport, scheduler or authentication flow changes. The new package is not advertised as a production service or a new MCP capability. Existing clients continue using their existing contracts.
+The #28 foundation did not change live service behavior. The #29 follow-up adopts one existing game inspection command through the shared transaction executor while preserving its wire contract and SQLite tables; see the command document for current integration and evidence. The module registry itself remains internal and is not advertised as a new MCP capability.
 
 ## Contract responsibilities
 
@@ -87,4 +87,4 @@ npm run build
 
 `test:simulation` type-checks both contracts and fixtures, then exercises exact version pins, invalid references, unit mismatch, private access, projection validation, unknown evidence and hostile/non-JSON values. The existing game/scene suites remain the behavioral baseline.
 
-#29 owns transactional command dispatch: neither `authorizeCommand` nor `proposeTransition` runs in this registry. #30 owns conservation mechanisms; #31 owns scheduler execution; #32 owns event persistence; #33 proves actual service reuse by tower-defense and a neutral work cell. A passing contract fixture does not close those issues.
+#29 adds transactional command dispatch and pure registry transition proposals, invoking `authorizeCommand` and `proposeTransition` with frozen inputs. The registry itself does not commit state or receipts. #30 owns conservation mechanisms; #31 owns scheduler execution; #32 owns event persistence; #33 proves actual service reuse by tower-defense and a neutral work cell. A passing contract fixture does not close those issues.

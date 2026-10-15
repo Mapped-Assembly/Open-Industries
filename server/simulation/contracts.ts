@@ -76,7 +76,7 @@ export interface SimulationInstance {
   observations: Observation[];
   state: JsonObject;
 }
-/** Reserved command envelope for #29; this registry does not dispatch or persist it. */
+/** Common command envelope; the shared executor owns persistence and revisions. */
 export interface SimulationCommand {
   command_id: string;
   instance_id: string;

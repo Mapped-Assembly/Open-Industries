@@ -3,8 +3,9 @@ import { chmodSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { promisify } from 'node:util';
-import { gameFail, validateGameRequest, validateGameResult } from './mcp-game-contract.mjs';
+import { gameContract, gameFail, validateGameRequest, validateGameResult } from './mcp-game-contract.mjs';
 import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game-world.mjs';
+import { executeTransactionalCommand, SimulationCommandError } from './simulation/commands.mjs';
 
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -117,7 +118,7 @@ export class GameDatabase {
     if (!row) gameFail('NOT_AVAILABLE');
     return JSON.parse(row.state);
   }
-  save(match) {
+  assertState(match) {
     for (const p of match.players) {
       for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
         const total = (p.deposit.collected ? 0 : p.deposit[constituent])
@@ -130,6 +131,9 @@ export class GameDatabase {
       if (canonical(allocations) !== canonical(p.base.starter_ledger) || p.base.assets.filter(a => a.kind === 'tower').length !== 1
         || p.base.assets.filter(a => a.kind === 'robot').length !== 2) gameFail('INVARIANT_FAILED');
     }
+  }
+  save(match) {
+    this.assertState(match);
     this.db.prepare('UPDATE matches SET status=?,last_tick=?,state=? WHERE id=?').run(match.status, match.last_advanced_ms, JSON.stringify(match), match.id);
   }
   cancel(p, job, reason) {
@@ -203,9 +207,50 @@ export class GameDatabase {
     const open = rows.map(row => JSON.parse(row.state)).filter(m => m.status === 'active' || (m.status === 'waiting' && m.invite_expires > this.clock()));
     if (open.length >= 3 || (creating && this.db.prepare('SELECT count(*) n FROM matches WHERE host=? AND created>?').get(owner, this.clock() - 86400000).n >= 20)) gameFail('LIMIT_REACHED');
   }
+  /** Existing game preconditions shared by old dispatch and the extracted command path. */
+  checkMutation(match, owner, action) {
+    if (!['join_match', 'abandon_match', 'rotate_invite'].includes(action) && match.status !== 'active') gameFail('MATCH_INACTIVE');
+    if (action === 'abandon_match' && match.status === 'completed') gameFail('MATCH_INACTIVE');
+    if (action !== 'abandon_match' && this.db.prepare('SELECT count(*) n FROM receipts WHERE owner=? AND match_id=?').get(owner, match.id).n >= 256) gameFail('LIMIT_REACHED');
+    if (!['pause_job', 'cancel_job', 'dismantle_machine', 'abandon_match'].includes(action) && !this.healthy()) gameFail('SCHEDULER_UNAVAILABLE');
+  }
+  /** Adopt one real command without changing its wire schema, tables or receipt fingerprint. */
+  inspectThroughCore(token, name, args) {
+    try {
+      return executeTransactionalCommand({command_id:args.command_id,instance_id:args.match_id,expected_revision:args.expected_revision,
+        action:'inspect_deposit',payload:{deposit_id:args.deposit_id}}, {
+        transaction: work => this.transaction(work), authenticate: () => this.identity(token),
+        load: id => this.load(id), instanceId: state => state.id, revision: state => state.revision,
+        setRevision: (state, revision) => { state.revision = revision; },
+        authorized: (state, principal) => state.players.some(p => p.owner === principal),
+        now: state => Math.max(this.clock(),state.last_advanced_ms),
+        requestKey: () => canonical({name,arguments:args}),
+        receipt: (principal,id) => {
+          const receipt = this.db.prepare('SELECT request,result FROM receipts WHERE owner=? AND command_id=?').get(principal,id);
+          return receipt ? {request:receipt.request,result:JSON.parse(receipt.result)} : undefined;
+        },
+        prepare: state => {this.advance(state);return state;},
+        apply: (state,command,context) => {
+          if (command.action !== 'inspect_deposit') gameFail('INVALID_REQUEST');
+          this.checkMutation(state,context.principal_id,command.action);
+          this.command(state,state.players.find(p => p.owner === context.principal_id),{action:command.action,...command.payload});
+          return {state,events:[]};
+        },
+        validate: state => this.assertState(state),
+        result: (state,command,context) => validateGameResult(name,{version:gameContract.version,balance_version:gameContract.balance_version,
+          snapshot:this.snapshot(state,context.principal_id),command_id:command.command_id,invite_code:null}),
+        save: state => this.save(state),
+        saveReceipt: (principal,command,request,result) => this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(principal,command.command_id,command.instance_id,request,JSON.stringify(result)),
+      });
+    } catch(error) {
+      if (error instanceof SimulationCommandError) gameFail(error.code === 'EVENTS_UNSUPPORTED' ? 'INVARIANT_FAILED' : error.code);
+      throw error;
+    }
+  }
   dispatch(token, name, raw) {
     const args = validateGameRequest(name, raw);
     if (name === 'astra.game_describe') gameFail('INVALID_REQUEST');
+    if (name === 'astra.game_command' && args.action === 'inspect_deposit') return this.inspectThroughCore(token,name,args);
     return this.transaction(() => {
       const owner = this.identity(token), operation = name.replace('astra.game_', '');
       const request = canonical({ name, arguments: args });
@@ -241,10 +286,7 @@ export class GameDatabase {
         this.advance(match);
         if (operation !== 'read_match') {
           const action = operation === 'command' ? args.action : operation;
-          if (!['join_match', 'abandon_match', 'rotate_invite'].includes(action) && match.status !== 'active') gameFail('MATCH_INACTIVE');
-          if (action === 'abandon_match' && match.status === 'completed') gameFail('MATCH_INACTIVE');
-          if (action !== 'abandon_match' && this.db.prepare('SELECT count(*) n FROM receipts WHERE owner=? AND match_id=?').get(owner, match.id).n >= 256) gameFail('LIMIT_REACHED');
-          if (!['pause_job', 'cancel_job', 'dismantle_machine', 'abandon_match'].includes(action) && !this.healthy()) gameFail('SCHEDULER_UNAVAILABLE');
+          this.checkMutation(match, owner, action);
           if (action === 'join_match') {
             match.players.push(provisionPlayer(owner, 2, match.world)); match.status = 'active'; match.invite_hash = null;
             this.db.prepare('INSERT INTO members VALUES(?,?,2)').run(match.id, owner);
