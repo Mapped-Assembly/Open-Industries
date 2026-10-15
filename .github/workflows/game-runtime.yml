@@ -19,5 +19,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run test:simulation
       - run: npm run test:mcp-game
       - run: npm run test:mcp

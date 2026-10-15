@@ -31,7 +31,7 @@
     "test:camera-depth": "node --import tsx scripts/camera-depth-test.ts",
     "postinstall": "node scripts/prepare-vendor.mjs",
     "dev": "concurrently -k -n api,web \"node --env-file-if-exists=.env server/index.mjs\" \"vite --host 127.0.0.1\"",
-    "build": "tsc --noEmit && tsc --noEmit -p tsconfig.mcp.json && vite build",
+    "build": "tsc --noEmit && tsc --noEmit -p tsconfig.mcp.json && tsc -p tsconfig.simulation.json && vite build",
     "start": "node --env-file-if-exists=.env server/index.mjs",
     "test": "node scripts/smoke.mjs",
     "test:e2e": "node scripts/smoke.mjs",
@@ -62,7 +62,8 @@
     "demo:mcp-scene": "node scripts/replay-scene-workflow.mjs",
     "test:form-workflows": "node --import tsx scripts/form-workflows-test.ts",
     "test:form-workflows-browser": "node --import tsx scripts/form-workflows-browser-test.ts",
-    "game:server": "node --env-file-if-exists=.env server/game-service.mjs"
+    "game:server": "node --env-file-if-exists=.env server/game-service.mjs",
+    "test:simulation": "tsc -p tsconfig.simulation.json && node --import tsx --test tests/simulation/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
