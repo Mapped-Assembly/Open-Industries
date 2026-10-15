@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { GameDatabase } from './game-sqlite.mjs';
 import { gameErrors, gameFail, GameToolError } from './mcp-game-contract.mjs';
 import { SimulationEventError } from './simulation/events.mjs';
+import { AuthorityError } from './simulation/sqlite-authority.mjs';
 
 export async function startGameService({ database, port = 8790, allowSignup = false, tickMs = 1000 }) {
   const db = new GameDatabase(database);
@@ -42,7 +43,7 @@ export async function startGameService({ database, port = 8790, allowSignup = fa
       if (error instanceof SimulationEventError) return send(error.code === 'CURSOR_EXPIRED' ? 409 : error.code === 'NOT_AVAILABLE' ? 400 : 503,
         {error:{code:error.code === 'CURSOR_EXPIRED' ? 'CURSOR_EXPIRED' : error.code === 'NOT_AVAILABLE' ? 'NOT_AVAILABLE' : 'UNAVAILABLE',
           message:error.code === 'CURSOR_EXPIRED' ? 'History cursor expired. Fetch a new snapshot.' : error.code === 'NOT_AVAILABLE' ? gameErrors.NOT_AVAILABLE : gameErrors.UNAVAILABLE}});
-      const code = error instanceof GameToolError ? error.code : 'UNAVAILABLE';
+      const code = error instanceof GameToolError || error instanceof AuthorityError ? error.code : 'UNAVAILABLE';
       send(code === 'AUTH_REQUIRED' ? 401 : code === 'LIMIT_REACHED' ? 429 : code === 'UNAVAILABLE' ? 503 : 400,
         { error: { code, message: gameErrors[code] || gameErrors.UNAVAILABLE } });
     }
