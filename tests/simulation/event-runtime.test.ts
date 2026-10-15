@@ -166,3 +166,12 @@ test('variable-rate shared charging exactly matches native solar starvation and 
     assert.equal(nativeGame(result).players[0].robots[partial?1:0].energy_mj,8000000);
   }
 });
+
+
+test('valid resource names do not inherit object prototype values during postings or issuance',()=>{
+  const accounts=[account('battery','stock','mJ',10),account('spent','spent')];
+  const initial=createResourceBalances('fixture',pin,accounts,[allocation('battery',5,'constructor')],0);
+  const next=settleResourceBalances(initial,context(0),accounts,[allocation('battery',4,'constructor'),allocation('spent',2,'constructor')],[{resource_id:'constructor',quantity:1,kind:'metered',source_id:'solar'}],()=>true);
+  assert.equal(next.issued_totals.constructor,1);
+  assert.deepEqual(validateResourceBalances(next),next);
+});

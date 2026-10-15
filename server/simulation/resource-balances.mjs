@@ -27,6 +27,7 @@ const balanceMap=rows=>{
   const map=new Map();for(const row of rows){if(map.has(key(row)))fail();map.set(key(row),BigInt(row.quantity));}return map;
 };
 const safe=value=>{if(value<0n||value>BigInt(Number.MAX_SAFE_INTEGER))fail();return Number(value);};
+const own=(record,id)=>Object.hasOwn(record,id)?record[id]:0;
 const sorted=rows=>[...rows].sort((a,b)=>key(a).localeCompare(key(b)));
 /** Validate units, capacity and nonnegative quantities before any proposal can commit. */
 function checkBalances(accounts,balances){
@@ -38,7 +39,7 @@ function checkBalances(accounts,balances){
 }
 /** Replay exact simultaneous postings; externally metered issuance never permits constituent transmutation. */
 function post(accounts,balances,postings,credits){
-  const map=balanceMap(balances),metadata=new Map(accounts.map(a=>[a.id,a])),totals={};
+  const map=balanceMap(balances),metadata=new Map(accounts.map(a=>[a.id,a])),totals=Object.create(null);
   for(const row of postings){
     const a=metadata.get(row.account_id);if(!a||a.unit!==row.unit||!Number.isSafeInteger(row.delta))fail();
     if(row.delta<0&&['spent','spill','waste'].includes(a.kind))throw new ResourceLedgerError('RESERVATION_CLOSED');
@@ -47,7 +48,7 @@ function post(accounts,balances,postings,credits){
   }
   const units=new Map(balances.map(row=>[row.resource_id,row.unit]));for(const row of postings){if(units.has(row.resource_id)&&units.get(row.resource_id)!==row.unit)throw new ResourceLedgerError('UNIT_MISMATCH');units.set(row.resource_id,row.unit);}
   for(const c of credits){const unit=units.get(c.resource_id);if((c.kind==='metered'&&unit!=='mJ')||(c.kind==='bootstrap'&&!['mJ','count'].includes(unit)))throw new ResourceLedgerError('INCOMPATIBLE_RESOURCE');}
-  const issued={};for(const c of credits)issued[c.resource_id]=(issued[c.resource_id]??0n)+BigInt(c.quantity);
+  const issued=Object.create(null);for(const c of credits)issued[c.resource_id]=(issued[c.resource_id]??0n)+BigInt(c.quantity);
   for(const r of new Set([...Object.keys(totals),...Object.keys(issued)]))if((totals[r]??0n)!==(issued[r]??0n))throw new ResourceLedgerError('CONSERVATION_FAILED');
   const next=[];for(const [k,n] of map){if(n<0n)throw new ResourceLedgerError('INSUFFICIENT_RESOURCE');if(n){const [account_id,resource_id,lot_id,unit]=JSON.parse(k);next.push({account_id,resource_id,lot_id,unit,quantity:safe(n)});}}
   checkBalances(accounts,next);return sorted(next);
@@ -66,11 +67,11 @@ export function validateResourceBalances(raw){
     if(e.sequence!==++seq||e.context.expected_sequence!==seq-1||e.previous_hash!==hash||digest(body)!==claimed||e.context.simulation_time_ms<time||ids.has(e.context.id))fail();
     ids.add(e.context.id);time=e.context.simulation_time_ms;
     balances=post(ledger.accounts,balances,e.postings,e.credits);
-    for(const c of e.credits)issued[c.resource_id]=safe(BigInt(issued[c.resource_id]??0)+BigInt(c.quantity));
+    for(const c of e.credits)issued[c.resource_id]=safe(BigInt(own(issued,c.resource_id))+BigInt(c.quantity));
     hash=claimed;
   }
   if(seq!==ledger.sequence||canonicalCommand(sorted(balances))!==canonicalCommand(sorted(ledger.balances))||canonicalCommand(issued)!==canonicalCommand(ledger.issued_totals))fail();
-  const expected={...ledger.opening_totals};for(const [r,n]of Object.entries(issued))expected[r]=safe(BigInt(expected[r]??0)+BigInt(n));
+  const expected={...ledger.opening_totals};for(const [r,n]of Object.entries(issued))expected[r]=safe(BigInt(own(expected,r))+BigInt(n));
   assertResourceConservation(expected,resourceTotals(ledger.balances));
   return ledger;
 }
@@ -111,9 +112,9 @@ export function settleResourceBalances(raw,context,accounts,balances,credits,pol
   const applied=post(nextAccounts,ledger.balances,postings,issuance);
   const last=ledger.entries.at(-1);if(ctx.simulation_time_ms<(last?.context.simulation_time_ms??ledger.checkpoint.simulation_time_ms))fail();
   const entry={sequence:ledger.sequence+1,context:ctx,request_hash:digest(request),postings,credits:issuance,accounts:nextAccounts.filter(a=>!previous.has(a.id)),previous_hash:last?.hash??ledger.checkpoint.hash};
-  for(const c of issuance)ledger.issued_totals[c.resource_id]=safe(BigInt(ledger.issued_totals[c.resource_id]??0)+BigInt(c.quantity));
+  for(const c of issuance)ledger.issued_totals[c.resource_id]=safe(BigInt(own(ledger.issued_totals,c.resource_id))+BigInt(c.quantity));
   ledger.entries.push({...entry,hash:digest(entry)});ledger.accounts=nextAccounts;ledger.balances=applied;ledger.sequence++;
-  if(ledger.entries.length>32){const removed=ledger.entries.shift();ledger.checkpoint.balances=post(ledger.accounts,ledger.checkpoint.balances,removed.postings,removed.credits);for(const c of removed.credits)ledger.checkpoint.issued_totals[c.resource_id]=safe(BigInt(ledger.checkpoint.issued_totals[c.resource_id]??0)+BigInt(c.quantity));ledger.checkpoint.sequence=removed.sequence;ledger.checkpoint.simulation_time_ms=removed.context.simulation_time_ms;ledger.checkpoint.hash=removed.hash;}
+  if(ledger.entries.length>32){const removed=ledger.entries.shift();ledger.checkpoint.balances=post(ledger.accounts,ledger.checkpoint.balances,removed.postings,removed.credits);for(const c of removed.credits)ledger.checkpoint.issued_totals[c.resource_id]=safe(BigInt(own(ledger.checkpoint.issued_totals,c.resource_id))+BigInt(c.quantity));ledger.checkpoint.sequence=removed.sequence;ledger.checkpoint.simulation_time_ms=removed.context.simulation_time_ms;ledger.checkpoint.hash=removed.hash;}
   return validateResourceBalances(ledger);
 }
 /** Independent schema clone for a registered domain's persisted state. */
