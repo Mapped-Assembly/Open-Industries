@@ -81,3 +81,8 @@ export type {
   EventPage,
 } from './event-contracts.js';
 export { SqliteEventHistory, SimulationEventError } from './events.mjs';
+export { advanceEventClock, EventClockError } from './event-clock.mjs';
+export { validateEventJobs, transitionEventJobs } from './event-jobs.mjs';
+export { createResourceBalances, validateResourceBalances, settleResourceBalances, resourceBalancesSchema } from './resource-balances.mjs';
+export { DomainCommandError } from './registry.js';
+export type { EventJob, EventClockPolicy, BalanceAccount, ResourceCredit, BalanceContext, BalanceEntry, BalancePosting, ResourceBalanceLedger, BalanceProposal, ResourceBalancePolicy } from './event-runtime-contracts.js';

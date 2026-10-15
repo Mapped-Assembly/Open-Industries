@@ -44,3 +44,25 @@ migration failure and unknown-pin recovery. The neutral service remains independ
 The robot tick-equivalence test restores a complete closed SQLite backup before comparing
 long and short schedules, including its history. Synthetic old-schema tests clear only their
 test-created newer journal; captured-save tests separately prove real journal preservation.
+
+
+## Shared envelope, scheduler and ledger (SQLite 5)
+
+The current authority persists `SimulationInstance` with canonical event jobs, typed private
+observations and balanced resource accounts. The real MCP autonomous-progress assertion reads
+`state.schedule.jobs`, proving the production timer advances shared checkpoints. Captured
+v3/v5 saves retain exact native views and receipt bytes while stored JSON changes to an envelope.
+
+Event-runtime regressions compare original native rules and shared clock advancement for active
+hauls, fractional time, solar-starved charging, final one-millisecond transfer, bounded catch-up
+and restart. Generic ledger tests cover exact conservation, incompatible units, capacity,
+transmutation, sink refunds, unauthorized issuance, replay and bounded history compaction.
+A receipt-trigger failure during a real collection reservation leaves jobs, resources and history
+unchanged; the identical request then commits once and replays exactly. Registry tests validate
+entity/evidence changes together and sanitize private callback errors.
+
+The `Game runtime` CI workflow runs native/material/shared tests on Linux and Windows. Its
+`downstream-browser` job runs the immutable tower-defense client against the PR authority,
+including actual HTTP/MCP and desktop/mobile two-account recovery; screenshots are uploaded as
+`adopted-runtime-desktop-mobile-evidence`. Scene-authoring CI remains a separate regression gate.
+These tests exercise modeled software behavior, not physical sensor or process validation.

@@ -1,4 +1,5 @@
 import Ajv from 'ajv';
+import { advanceEventClock } from './event-clock.mjs';
 import type { DomainPin, JsonObject } from './contracts.js';
 import type {
   JobControl,
@@ -9,7 +10,6 @@ import type {
 } from './job-contracts.js';
 import { copyJson } from './json.mjs';
 import { identifier, objectSchema, pinSchema } from './schema.js';
-import { authoritativeTime } from './time.mjs';
 
 /** Invalid persisted checkpoints and unsupported controls fail closed, without a partial proposal. */
 export class SimulationJobError extends Error {
@@ -251,13 +251,10 @@ export function advanceJobSchedule(
   )
     invalid();
   policy.validate(schedule.domain);
-  schedule.observed_at_ms = authoritativeTime(wallNow, schedule.observed_at_ms);
-  for (
-    let tick = 0;
-    tick < maxSteps && schedule.observed_at_ms - schedule.cursor_ms >= schedule.quantum_ms;
-    tick++
-  ) {
-    const at = schedule.cursor_ms + schedule.quantum_ms;
+  return advanceEventClock(schedule, wallNow, maxSteps, {
+    validate: (state) => { validateJobSchedule(state); policy.validate(state.domain); },
+    next: (state, remaining) => remaining >= state.quantum_ms ? state.quantum_ms : 0,
+    step: (schedule, {at_ms: at}) => {
     // Snapshot eligibility avoids dependency-order effects within one global boundary.
     const states = new Map(schedule.jobs.map((j) => [j.id, j.state]));
     const ordered = [...schedule.jobs].sort(
@@ -322,10 +319,8 @@ export function advanceJobSchedule(
       } else invalid();
       policy.validate(schedule.domain);
     }
-    schedule.cursor_ms = at;
-  }
-  policy.validate(schedule.domain);
-  return validateJobSchedule(schedule);
+    },
+  });
 }
 
 /** Server timer/service calls this under the existing storage lock, independently of sessions. */

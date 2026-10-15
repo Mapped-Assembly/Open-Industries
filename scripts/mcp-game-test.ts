@@ -141,7 +141,7 @@ try {
   await ok(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
   const migrationFixture = new DatabaseSync(database);
   const row = migrationFixture.prepare('SELECT state FROM matches WHERE id=?').get(id) as { state: string };
-  const old = JSON.parse(row.state); old.legacy_recovery = true;
+  const old = JSON.parse(row.state); old.state.native.legacy_recovery = true;
   migrationFixture.prepare('UPDATE matches SET state=? WHERE id=?').run(JSON.stringify(old), id); migrationFixture.close();
   const read = async () => (await ok(a, 'read_match', { version: 5, match_id: id })).snapshot;
   const inspected = await ok(a, 'command', { ...command(), match_id: id, expected_revision: (await read()).revision, action: 'inspect_deposit', deposit_id: created.snapshot.deposits[0].id });
@@ -156,7 +156,7 @@ try {
   const inspectDB = new DatabaseSync(database, { readOnly: true });
   const progressed = JSON.parse(inspectDB.prepare('SELECT state FROM matches WHERE id=?').get(id)!.state as string);
   inspectDB.close();
-  assert(progressed.players[0].jobs[0].work_ms > 0, 'independent scheduler must advance without clients');
+  assert(progressed.state.schedule.jobs.some((j: any) => j.kind === 'process' && j.progress_ms > 0), 'independent scheduler must advance without clients');
   await stop(); await start();
   // Real service process restart, durable sessions and autonomous completion.
   await delay(20000);
