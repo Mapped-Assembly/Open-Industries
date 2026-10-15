@@ -1,3 +1,4 @@
+import { recoveryVersion, recoveryRecipes, recoveryPlan, recoveryOutputMetadata, recoveryInspection } from './game-recovery.mjs';
 import { randomUUID } from 'node:crypto';
 import { BatchSchema, ComponentSchema, ObservationSchema, CATALOG_VERSION, BALANCE_VERSION } from '@openindustries/material-science/schema';
 import { evaluateUse, evaluateSubstitution, evaluateComponent, planProcess, projectBatch } from '@openindustries/material-science/engine';
@@ -6,7 +7,7 @@ import { ResultSchema } from '@openindustries/material-science/protocol';
 import { contentsOf, grams } from './game-robots.mjs';
 
 export const scienceVersions = { catalog: CATALOG_VERSION, recipes: BALANCE_VERSION, sensors: 'bench-v1' };
-export const catalog = () => ({ versions: scienceVersions, materials: listMaterials(), recipes: listRecipes(), parts: listParts(), substitutions: listSubstitutions(),
+export const catalog = () => ({ versions: scienceVersions, materials: listMaterials(), recipes: [...listRecipes(),...recoveryRecipes()], recovery: { version: recoveryVersion, equipment: 'existing-bench-and-separator', maximum_temperature_c: 20, scope: 'cold-sorting-trimming-and-isolation-not-manufacturing' }, parts: listParts(), substitutions: listSubstitutions(),
   scope: 'bounded-game-rules-not-engineering-certification', inspection: { duration_ms: 3000, power_w: 100, energy_j: 300 } });
 export const constituents = b => ['copper', 'hdpe', 'dirt', 'steel', 'aluminum', 'glass', 'rubber', 'unknown'].filter(k => contentsOf(b)[k] > 0).map(material => ({ material, massG: contentsOf(b)[material] }));
 export function materialBatch(b, inspected = false) {
@@ -29,13 +30,13 @@ export function initializeScience(match) {
 }
 export const availableMachine = p => ({ kind: p.machine.kind, enabled: p.machine.status === 'ready', availablePowerW: p.machine.power_w,
   availableEnergyJ: Math.floor(p.machine.energy_mj / 1000), maximumTemperatureC: null });
-export function processPlan(p, batch, recipe) {
+export function processPlan(p, batch, recipe, match) {
   if (p.jobs.some(j => j.state === 'running' || j.state === 'paused')) return ResultSchema.parse({ status: 'ineligible', code: 'MACHINE_BUSY', message: 'Finish or cancel the current job before starting another process.', nextActions: ['finish-or-cancel-current-job'] });
-  return ResultSchema.parse(planProcess(batch.material, recipe, availableMachine(p)));
+  return ResultSchema.parse(recoveryPlan(p,batch,recipe,match) ?? planProcess(batch.material, recipe, availableMachine(p)));
 }
-export function processOutputs(plan) {
+export function processOutputs(plan, input) {
   const streams = [...plan.outputs, ...(plan.residue.massG ? [{ ...plan.residue, id: 'residue', form: 'residue' }] : [])];
-  return streams.map(s => ({ output_role: s.id, form: s.form, contents: Object.fromEntries(s.constituents.map(c => [c.material, c.massG])), ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, s.constituents.find(c => c.material === k)?.massG ?? 0])) }));
+  return streams.map(s => ({ output_role: s.id, form: s.form, ...recoveryOutputMetadata(plan,input,s), contents: Object.fromEntries(s.constituents.map(c => [c.material, c.massG])), ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, s.constituents.find(c => c.material === k)?.massG ?? 0])) }));
 }
 export function scienceProjection(match, p) {
   return { versions: match.science, observations: p.observations, components: p.components,
@@ -59,6 +60,7 @@ export function inspectAtBench(match, p, job, now) {
         { kind: 'density', value: 8950, unit: 'kg/m3', validFromC: 20, validToC: 20, uncertainty: { lower: 8800, upper: 9100 }, basis: 'measurement-fixture', source: 'bench-v1/copper-wire-test-fixture' },
       ];
     }
+    recoveryInspection(target,target.material,match);
     BatchSchema.parse(target.material);
   }
   const observation = ObservationSchema.parse({ id: randomUUID(), owner: p.owner, targetId: target.id,
@@ -68,7 +70,7 @@ export function inspectAtBench(match, p, job, now) {
   p.observations.push(observation);
   if (!isComponent) target.observation_id = observation.id;
 }
-export function evaluateScience(p, args, fail) {
+export function evaluateScience(p, args, fail, match) {
   const component = args.query === 'component';
   const target = (component ? p.components : p.batches).find(b => b.id === args.target_id);
   if (!target) return fail('NOT_AVAILABLE');
@@ -77,6 +79,6 @@ export function evaluateScience(p, args, fail) {
   else if (component) result = evaluateComponent(target, args.design_id);
   else if (args.query === 'use') result = evaluateUse(target.material, args.design_id, args.temperature_c);
   else if (args.query === 'substitution') result = evaluateSubstitution(target.material, args.design_id, args.temperature_c);
-  else result = processPlan(p, target, args.design_id);
+  else result = processPlan(p, target, args.design_id, match);
   return ResultSchema.parse(result);
 }

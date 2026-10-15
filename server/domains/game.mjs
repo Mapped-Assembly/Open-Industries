@@ -1,3 +1,4 @@
+import { isRecoveryRecipe, recoveryVersion } from '../game-recovery.mjs';
 import { initializeScience, materialBatch, scienceProjection, processPlan, processOutputs, inspectAtBench, evaluateScience, catalog, scienceVersions } from '../game-materials.mjs';
 import { initializeRobots, robotVersion, contentsOf, grams, commandRobot, stopRobot, settleRobots, robotStepLimit, chargingRobot, advanceRobots, robotProjection, checkRobotInvariants, robotsBusy } from '../game-robots.mjs';
 import { createHash, randomUUID } from 'node:crypto';
@@ -324,7 +325,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
     return operation === 'science_catalog'
       ? { version: 5, catalog: catalog() }
-      : { version: 5, match_id: match.id, revision: match.revision, result: evaluateScience(this.member(match, owner), args, gameFail) };
+      : { version: 5, match_id: match.id, revision: match.revision, result: evaluateScience(this.member(match, owner), args, gameFail, match) };
   }
   assertState(match) {
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
@@ -339,6 +340,10 @@ export class VersionedGameDomain extends LegacyGameDomain {
         + p.base.power.spilled_mj + (p.robot_charge_mj ?? 0) + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== p.base.power.initial_mj + p.base.power.generated_mj) gameFail('INVARIANT_FAILED');
       if (canonical(p.components.map(c => ({ kind: c.kind, quantity: c.quantity, unit_mass_g: c.unitMassG }))) !== canonical(p.base.inventory)
         || p.components.some(c => c.owner !== p.owner || c.allocation !== 'component-only')) gameFail('INVARIANT_FAILED');
+      for (const job of p.jobs) if ((isRecoveryRecipe(job.recipe) && job.recipe_version !== recoveryVersion)
+        || (job.recipe_version === recoveryVersion && !isRecoveryRecipe(job.recipe))) gameFail('INVARIANT_FAILED');
+      for (const b of p.batches) if (b.recovery_rule && (b.recovery_rule !== recoveryVersion
+        || !isRecoveryRecipe(b.recovery_recipe))) gameFail('INVARIANT_FAILED');
       for (const b of p.batches) if (b.material.massG !== grams(contentsOf(b))
         || canonical(b.material.constituents) !== canonical(materialBatch(b).constituents)) gameFail('INVARIANT_FAILED');
       const allocations = [...p.base.assets.flatMap(a => a.components.map(c => ({ ...c, allocation_id: a.id }))), ...p.base.inventory.map(c => ({ ...c, allocation_id: 'store' }))];
@@ -496,11 +501,11 @@ export class VersionedGameDomain extends LegacyGameDomain {
       if (!batch || p.machine.id !== args.machine_id) gameFail('NOT_AVAILABLE');
       if (batch.state !== 'available' || p.machine.status !== 'ready' || p.machine.energy_mj < 500 || p.jobs.some(live)) gameFail('NOT_READY');
       const recipe = action === 'start_processing' ? 'strip-cable' : args.recipe_id;
-      const evaluated = processPlan(p, batch, recipe);
+      const evaluated = processPlan(p, batch, recipe, match);
       if (evaluated.status === 'needs-inspection') gameFail('INSPECTION_REQUIRED');
       if (evaluated.status !== 'eligible') gameFail('INVALID_FEEDSTOCK');
-      const plan = { duration_ms: evaluated.durationMs, outputs: processOutputs(evaluated) }; batch.state = 'reserved'; p.base.ready_to_finish = false;
-      p.jobs.push({ id: randomUUID(), machine_id: p.machine.id, input_batch_id: batch.id, recipe, recipe_version: match.science.recipes,
+      const plan = { duration_ms: evaluated.durationMs, outputs: processOutputs(evaluated, batch) }; batch.state = 'reserved'; p.base.ready_to_finish = false;
+      p.jobs.push({ id: randomUUID(), machine_id: p.machine.id, input_batch_id: batch.id, recipe, recipe_version: isRecoveryRecipe(recipe) ? recoveryVersion : match.science.recipes,
         state: 'running', pause_reason: null, cancellation_reason: null, duration_ms: plan.duration_ms, work_ms: 0, energy_mj: 0,
         last_tick_ms: Math.max(this.clock(), match.last_advanced_ms), outputs: plan.outputs });
     } else if (['pause_job', 'resume_job', 'cancel_job'].includes(action)) {

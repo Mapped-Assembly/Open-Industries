@@ -2,7 +2,7 @@
 
 Open-Industries owns accounts, match identity, private deposits, inventory, jobs, time and receipts in a SQLite database. The game path does not use Supabase, Postgres, the scene CLI login, provider keys, or a hosted service. The independent Node process advances work even when all browsers and MCP clients disconnect.
 
-This is a two-player recovery session in a finite 96 × 56 municipal dump. The shared map contains fourteen waste sites, roads, obstacles, two bases and neutral outposts. Each crew can survey with its two robots, reserve and haul finite loads, inspect delivered material, process cable/residue, and recharge. All jobs run in SQLite while clients are absent. Manufacturing, combat, capture and victory remain unsupported. `ready_for_recovery` is true; `ready_for_full_game` remains false.
+This is a two-player recovery session in a finite 96 × 56 municipal dump. The shared map contains fourteen waste sites, roads, obstacles, two bases and neutral outposts. Each crew can survey with its two robots, reserve and haul finite loads, inspect delivered material, process every initial waste family through supported recovery routes, and recharge. All jobs run in SQLite while clients are absent. Manufacturing, combat, capture and victory remain unsupported. `ready_for_recovery` is true; `ready_for_full_game` remains false.
 
 ## Run
 
@@ -67,13 +67,13 @@ Requests: 8 KiB at the game boundary, 256 KiB results, 30-second MCP-to-service 
 
 `npm run test:mcp-game` uses the production SQLite engine and real service/MCP processes. It checks native account authentication, session revocation/expiry, hidden projections, ownership, two-player membership, simultaneous collection, duplicate receipts, transaction fault rollback, independent scheduling with clients absent, hard process restart, exactly-once outputs, conservation and 256 starting material partitions. CI runs on Linux and Windows.
 
-Wire version 5 rejects older clients. SQLite schema 5 stores the shared simulation envelope. The earlier schema 4 initializes persistent robots, private field observations and finite stock once; existing matches retain their original starter-cable path, while robots can recover their other sites. Existing field state is never reinitialized. Schema 3 added pinned material versions, private observations and component records referencing existing stock. Recovered legacy outputs receive no retroactive property evidence. Existing work and immutable receipts remain intact. The earlier schema-2 migration first upgrades v2 matches: preserve accounts, sessions, original cable IDs/composition/observations, batches, jobs, energy and immutable receipts; grant and ledger the new starter equipment/map once. Previous abandoned sessions become completed/abandoned. New private world contents are generated once and persisted. Legacy recipes remain `dump-v1`; map/catalog/sensor versions are independently pinned. Back up the database before upgrading, and upgrade the matching client together. An old request receipt stays immutable; its v2 command ID cannot be reused for a different v5 payload. This does not import or access the historical Postgres runtime. Scene-authoring persistence remains separate.
+Wire version 5 rejects older clients. SQLite schema 6 stores the shared simulation envelope and guards the new starter recovery rules against older binaries. Opening schema 5 only raises this compatibility marker; it does not rewrite existing state or receipts. The earlier schema 4 initializes persistent robots, private field observations and finite stock once; existing matches retain their original starter-cable path, while robots can recover their other sites. Existing field state is never reinitialized. Schema 3 added pinned material versions, private observations and component records referencing existing stock. Recovered legacy outputs receive no retroactive property evidence. Existing work and immutable receipts remain intact. The earlier schema-2 migration first upgrades v2 matches: preserve accounts, sessions, original cable IDs/composition/observations, batches, jobs, energy and immutable receipts; grant and ledger the new starter equipment/map once. Previous abandoned sessions become completed/abandoned. New private world contents are generated once and persisted. Legacy recipes remain `dump-v1`; map/catalog/sensor versions are independently pinned. Back up the database before upgrading, and upgrade the matching client together. An old request receipt stays immutable; its v2 command ID cannot be reused for a different v5 payload. This does not import or access the historical Postgres runtime. Scene-authoring persistence remains separate.
 
 ## World, lifecycle and privacy
 
 `world` is the shared public projection: positions, exterior waste categories, depleted status, roads, obstacles, outposts, tower slots and pinned versions. `base`, `field`, `science`, `deposits`, `batches` and `jobs` are the caller's private projection. The HMAC generation seed, uninspected composition/components, other crew's assets/inventory and observations never enter snapshots, receipts, error details or logs. Public depletion and lifecycle are intentionally shared. Each side has mirrored geometry and the same bounded starter recipe/energy path; cable composition is independently sampled so one crew's assay does not reveal the other's.
 
-All seven waste categories can be surveyed and recovered in new matches. Only owned robot/cargo/job/evidence state is projected. Public site revisions and availability reflect reservations, but disclose no constituent totals. Field-collected batch mass/form are visible; constituent fields remain null and canonical material projections stay uninspected until a paid bench test. Vehicle/appliance loads may contain unknown hazardous components: inspection isolates them; ordinary processing remains forbidden. No field scan certifies alloys, chemistry, purity or battery health.
+All seven waste categories can be surveyed and recovered in new matches. Only owned robot/cargo/job/evidence state is projected. Public site revisions and availability reflect reservations, but disclose no constituent totals. Field-collected batch mass/form are visible; constituent fields remain null and canonical material projections stay uninspected until a paid bench test. Vehicle/appliance loads may contain unknown hazardous components: paid inspection identifies the suspect load; only its matching cold isolation recipe can recover the target metal. All other constituents remain quarantined, and ordinary processing remains forbidden. No field scan certifies alloys, chemistry, purity or battery health.
 
 Lifecycle: waiting → active → completed. A waiting host can rotate its one-use, one-hour invitation after refreshing/signing in; older codes are invalidated. Expiry completes a waiting session with `invite-expired`. Abandonment cancels work and completes with `abandoned`. After each crew finishes a cable job, each can explicitly accept `finish_recovery`; both acceptances archive the session with `recovery-complete`. None of these reasons claims a combat winner (`winner_slot: null`). Completed history remains readable through membership listing/reconnect.
 
@@ -85,9 +85,9 @@ The canonical `@openindustries/material-science` package lives in `packages/mate
 
 Matches pin `materials-v2`, `balance-v2` and `bench-v1`; mismatched versions fail rather than silently adopting new rules. `astra.game_evaluate` accepts owned IDs and a catalog design only, with query `use`, `process`, `substitution` or `component`. It cannot receive batch composition, custom recipes, machine capabilities, property values, grades or identity. An eligible preview is not a reservation; startup rechecks real state atomically.
 
-A bench inspection costs 300 J over 3 seconds at 100 W, sharing the existing power ledger and single live-job limit. Owner-scoped observations store target/revision, server timestamp, bench position and bounded fixture evidence. Copper-wire fixture values are labeled synthetic game measurements and cover only 20 °C; other grades remain unknown. Starter-component tests reference existing stock allocations and certify only the named game-maintenance fixture. They never credit bulk material.
+A bench inspection costs 300 J over 3 seconds at 100 W, sharing the existing power ledger and single live-job limit. Owner-scoped observations store target/revision, server timestamp, bench position and bounded fixture evidence. Copper-wire and supported recovered-stock fixture values are labeled synthetic game measurements. Metal values cover only 20 °C; HDPE has an explicit bounded service-temperature interval. Unsupported grades remain unknown. Starter-component tests reference existing stock allocations and certify only the named game-maintenance fixture. They never credit bulk material.
 
-The separator uses the same library's integer/rational cable plan, preserving the 10 kg / 10 kJ fixture. Inspected residue can pass through `recover-cable-residue`, recovering half its remaining copper (floor grams) and retaining every other constituent/remainder. Outputs do not inherit grade or property evidence. The other five families have explicit catalog process/use paths; their required machines are not installed, so the authority refuses startup. Manufacturing and new machine provisioning remain separate work.
+The separator uses the same library's integer/rational cable plan, preserving the 10 kg / 10 kJ fixture. Inspected residue can pass through `recover-cable-residue`, recovering half its remaining copper (floor grams) and retaining every other constituent/remainder. Outputs do not inherit grade or property evidence. The game adds six cold starter-cell recovery/isolation recipes using the existing bench and separator. These do not grant the unavailable furnace, press or molding machines used by the pure catalog. Paid inspection of their usable outputs establishes bounded game-grade evidence for existing use evaluations. See [starter recovery processing](game-recovery-processing.md) for routes, limits and quarantine. Manufacturing and new machine provisioning remain separate work.
 
 See the downstream [science design](https://github.com/isayahc/tower-defense/blob/main/docs/material-science.md) for documented reference anchors, bounds, geometry and balance choices. These are bounded gameplay rules, not alloy inference, arbitrary chemistry or engineering certification.
 
@@ -119,7 +119,7 @@ Limits: 96 retained field jobs (return/recharge can replace the oldest finished 
 
 Native v5 material/robot rules live in `server/domains/game.mjs`; the registered adapter in
 `server/domains/game-core.mjs` stores jobs, private observations and resources in the shared
-`SimulationInstance`. SQLite schema 5 pins `native-game@dump-world-v1/schema1`. Common
+`SimulationInstance`. SQLite schema 6 pins `native-game@dump-world-v1/schema1`. Common
 clock/job/resource code checks progress and accounting before the envelope, history and
 receipt commit together. Native rates, routing, charger priority and outcomes remain domain
 policy. Wire v5 schemas and native receipt bytes are unchanged.
@@ -137,7 +137,7 @@ retain `game-runtime@dump-world-v1/schema3`, distinct from the envelope, wire an
 versions. `game-history-v3` projects both native historical rows and new envelopes; an older
 projection-bound cursor requires a fresh snapshot. Existing streams and cursor keys remain.
 
-SQLite versions 0–4 upgrade atomically to 5, preserving native IDs, inventory, paid work,
+SQLite versions 0–4 upgrade atomically through the envelope migration to 6, preserving native IDs, inventory, paid work,
 observations, pins, revisions and receipts. Existing science/robot upgrades run only when
 needed; `shared-core-cutover` records the envelope migration. Resource opening balances
 capture existing stock and sinks without inventing historical effects. Failed migration rolls
@@ -146,7 +146,7 @@ restore-backup/exact-runtime remedy. Older v2/v3/v4 requests can only replay an 
 identical receipt through HTTP/database; MCP and current clients remain strict v5.
 
 Back up the complete database before upgrading, using SQLite backup and retaining history
-and cursor keys. Returning to any pre-schema-5 binary requires that full pre-upgrade backup;
+and cursor keys. Returning to any pre-schema-6 binary requires that full pre-upgrade backup;
 do not combine old inventory with newer receipts. See
 [shared runtime adoption](architecture/shared-runtime-adoption.md) and
 [event runtime accounting](architecture/event-runtime-accounting.md) for reproduction,

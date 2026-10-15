@@ -1,3 +1,4 @@
+import { recoveryRecipes, recoveryVersion } from './game-recovery.mjs';
 import Ajv from 'ajv';
 import { jsonSchemas } from '@openindustries/material-science/protocol';
 import { catalog, scienceVersions } from './game-materials.mjs';
@@ -14,12 +15,12 @@ const mass = { copper_g: integer(10000), hdpe_g: integer(10000), dirt_g: integer
 const observation = object({ id: uuid, sensor: { const: 'cable-assay-v1' }, ...mass });
 const machine = object({ id: uuid, kind: { const: 'cable-separator' }, status: { enum: ['ready', 'destroyed'] },
   power_w: { const: 500 }, energy_mj: integer(20000000), dissipated_mj: integer(20000000) });
-const batch = object({ id: uuid, form: { enum: ['cable', 'wire', 'flakes', 'residue', 'mixed'] },
+const batch = object({ id: uuid, form: { enum: ['cable', 'wire', 'flakes', 'residue', 'mixed', 'stock', 'granulate', 'tread'] },
   state: { enum: ['available', 'reserved', 'consumed'] }, mass_g: integer(10000), ...Object.fromEntries(Object.entries(mass).map(([k, v]) => [k, nullable(v)])), observation_id: nullable(uuid),
-  source_job_id: nullable(uuid), output_role: nullable({ enum: ['conductor', 'insulation', 'residue'] }),
+  source_job_id: nullable(uuid), output_role: nullable({ enum: ['conductor', 'insulation', 'residue', 'usable'] }),
   grade: { enum: ['assayed-feedstock', 'recovered-ungraded'] } });
-const job = object({ id: uuid, machine_id: uuid, input_batch_id: uuid, recipe: { enum: ['strip-cable', 'recover-cable-residue', 'inspect-batch', 'inspect-component'] },
-  recipe_version: { enum: ['dump-v1', 'balance-v2', 'bench-v1'] }, state: { enum: ['running', 'paused', 'completed', 'cancelled'] },
+const job = object({ id: uuid, machine_id: uuid, input_batch_id: uuid, recipe: { enum: ['strip-cable', 'recover-cable-residue', 'inspect-batch', 'inspect-component', ...recoveryRecipes().map(r=>r.id)] },
+  recipe_version: { enum: ['dump-v1', 'balance-v2', 'bench-v1', recoveryVersion] }, state: { enum: ['running', 'paused', 'completed', 'cancelled'] },
   pause_reason: nullable({ enum: ['requested', 'power'] }),
   cancellation_reason: nullable({ enum: ['requested', 'machine_destroyed', 'match_abandoned'] }),
   duration_ms: integer(20000), work_ms: integer(20000), energy_mj: integer(10000000) });
@@ -92,7 +93,7 @@ export const gameContract = {
   retry_policy: 'same-command-id-and-identical-payload-returns-original-receipt',
   polling: 'full-snapshot-replaces-local-state', ready_for_recovery: true, ready_for_full_game: false,
   supported: ['two-player-invite', 'private-deposit-assay', 'finite-collection', 'durable-cable-processing',
-    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning', 'robot-routing', 'private-field-sensing', 'finite-reservations', 'cargo-hauling', 'shared-power-charging', 'interrupt-retreat', 'sensor-upgrade-catalog'],
+    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning', 'robot-routing', 'private-field-sensing', 'finite-reservations', 'cargo-hauling', 'shared-power-charging', 'interrupt-retreat', 'sensor-upgrade-catalog', 'all-initial-waste-recovery', 'cold-hazard-isolation'],
   unsupported: ['sensor-kit-manufacturing', 'combat', 'capture', 'victory', 'property-certification', 'events'],
 };
 const cursor = nullable(uuid);
@@ -140,7 +141,7 @@ export const gameErrors = {
   CLASS_UNSUPPORTED: 'Select a candidate class supported by your saved observation, or collect unclassified material for inspection.',
   CARGO_FULL: 'Return to unload before collecting more material.',
   INSPECTION_REQUIRED: 'A server-issued inspection is required before collection or processing.',
-  INVALID_FEEDSTOCK: 'The inspected input does not satisfy the cable recipe.',
+  INVALID_FEEDSTOCK: 'The inspected input is unavailable for this recipe. Evaluate the owned batch for its reason and next actions.',
   NOT_READY: 'The batch, machine or job is not ready for this operation. Read the current snapshot.',
   INVARIANT_FAILED: 'The operation was rolled back because stored game state was inconsistent.',
   OUTCOME_UNKNOWN: 'The operation may have committed. Retry the identical command_id and payload, then read the match.',

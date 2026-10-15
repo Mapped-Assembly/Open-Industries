@@ -139,10 +139,16 @@ try {
   assert.deepEqual(pair[0], pair[1]);
   const created = pair[0], id = created.snapshot.match_id;
   await ok(b, 'join_match', { ...command(), match_id: id, invite_code: created.invite_code });
+  // Prepare the legacy fixture with the service stopped; its independent worker is a writer.
+  await Promise.all(clients.map(c => c.close())); clients.length = 0;
+  await stop();
   const migrationFixture = new DatabaseSync(database);
-  const row = migrationFixture.prepare('SELECT state FROM matches WHERE id=?').get(id) as { state: string };
-  const old = JSON.parse(row.state); old.state.native.legacy_recovery = true;
-  migrationFixture.prepare('UPDATE matches SET state=? WHERE id=?').run(JSON.stringify(old), id); migrationFixture.close();
+  try {
+    const row = migrationFixture.prepare('SELECT state FROM matches WHERE id=?').get(id) as { state: string };
+    const old = JSON.parse(row.state); old.state.native.legacy_recovery = true;
+    migrationFixture.prepare('UPDATE matches SET state=? WHERE id=?').run(JSON.stringify(old), id);
+  } finally { migrationFixture.close(); }
+  await start(); a = connect(aToken); b = connect(bToken); a2 = connect(aToken);
   const read = async () => (await ok(a, 'read_match', { version: 5, match_id: id })).snapshot;
   const inspected = await ok(a, 'command', { ...command(), match_id: id, expected_revision: (await read()).revision, action: 'inspect_deposit', deposit_id: created.snapshot.deposits[0].id });
   const args = { version: 5, match_id: id, expected_revision: inspected.snapshot.revision, action: 'collect_deposit', deposit_id: created.snapshot.deposits[0].id };

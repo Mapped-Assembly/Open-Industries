@@ -24,7 +24,7 @@ try {
   const evaluate = (target_id: string, query: string, design_id: string, temperature_c = 20, token = a) => call(token, 'evaluate', { version: 5, match_id: id, target_id, query, design_id, temperature_c }).result;
   const tick = (ms: number) => { time += ms; db.tick(); };
   const cat = call(a, 'science_catalog', { version: 5, match_id: id }).catalog;
-  assert.equal(Object.keys(cat.materials).length, 6); assert.equal(cat.recipes.length, 7);
+  assert.equal(Object.keys(cat.materials).length, 6); assert.equal(cat.recipes.length, 13);
   assert.equal(cat.versions.catalog, 'materials-v2');
   assert.throws(() => call(outsider, 'science_catalog', { version: 5, match_id: id }), { code: 'NOT_AVAILABLE' });
   const deposit = read().deposits[0].id;
