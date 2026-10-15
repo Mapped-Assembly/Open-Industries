@@ -342,7 +342,7 @@ test('two independent lab writers cannot reserve the final kit twice', async () 
           errors = '';
         child.stdout.on('data', (c) => (output += c));
         child.stderr.on('data', (c) => (errors += c));
-        child.once('exit', (code) => {
+        child.once('close', (code) => {
           if (code !== 0) reject(Error(errors));
           else resolve(JSON.parse(output));
         });
@@ -465,9 +465,12 @@ test('real lab service survives hard kill, no-client progress, delivery restart 
     const doomed = spawn(
       process.execPath,
       ['--import', 'tsx', script, 'kill-before-commit', path, timeFile],
-      { stdio: 'ignore' },
+      { stdio: ['ignore', 'pipe', 'pipe'] },
     );
-    await new Promise<void>((done) => doomed.once('exit', () => done()));
+    let marker = '';
+    doomed.stdout!.on('data', (chunk) => (marker += chunk.toString()));
+    await new Promise<void>((done) => doomed.once('close', () => done()));
+    assert.match(marker, /KILL_BEFORE_COMMIT/);
     db = new FieldLabDatabase(path, { clock: () => 1000 + labSlotMs });
     assert.equal(canonicalCommand(db.load(id)), before);
     db.close();

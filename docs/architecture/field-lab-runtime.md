@@ -14,8 +14,8 @@ SQLite authority and authorized post-state history provide the core mechanisms.
 
 Each lab has 24 stable sample jobs and an exclusive instrument reservation. Job checkpoints
 bind intake/assay/result phases to the existing `instruments` and `pipette` scene instance IDs.
-Equipment entities bind seven existing instance IDs to the SHA-256 of the frozen portable
-scene. The saved model digest pins the scenario input file as well as the module version.
+Equipment entities bind seven existing instance IDs to the canonical-JSON SHA-256 of the frozen portable
+scene (independent of checkout line endings). The saved model digest pins the scenario input file as well as the module version.
 Changed or unknown pins/digests fail with an exact-runtime/complete-backup remedy. This new
 schema does not import or convert game, work-cell or historical in-memory saves.
 

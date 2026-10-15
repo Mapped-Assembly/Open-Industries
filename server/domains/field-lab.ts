@@ -65,7 +65,7 @@ const sceneBytes = readFileSync(
 );
 const scene = JSON.parse(sceneBytes.toString()) as { instances: { id: string }[] };
 const modelDigest = createHash('sha256').update(canonicalCommand(inputs)).digest('hex');
-const sceneDigest = createHash('sha256').update(sceneBytes).digest('hex');
+const sceneDigest = createHash('sha256').update(canonicalCommand(scene)).digest('hex');
 const equipment = ['pipette', 'instruments', 'water', 'battery', 'stock', 'waste', 'courier'];
 for (const id of equipment)
   if (!scene.instances.some((i) => i.id === id)) throw Error('UNSUPPORTED_FIELD_LAB_SCENE');
@@ -188,7 +188,7 @@ function transfer(
       unit: 'mJ',
       quantity: credit.quantity,
     });
-  // Preserve opening/delivery/solar lots during every transfer; deterministic FIFO never relabels stock.
+  // Preserve opening/delivery/solar lots during every transfer; deterministic lot ordering never relabels stock.
   for (const [account_id, resource_id, delta] of changes.filter((c) => c[2] < 0)) {
     let remaining = -delta;
     for (const row of balances

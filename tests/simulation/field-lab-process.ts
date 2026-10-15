@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeSync } from 'node:fs';
 import { startFieldLabService } from '../../server/field-lab-service.js';
 import { FieldLabDatabase } from '../../server/simulation/field-lab-runtime.js';
 const [role, path, timeFile, token, request] = process.argv.slice(2);
@@ -17,6 +17,7 @@ if (role === 'service') {
   const db = new FieldLabDatabase(path!, { clock });
   if (role === 'kill-before-commit')
     db.tick(() => {
+      writeSync(1, 'KILL_BEFORE_COMMIT\n');
       process.kill(process.pid, 'SIGKILL');
     });
   else {
