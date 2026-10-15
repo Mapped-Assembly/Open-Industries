@@ -63,4 +63,4 @@ The simulation suite includes real temporary file-backed SQLite and separate Nod
 
 The adopted game test checks native account authentication, original published response keys/version, exact request fingerprint and receipt bytes, rollback on receipt-insert failure, cross-owner denial, and replay after time advancement. Existing real game service/MCP tests continue to cover browser-independent progress, process restart, revocation and exactly-once material outputs. A neutral fixture's authenticator is deliberately test-only; it is not a replacement production login flow.
 
-This PR establishes command atomicity. Resource mechanisms are added in [#30](simulation-resources.md). Shared scheduler execution (#31), durable event replay (#32), and production generic adoption/migrations (#33) remain separate work.
+This PR establishes command atomicity. Resource mechanisms are added in [#30](simulation-resources.md), and durable job/worker APIs in [#31](simulation-jobs.md). Durable external event replay (#32) and production generic adoption/migrations (#33) remain separate work.

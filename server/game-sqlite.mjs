@@ -7,6 +7,7 @@ import { gameContract, gameFail, validateGameRequest, validateGameResult } from 
 import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game-world.mjs';
 import { executeTransactionalCommand, SimulationCommandError } from './simulation/commands.mjs';
 import { assertResourceConservation, energyForPower, splitQuantity } from './simulation/resources.mjs';
+import { authoritativeTime } from './simulation/time.mjs';
 
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
@@ -18,6 +19,7 @@ const live = job => job.state === 'running' || job.state === 'paused';
 /** Preserve published game errors while using exact shared accounting. */
 const accountedEnergy = (power, duration) => {try {return energyForPower(power, duration);} catch {gameFail('INVARIANT_FAILED');}};
 const conserved = (expected, actual) => {try {assertResourceConservation(expected, actual);} catch {gameFail('INVARIANT_FAILED');}};
+const accountedTime = (now, previous) => {try {return authoritativeTime(now, previous);} catch {gameFail('INVARIANT_FAILED');}};
 const mass = value => ({ copper_g: value.copper_g, hdpe_g: value.hdpe_g, dirt_g: value.dirt_g });
 
 export function cablePlan(input) {
@@ -150,7 +152,7 @@ export class GameDatabase {
     match.status = 'completed'; match.completion = { reason, winner_slot: null }; match.invite_hash = null;
   }
   advance(match) {
-    const now = Math.max(this.clock(), match.last_advanced_ms);
+    const now = accountedTime(this.clock(), match.last_advanced_ms);
     if (match.status === 'waiting' && match.invite_expires <= now) {
       this.complete(match, 'invite-expired'); match.revision++;
     }
