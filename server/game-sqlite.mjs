@@ -23,7 +23,8 @@ export class GameDatabase extends VersionedGameDomain {
       CREATE INDEX IF NOT EXISTS receipts_match ON receipts(match_id,owner);
 
     `);
-    this.history = new SqliteEventHistory(this.db);
+    // Envelopes include a resource replay tail; bound full post-state history to keep auth responsive.
+    this.history = new SqliteEventHistory(this.db,{maxEvents:64,maxBytes:2*1024*1024});
     this.registry = new DomainRegistry(); this.registry.register(gameDomainModule(code=>{throw new DomainCommandError(code);}));
     this.viewInstances = new WeakMap();
     // Initialize the old cutover first, then record real upgrades atomically with state.

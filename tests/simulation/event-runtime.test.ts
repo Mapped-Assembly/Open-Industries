@@ -141,6 +141,15 @@ test('actual game commands persist the registered envelope and reject tampered l
     assert.notEqual(committed,before);
     assert.deepEqual(db.dispatch(a.token,'astra.game_command',request),receipt);
     assert.equal(canonical(db.loadInstance(id)),committed);
+    // Repeated independent ticks compact full-envelope history while native receipts survive.
+    for(let i=0;i<70;i++){time+=1000;db.tick();}
+    db.transaction(()=>{
+      const head=db!.history.head(id);assert(head.checkpoint.sequence>0);
+      assert.deepEqual(db!.history.replay(id).state,db!.loadInstance(id));
+      assert(Number(db!.db.prepare('SELECT count(*) n FROM simulation_events WHERE instance_id=?').get(id)!.n)<=64);
+      assert(Number(db!.db.prepare('SELECT sum(length(CAST(event AS BLOB))) n FROM simulation_events WHERE instance_id=?').get(id)!.n)<=2*1024*1024);
+    });
+    assert.deepEqual(db.dispatch(a.token,'astra.game_command',request),receipt);
   }finally{db?.close();await rm(dir,{recursive:true,force:true});}
 });
 

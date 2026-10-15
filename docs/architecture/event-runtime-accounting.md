@@ -82,3 +82,11 @@ not physical validation, FIELD-LAB completion or scene/CAD authority binding (#1
 
 Reproduction and verification commands are in [shared runtime adoption](shared-runtime-adoption.md)
 and [runtime verification](../game-runtime-verification.md).
+
+
+Game post-state history retains at most 64 events / 2 MiB plus its complete checkpoint.
+The envelope already contains a bounded resource replay tail. This smaller game journal
+bounds synchronous history verification so account login and reconnect remain responsive
+while both crews poll. Compaction preserves exact current replay and immutable command
+receipts; an overtaken pagination cursor requires a fresh snapshot. The neutral fixture's
+existing history defaults are unchanged.
