@@ -67,7 +67,7 @@ Requests: 8 KiB at the game boundary, 256 KiB results, 30-second MCP-to-service 
 
 `npm run test:mcp-game` uses the production SQLite engine and real service/MCP processes. It checks native account authentication, session revocation/expiry, hidden projections, ownership, two-player membership, simultaneous collection, duplicate receipts, transaction fault rollback, independent scheduling with clients absent, hard process restart, exactly-once outputs, conservation and 256 starting material partitions. CI runs on Linux and Windows.
 
-Wire version 5 rejects older clients. SQLite schema 4 initializes persistent robots, private field observations and finite stock once; existing matches retain their original starter-cable path, while robots can recover their other sites. Existing field state is never reinitialized. Schema 3 added pinned material versions, private observations and component records referencing existing stock. Recovered legacy outputs receive no retroactive property evidence. Existing work and immutable receipts remain intact. The earlier schema-2 migration first upgrades v2 matches: preserve accounts, sessions, original cable IDs/composition/observations, batches, jobs, energy and immutable receipts; grant and ledger the new starter equipment/map once. Previous abandoned sessions become completed/abandoned. New private world contents are generated once and persisted. Legacy recipes remain `dump-v1`; map/catalog/sensor versions are independently pinned. Back up the database before upgrading, and upgrade the matching client together. An old request receipt stays immutable; its v2 command ID cannot be reused for a different v5 payload. This does not import or access the historical Postgres runtime. Scene-authoring persistence remains separate.
+Wire version 5 rejects older clients. SQLite schema 5 stores the shared simulation envelope. The earlier schema 4 initializes persistent robots, private field observations and finite stock once; existing matches retain their original starter-cable path, while robots can recover their other sites. Existing field state is never reinitialized. Schema 3 added pinned material versions, private observations and component records referencing existing stock. Recovered legacy outputs receive no retroactive property evidence. Existing work and immutable receipts remain intact. The earlier schema-2 migration first upgrades v2 matches: preserve accounts, sessions, original cable IDs/composition/observations, batches, jobs, energy and immutable receipts; grant and ledger the new starter equipment/map once. Previous abandoned sessions become completed/abandoned. New private world contents are generated once and persisted. Legacy recipes remain `dump-v1`; map/catalog/sensor versions are independently pinned. Back up the database before upgrading, and upgrade the matching client together. An old request receipt stays immutable; its v2 command ID cannot be reused for a different v5 payload. This does not import or access the historical Postgres runtime. Scene-authoring persistence remains separate.
 
 ## World, lifecycle and privacy
 
@@ -117,24 +117,37 @@ Limits: 96 retained field jobs (return/recharge can replace the oldest finished 
 
 ## Shared command/history integration
 
-Native v5 material/robot policies now live in `server/domains/game.mjs`, using the common
-SQLite authority and transactional command executor. `POST /simulation/history` returns
-authorized snapshots and retained post-state history; it never exposes raw world truth or
-an opponent's robots, assays, cargo or instruments. Histories retain the native compatibility
-wrapper pin `game-runtime@dump-world-v1/schema3`; this pin is distinct from wire v5 / SQLite 4.
-The wrapper accepts explicitly versioned pre-science, science and robot state shapes. Each
-new robot state additionally pins `robots-v1`, `field-sensors-v1` and its science versions.
-No existing stream is relabeled or replaced with invented past events. The projection is
-now `game-history-v2`; an older projection-bound pagination cursor requires a fresh snapshot.
+Native v5 material/robot rules live in `server/domains/game.mjs`; the registered adapter in
+`server/domains/game-core.mjs` stores jobs, private observations and resources in the shared
+`SimulationInstance`. SQLite schema 5 pins `native-game@dump-world-v1/schema1`. Common
+clock/job/resource code checks progress and accounting before the envelope, history and
+receipt commit together. Native rates, routing, charger priority and outcomes remain domain
+policy. Wire v5 schemas and native receipt bytes are unchanged.
 
-SQLite versions 0–3 upgrade atomically to 4, including the cutover/migration event. Existing
-v5/schema-4 rows retain their exact JSON and receipts on opening. Failed migrations roll
-back state, version and history together. Unknown robot/material pins fail with a restore
-backup/exact runtime remedy. Older v2/v3/v4 requests can only replay an existing identical
-receipt through the native HTTP/database boundary; they cannot create new intents. MCP
-and the current client remain strict v5 and do not downgrade.
+Each advancement runs at most 1,000 physical boundaries per instance, retaining unprocessed
+downtime as debt. The server worker drains it without browsers. Snapshot reads expose the
+original `scheduler_healthy=false` while debt remains; a command that cannot catch up returns
+`SCHEDULER_UNAVAILABLE` without committing a partial command. Wait/read/retry with the same
+intent after recovery. No client supplies elapsed time or progress. Variable-rate charging and
+250 ms travel retain exact integer-millisecond event boundaries rather than being quantized.
 
-Back up the complete database before upgrading. Returning a schema-4 database to the old
-schema-2 runtime requires restoring the pre-upgrade backup; do not mix old inventory with
-new receipts. New history tables do not alter native v5 state/receipt bytes. Event/job/resource
-envelope conversion is still pending in #33; the native scheduler is preserved in this step.
+`POST /simulation/history` returns authorized snapshots and retained post-state history. It
+never exposes raw world truth or another crew's private assets/evidence. Existing journals
+retain `game-runtime@dump-world-v1/schema3`, distinct from the envelope, wire and SQLite
+versions. `game-history-v3` projects both native historical rows and new envelopes; an older
+projection-bound cursor requires a fresh snapshot. Existing streams and cursor keys remain.
+
+SQLite versions 0–4 upgrade atomically to 5, preserving native IDs, inventory, paid work,
+observations, pins, revisions and receipts. Existing science/robot upgrades run only when
+needed; `shared-core-cutover` records the envelope migration. Resource opening balances
+capture existing stock and sinks without inventing historical effects. Failed migration rolls
+back state, version and history together. Unknown module/robot/material pins fail with a
+restore-backup/exact-runtime remedy. Older v2/v3/v4 requests can only replay an existing
+identical receipt through HTTP/database; MCP and current clients remain strict v5.
+
+Back up the complete database before upgrading, using SQLite backup and retaining history
+and cursor keys. Returning to any pre-schema-5 binary requires that full pre-upgrade backup;
+do not combine old inventory with newer receipts. See
+[shared runtime adoption](architecture/shared-runtime-adoption.md) and
+[event runtime accounting](architecture/event-runtime-accounting.md) for reproduction,
+resource/worker bounds and the domain/core boundary.

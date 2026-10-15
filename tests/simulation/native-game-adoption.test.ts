@@ -40,7 +40,7 @@ test('captured native v3 upgrades once, preserves paid work/IDs/receipt bytes an
     const original=JSON.parse(String(fixture.tables.matches[0].state)), id=original.id;
     db=new GameDatabase(path,{clock:()=>fixture.time});
     const migrated=db.load(id);
-    assert.equal(db.db.prepare('PRAGMA user_version').get()!.user_version,4);
+    assert.equal(db.db.prepare('PRAGMA user_version').get()!.user_version,5);
     assert.equal(migrated.legacy_recovery,true);
     assert.equal(migrated.robot_version,'robots-v1');
     assert.equal(migrated.world.seed,original.world.seed);
@@ -66,11 +66,11 @@ test('captured native v3 upgrades once, preserves paid work/IDs/receipt bytes an
     const own=db.historyPage(fixture.tokens[0],{instance_id:id,cursor:null,limit:100});
     assert.equal('field' in db.historicalSnapshot(original,db.identity(fixture.tokens[0])),false);
     assert.equal(own.snapshot.field.version,'robots-v1');
-    assert(own.events.some((e:any)=>e.action==='native-v5-upgrade' && e.snapshot.field.version==='robots-v1'));
+    assert(own.events.some((e:any)=>e.action==='shared-core-cutover' && e.snapshot.field.version==='robots-v1'));
     const other=JSON.stringify(db.historyPage(fixture.tokens[1],{instance_id:id,cursor:null,limit:100}));
     assert(!other.includes(migrated.players[0].machine.id));
     assert(!other.includes(migrated.world.seed));
-    db.transaction(()=>assert.deepEqual(db!.history.replay(id).state,migrated));
+    db.transaction(()=>assert.deepEqual(db!.history.replay(id).state,db!.loadInstance(id)));
     db.close();db=new GameDatabase(path,{clock:()=>fixture.time});
     assert.deepEqual(db.load(id),migrated);
     assert.deepEqual(receipts(db.db),stored);

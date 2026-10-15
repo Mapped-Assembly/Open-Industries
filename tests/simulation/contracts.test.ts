@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { DomainRegistry, SimulationContractError } from '../../server/simulation/registry.js';
+import { DomainCommandError, DomainRegistry, SimulationContractError } from '../../server/simulation/registry.js';
 import type { DomainModule, SimulationInstance } from '../../server/simulation/contracts.js';
 import { fixtureEntity, fixtureInstance, fixtureModule } from './fixtures.js';
 
@@ -269,4 +269,25 @@ test('domain callback failures expose stable contract errors without private dia
     () => registry.project({ ...instance, pin: projected.pin }, 'alice'),
     code('INVALID_PROJECTION'),
   );
+});
+
+
+test('domain proposals atomically validate entity/evidence updates and preserve only explicit public rejections', () => {
+  const instance=fixtureInstance(),command={command_id:'inspect-1',instance_id:instance.id,expected_revision:1,action:'fixture-inspect',payload:{target:{instance_id:instance.id,entity_id:'instrument-1'}}};
+  const make=(propose:DomainModule['proposeTransition'])=>{
+    const registry=new DomainRegistry(),module=fixtureModule('work-cell');
+    module.authorizeCommand=()=>true;module.proposeTransition=propose;registry.register(module);return registry;
+  };
+  const extra=fixtureEntity(instance.id,'instrument-2','alice');
+  const valid=make(()=>({state:instance.state,events:[],entities:[...instance.entities,extra],observations:instance.observations}));
+  assert.equal(valid.transition(instance,'alice',command).entities!.length,2);
+  assert.equal(instance.entities.length,1);
+  const foreign=make(()=>({state:instance.state,events:[],entities:[{...extra,instance_id:'foreign'}]}));
+  assert.throws(()=>foreign.transition(instance,'alice',command),code('INVALID_TRANSITION'));
+  const missingSource=make(()=>({state:instance.state,events:[],entities:[]}));
+  assert.throws(()=>missingSource.transition(instance,'alice',command),code('INVALID_TRANSITION'));
+  const publicError=make(()=>{throw new DomainCommandError('POWER_REQUIRED');});
+  assert.throws(()=>publicError.transition(instance,'alice',command),(e:unknown)=>e instanceof DomainCommandError&&e.code==='POWER_REQUIRED'&&!e.message.includes('private'));
+  const privateError=make(()=>{throw Error('private-material-canary');});
+  assert.throws(()=>privateError.transition(instance,'alice',command),code('INVALID_TRANSITION'));
 });

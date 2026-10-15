@@ -1,16 +1,15 @@
 # Shared runtime adoption: game compatibility and a neutral service
 
-Status: native material/robot integration follows the first service-adoption step for #33.
-This does **not** close #33. The v5 game and neutral work-cell service share authority, command
-transactions and authorized history. Generic game envelope/resource/job migration remains
-outstanding. Material/robot policies from PR #6/#16 are integrated here; those older branches
-need no separate merge before this PR.
+Status: #33 adopts the shared envelope, bounded clock driver, job checkpoints, resource
+accounting, authority, command transactions and authorized history in the native v5 game.
+The independently running neutral work-cell uses the same core without game-required fields.
+Published-head CI must pass both native services and the two-account game browser flow.
 
 ## Implemented boundary
 
 | Path | Domain ownership | Shared mechanisms | Persisted compatibility |
 | --- | --- | --- | --- |
-| Existing game service/MCP | `server/domains/game.mjs`: world, membership/invites, balance, recovery, processing, completion and private/history projections | `SqliteAuthority`, every native game command through `executeTransactionalCommand`, exact resource/time helpers and `SqliteEventHistory` | Native protocol v5 and SQLite schema 4; unchanged native v5 state/receipt bytes, explicit older-save upgrades |
+| Existing game service/MCP | `server/domains/game-core.mjs` and `game.mjs`: native rules, event boundaries and private/history projections | `SimulationInstance`, `DomainRegistry`, transactional commands, event clock/jobs, balanced resource ledger, `SqliteAuthority` and `SqliteEventHistory` | Native protocol v5, SQLite schema 5; lossless native state view and unchanged receipt bytes, atomic explicit older-save upgrades |
 | Work-cell service/MCP | `server/domains/work-cell.ts`: instrument, finite fixture stock, timed modeled assay, rates, interruptions and result projection | Real `DomainRegistry` envelopes, transactional commands, resource ledger/reservations, job worker and persisted history | Envelope v1, `work-cell@fixture-v1` / schema 1, dedicated SQLite schema 100 |
 
 `SqliteAuthority` owns native account/session hashing, SQLite locks, transactions, heartbeat
@@ -19,12 +18,13 @@ Both adapters reuse it. Accounts remain scoped to their database; sharing implem
 not implicitly merge game/work-cell accounts. Transports resolve the current session before
 accepting a principal and never accept a trusted owner or simulation clock from the client.
 
-The versioned game compatibility module retains its published native v5 event-boundary progression and exact yields.
+The versioned game module preserves published v5 event-boundary progression and exact yields.
 Creation/join remain explicit native bootstrap flows. Every `astra.game_command`, including
-invite rotation, now uses the common executor with original request keys/results. Game state
-has not been converted to a generic `SimulationInstance`, nor its existing orders/inventory to
-the new job/resource storage. That migration must be versioned and tested separately under
-the remaining #33 work; the current split avoids silently reinterpreting live saves.
+invite rotation, uses the common executor and registry with original request keys/results.
+Game jobs and observations have one canonical owner in the shared envelope. Native route,
+phase and recipe details are job checkpoints; native projections reconstruct the original v5
+shape. The resource ledger checks every proposed resource change before it can commit.
+See [event runtime accounting](event-runtime-accounting.md) for the exact split and limits.
 
 The neutral adapter is a real independently running server, not the earlier test-only HTTP
 fixture. It registers the trusted work-cell module, persists envelopes, runs the shared worker
@@ -113,18 +113,18 @@ and strict version gates remain unchanged. No client is silently downgraded from
 
 ## Save compatibility, backup and rollback
 
-Native game schemas 0–3 use explicit atomic upgrades to schema 4 in the versioned domain
-module. They retain IDs, inventory, paid work, observations and immutable receipt bytes;
-newly provisioned probes are recorded once in the starter ledger. Migrated matches keep
-the starter recovery path. New matches require physical robot surveying/collection/hauling.
-Existing native v5 saves keep their exact persisted state and receipts on cutover/reopen.
-Unknown robot/science pins or database versions fail with an explicit backup/runtime remedy.
+Native game schemas 0–4 upgrade atomically to schema 5. Existing native science/robot
+upgrades run first when necessary. Packing the shared envelope retains IDs, inventory,
+paid work, observations, pins, revision and immutable receipt bytes. No old elapsed-time
+history is invented: current finite balances become the opening checkpoint. The migration
+appends one `shared-core-cutover` event. Captured v3/v5 saves verify lossless native views,
+old history, exact receipts and one-time initialization across reopen.
 
-The persisted native history wrapper stays `game-runtime@dump-world-v1/schema3`; it is not
-the wire or SQLite version. Historical pre-science states use their original private projection;
-science/robot states retain their own explicit pins. Replay validates frozen state without
-initializing science, granting components or rerunning effects. A real upgrade appends one
-migration event within the same state/version transaction; old journals and cursor keys remain.
+The history wrapper remains `game-runtime@dump-world-v1/schema3`; the current envelope pins
+`native-game@dump-world-v1/schema1`. These differ from wire v5 / SQLite 5. Old journals and
+cursor keys remain; `game-history-v3` projects both old native and new envelope events.
+Older projection-bound cursors require a fresh snapshot. Unknown module/science/robot pins
+or database versions fail with a restore-backup/exact-runtime remedy without rewriting saves.
 
 Work-cell storage uses schema 100 and refuses a game save. The game service refuses schema
 100. Unknown work-cell module/schema pins fail startup rather than rerolling stock or erasing
@@ -136,31 +136,33 @@ for example `sqlite3 /absolute/path/runtime.sqlite '.backup /absolute/path/runti
 Keep the entire database, including history and cursor keys, together. Do not copy a live main
 database file while dropping its WAL. Test the backup with the matching module/runtime before
 an upgrade. Restoring it discards work after that backup; never combine newer receipts with an
-older inventory or job state. A return to the earlier v3/schema-2 binary requires the pre-upgrade backup.
-Native v5/schema-4 state and receipt bytes are preserved; new history tables are additive.
+older inventory or job state. Returning to any pre-schema-5 binary requires the full pre-upgrade backup.
+Receipt bytes and the lossless native view are preserved; persisted state is now an envelope.
 A work-cell database requires this service or its compatible successor.
 
-## Evidence and remaining #33 work
+## Verification evidence
 
-`npm run test:simulation` includes 61 tests. The four captured-native-save tests cover
-v3/v5 migration, exact paid work/reservations/observations/receipt preservation, old history,
-revoked retry, rollback and unsupported-pin remedies. Robot/material suites run directly
-against this adopted checkout, rather than a separate pinned baseline. The downstream
-HTTP/MCP integration verifies strict v5 discovery, native identities, ownership/privacy,
-invites, processing, retries, CSRF/cookies and revocation against this actual authority.
-The production build and room/scene regressions are also required.
+`npm run test:simulation` covers the core contracts, transactional commands, both job policies,
+resource conservation, history, neutral independent service, real SQLite concurrency/restart,
+and captured-native migrations. Event-runtime tests compare exact physical checkpoints with
+the original native rules, including quarter-second travel, variable-rate solar-starved charging,
+one-millisecond final transfer, bounded debt, clock rollback and ledger tail compaction.
+Receipt insertion failure during a real robot reservation rolls back the entire envelope and
+history; identical retry commits once. Registry tests reject inconsistent entity/evidence
+proposals and preserve only explicitly public domain rejection codes.
 
-Downstream discovery now verifies required game tools while allowing additional installed
-neutral tools. The client still rejects mismatched game schemas/versions; no authority moves
-to the browser. The local Chromium download remains unavailable (truncated archives); the
-GitHub browser job runs the actual desktop/mobile two-account recovery/reconnect flow and
-publishes its screenshots. Do not claim that browser acceptance passed until that job succeeds.
+`npm run test:mcp-game` runs robot/world regressions and independent production HTTP/MCP
+reconnect, concurrent collection, autonomous progress, hard process restart and exact receipt
+replay. `npm run test:materials`, `npm run build`, `npm run test:mcp` and scene regressions
+protect the existing materials and authoring paths. The downstream integration runs its real
+HTTP/MCP adapter against this checkout. The upstream `downstream-browser` CI job checks out
+immutable client commit `9fb37e7304935aea6616a1dc8c9bd6bd68e390fc`, uses this PR's runtime,
+and runs two isolated desktop/mobile accounts through recovery, materials, robots, lost
+responses, logout/reconnect and mutual completion, uploading screenshots. Consult that job's
+result for published-head browser acceptance; a local Chromium download is unavailable.
 
-Remaining #33 acceptance: faithful generic game envelope/resource/job migration preserving
-native outputs, schedules and receipts, plus published two-account desktop/mobile evidence.
-Native robot/process advancement is still domain-specific. This PR proves native v5
-compatibility with the extracted authority/command/history; it does not pretend those orders
-already use `SimulationInstance`, `runJobWorker` or the generic resource ledger.
+The wire schemas remain v5. Discovery allows additional neutral tools while still requiring
+all game tools and exact supported game versions. No simulation authority moves to the client.
 
 For later domains, register trusted exact-pin modules with strict schemas, domain invariants,
 explicit projections and finite initialization. Select worker/resource policies by the exact

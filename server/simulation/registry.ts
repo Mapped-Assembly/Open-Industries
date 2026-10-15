@@ -18,6 +18,14 @@ import {
   objectSchema,
 } from './schema.js';
 
+/** An explicitly public, stable rejection from a trusted domain policy. */
+export class DomainCommandError extends Error {
+  constructor(public readonly code: string) {
+    super('Domain command rejected');
+    if (!/^[A-Z][A-Z0-9_]{0,63}$/.test(code)) throw Error('INVALID_DOMAIN_REJECTION');
+    this.name='DomainCommandError';
+  }
+}
 /** Stable boundary errors contain no domain state or validator value dumps. */
 export class SimulationContractError extends Error {
   constructor(
@@ -46,12 +54,14 @@ const validEnvelope = ajv.compile(instanceSchema);
 const validPin = ajv.compile(pinSchema);
 const validReference = ajv.compile(referenceSchema);
 const validCommand = ajv.compile(commandSchema);
-const validProposal = ajv.compile(
-  objectSchema({
-    state: { type: 'object' },
-    events: { type: 'array', maxItems: 256, items: { type: 'object' } },
-  }),
-);
+const validProposal = ajv.compile({
+  type: 'object', additionalProperties: false,
+  properties: {
+    state: {type:'object'}, events: {type:'array',maxItems:256,items:{type:'object'}},
+    entities: instanceSchema.properties!.entities,
+    observations: instanceSchema.properties!.observations,
+  }, required:['state','events'],
+});
 const key = (pin: DomainPin): string =>
   JSON.stringify([pin.module_id, pin.module_version, pin.schema_version]);
 
@@ -268,12 +278,12 @@ export class DomainRegistry {
       if (entry.module.authorizeCommand(instance, value, context) !== true) fail('NOT_AVAILABLE');
       proposal = cloneJson(entry.module.proposeTransition(instance, value, context));
     } catch (error) {
-      if (error instanceof SimulationContractError && error.code === 'NOT_AVAILABLE') throw error;
+      if (error instanceof DomainCommandError || (error instanceof SimulationContractError && error.code === 'NOT_AVAILABLE')) throw error;
       return fail('INVALID_TRANSITION');
     }
     if (!validProposal(proposal)) fail('INVALID_TRANSITION');
     try {
-      this.validateInstance({ ...instance, state: proposal.state });
+      this.validateInstance({ ...instance, state: proposal.state, entities: proposal.entities ?? instance.entities, observations: proposal.observations ?? instance.observations });
     } catch {
       return fail('INVALID_TRANSITION');
     }

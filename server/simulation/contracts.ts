@@ -93,6 +93,9 @@ export interface DomainContext {
 export interface TransitionProposal {
   state: JsonObject;
   events: JsonObject[];
+  /** Trusted modules may atomically add/update typed entities and evidence with domain state. */
+  entities?: SimulationEntity[];
+  observations?: Observation[];
 }
 /** Future migrations are explicit offline proposals, never invoked on reads. */
 export interface MigrationHook {

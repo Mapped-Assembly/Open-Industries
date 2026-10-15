@@ -622,10 +622,10 @@ test('production game HTTP history shares command identity, hides opponent data,
     tx(service.db.db, () =>
       assert.deepEqual(
         service.db.history.replay(created.snapshot.match_id).state,
-        service.db.load(created.snapshot.match_id),
+        service.db.loadInstance(created.snapshot.match_id),
       ),
     );
-    const before = service.db.load(created.snapshot.match_id);
+    const before = service.db.loadInstance(created.snapshot.match_id);
     service.db.db.exec(
       "CREATE TRIGGER history_receipt_fault BEFORE INSERT ON receipts BEGIN SELECT RAISE(ABORT,'private-error-canary'); END;",
     );
@@ -641,7 +641,7 @@ test('production game HTTP history shares command identity, hides opponent data,
     assert.equal(failed.status, 503);
     assert(!JSON.stringify(failed.value).includes('canary'));
     service.db.db.exec('DROP TRIGGER history_receipt_fault');
-    assert.deepEqual(service.db.load(created.snapshot.match_id), before);
+    assert.deepEqual(service.db.loadInstance(created.snapshot.match_id), before);
     assert.equal(
       service.db.db.prepare('SELECT count(*) n FROM simulation_events').get()!.n,
       eventsBefore,
