@@ -4,10 +4,16 @@ import { dirname, relative, resolve } from 'node:path';
 import { callRoomTool, roomTools } from './mcp-rooms.mjs';
 import { sceneTools } from './mcp-scene-contract.mjs';
 import { gameTools } from './mcp-game-contract.mjs';
+import { simulationTools } from './mcp-simulation-contract.mjs';
 import { scrubPortableData as scrub } from '../src/lib/portable-data.mjs';
 
 let sceneRuntime;
 let gameRuntime;
+let simulationRuntime;
+async function simulationModule() {
+  simulationRuntime ??= import('tsx/esm/api').then(({tsImport})=>tsImport('./mcp-simulation.ts',import.meta.url));
+  return simulationRuntime;
+}
 async function sceneModule() {
   sceneRuntime ??= import('tsx/esm/api').then(({ tsImport }) => tsImport('./mcp-scenes.ts', import.meta.url));
   return sceneRuntime;
@@ -31,6 +37,7 @@ const tools = [
   ...roomTools,
   ...sceneTools,
   ...gameTools,
+  ...simulationTools,
   { name: 'astra.read_animation_feedback', description: 'Read the latest scrubbed Mergence authored-animation review for Form iteration.', inputSchema: { type: 'object', properties: {} } },
   { name: 'astra.read_form_project', description: 'Read a local compiled Form project manifest from the Mergence checkout.', inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'Checkout-relative path, usually demo/form-project.json.' } } } },
   { name: 'astra.save_form_project', description: 'Save a Form MCP project_ir back into an existing compiled project manifest.', inputSchema: { type: 'object', properties: { path: { type: 'string' }, project_ir: { type: 'object' } }, required: ['path', 'project_ir'] } },
@@ -39,6 +46,7 @@ const tools = [
 ];
 
 async function callTool(name, args = {}) {
+  if(simulationTools.some(tool=>tool.name===name))return (await simulationModule()).callSimulationTool(name,args);
   if (gameTools.some(tool => tool.name === name)) return (await gameModule()).callGameTool(root, name, args);
   if (sceneTools.some(tool => tool.name === name)) return (await sceneModule()).callSceneTool(root, name, args);
   if (roomTools.some(tool => tool.name === name)) return callRoomTool(root, name, args);
@@ -84,6 +92,10 @@ async function handle(request) {
   if (request.method === 'tools/call') {
     try { return response(request.id, textResult(await callTool(request.params?.name, request.params?.arguments))); }
     catch (error) {
+      if(simulationTools.some(tool=>tool.name===request.params?.name)) {
+        const known=error?.name==='SimulationToolError';
+        return response(request.id,{...textResult({error:{code:known?error.code:'UNAVAILABLE',message:known?error.message:'Simulation transport is unavailable.'}}),isError:true});
+      }
       if (gameTools.some(tool => tool.name === request.params?.name)) {
         const known = error?.name === 'GameToolError';
         return response(request.id, { ...textResult({ error: { code: known ? error.code : 'UNAVAILABLE',
