@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { GameDatabase } from './game-sqlite.mjs';
 import { gameErrors, gameFail, GameToolError } from './mcp-game-contract.mjs';
+import { SimulationEventError } from './simulation/events.mjs';
+import { AuthorityError } from './simulation/sqlite-authority.mjs';
 
 export async function startGameService({ database, port = 8790, allowSignup = false, tickMs = 1000 }) {
   const db = new GameDatabase(database);
@@ -16,7 +18,7 @@ export async function startGameService({ database, port = 8790, allowSignup = fa
       const token = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization || '')?.[1];
       if (req.method === 'GET' && req.url === '/health') return send(200, { scheduler_healthy: db.healthy(), registration_enabled: allowSignup, version: 3 });
       if (req.method === 'GET' && req.url === '/auth/session') { db.identity(token); return send(200, { authenticated: true }); }
-      if (req.method !== 'POST' || !['/auth/login', '/auth/register', '/auth/logout', '/game'].includes(req.url)) return send(404, { error: { code: 'INVALID_REQUEST', message: gameErrors.INVALID_REQUEST } });
+      if (req.method !== 'POST' || !['/auth/login', '/auth/register', '/auth/logout', '/game', '/simulation/history'].includes(req.url)) return send(404, { error: { code: 'INVALID_REQUEST', message: gameErrors.INVALID_REQUEST } });
       if (req.headers['content-type']?.split(';')[0] !== 'application/json') gameFail('INVALID_REQUEST');
       let size = 0; const chunks = [];
       for await (const chunk of req) { size += chunk.length; if (size > 12288) gameFail('INVALID_REQUEST'); chunks.push(chunk); }
@@ -33,11 +35,15 @@ export async function startGameService({ database, port = 8790, allowSignup = fa
         finally { authPending--; }
       }
       db.identity(token);
+      if (req.url === '/simulation/history') return send(200, db.historyPage(token,body));
       if (req.url === '/auth/logout') { db.logout(token); return send(200, { authenticated: false }); }
       if (!body || Object.keys(body).sort().join(',') !== 'arguments,name' || typeof body.name !== 'string') gameFail('INVALID_REQUEST');
       return send(200, db.dispatch(token, body.name, body.arguments));
     } catch (error) {
-      const code = error instanceof GameToolError ? error.code : 'UNAVAILABLE';
+      if (error instanceof SimulationEventError) return send(error.code === 'CURSOR_EXPIRED' ? 409 : error.code === 'NOT_AVAILABLE' ? 400 : 503,
+        {error:{code:error.code === 'CURSOR_EXPIRED' ? 'CURSOR_EXPIRED' : error.code === 'NOT_AVAILABLE' ? 'NOT_AVAILABLE' : 'UNAVAILABLE',
+          message:error.code === 'CURSOR_EXPIRED' ? 'History cursor expired. Fetch a new snapshot.' : error.code === 'NOT_AVAILABLE' ? gameErrors.NOT_AVAILABLE : gameErrors.UNAVAILABLE}});
+      const code = error instanceof GameToolError || error instanceof AuthorityError ? error.code : 'UNAVAILABLE';
       send(code === 'AUTH_REQUIRED' ? 401 : code === 'LIMIT_REACHED' ? 429 : code === 'UNAVAILABLE' ? 503 : 400,
         { error: { code, message: gameErrors[code] || gameErrors.UNAVAILABLE } });
     }

@@ -76,7 +76,7 @@ Browser storage is subject to quota and eviction, so export a scene file for a p
 
 ### Browser workbench
 
-Install **Node.js 22** and Git, then run:
+Install **Node.js 22.16 or newer** and Git, then run:
 
 ```bash
 git clone https://github.com/caid-technologies/Form-Industries.git
@@ -175,6 +175,8 @@ The `Publish packages` workflow validates both builds before publishing. Add a c
 - [External-agent scene authoring](docs/mcp-scenes.md) — MCP setup, typed tools, revision URLs, and the deterministic cleanroom fixture.
 - [Finite resource accounting](docs/architecture/simulation-resources.md) — shared reservation lifecycle, exact units and conserved inventories.
 - [Durable job scheduling](docs/architecture/simulation-jobs.md) — server-time checkpoints, bounded catch-up, resource waits and interruption controls.
+- [Simulation event history](docs/architecture/simulation-events.md) — atomic private history, authorized snapshots and bounded replay/cursor semantics.
+- [Shared runtime adoption](docs/architecture/shared-runtime-adoption.md) — versioned game compatibility and a real one-operator work-cell HTTP/MCP service; remaining #33 integration is explicit.
 - [Simulation domain boundary](docs/architecture/simulation-domain-boundary.md) — typed contracts, trusted domain modules and [transactional commands](docs/architecture/transactional-simulation-commands.md); runtime extraction remains incremental.
 - [Authoritative city-dump runtime](docs/mcp-game-runtime.md) — authenticated two-player matches, private material inspection, durable processing and database scheduler setup.
 - [Development and integration guide](docs/development.md) — local generation, MCP, CLI, import contracts, and GIF details.

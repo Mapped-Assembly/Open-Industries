@@ -2,15 +2,15 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "allowJs": true
   },
   "include": [
     "server/simulation/**/*.ts",
     "tests/simulation/**/*.ts",
-    "server/simulation/**/*.mjs"
+    "server/simulation/**/*.mjs",
+    "server/domains/**/*.ts",
+    "server/simulation-service.ts"
   ],
   "exclude": []
 }

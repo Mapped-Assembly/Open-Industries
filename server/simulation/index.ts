@@ -70,3 +70,14 @@ export {
   runJobWorker,
 } from './jobs.js';
 export { authoritativeTime } from './time.mjs';
+export type {
+  EventLinks,
+  EventProvenance,
+  EventCheckpoint,
+  EventTransition,
+  SimulationEvent,
+  EventProjection,
+  EventReadRequest,
+  EventPage,
+} from './event-contracts.js';
+export { SqliteEventHistory, SimulationEventError } from './events.mjs';

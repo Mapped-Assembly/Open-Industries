@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/Mapped-Assembly/Open-Industries#readme",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.16.0"
   },
   "publishConfig": {
     "access": "public",
@@ -63,6 +63,7 @@
     "test:form-workflows": "node --import tsx scripts/form-workflows-test.ts",
     "test:form-workflows-browser": "node --import tsx scripts/form-workflows-browser-test.ts",
     "game:server": "node --env-file-if-exists=.env server/game-service.mjs",
+    "simulation:server": "node --env-file-if-exists=.env --import tsx server/simulation-service.ts",
     "test:simulation": "tsc -p tsconfig.simulation.json && node --import tsx --test tests/simulation/*.test.ts"
   },
   "dependencies": {
