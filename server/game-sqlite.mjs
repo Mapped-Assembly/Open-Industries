@@ -12,7 +12,7 @@ export { canonical, cablePlan } from './domains/game.mjs';
 /** No external IO inside transactions. SQLite serializes writers across processes. */
 export class GameDatabase extends VersionedGameDomain {
   constructor(path, { clock = Date.now } = {}) {
-    super(path,{clock,supportedVersions:[0,1,2,3,4,5]});
+    super(path,{clock,supportedVersions:[0,1,2,3,4,5,6]});
     const version=Number(this.db.prepare('PRAGMA user_version').get().user_version);
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS matches(id TEXT PRIMARY KEY, host TEXT NOT NULL REFERENCES accounts(id), status TEXT NOT NULL, created INTEGER NOT NULL, last_tick INTEGER NOT NULL, state TEXT NOT NULL CHECK(json_valid(state)));
@@ -36,7 +36,7 @@ export class GameDatabase extends VersionedGameDomain {
           this.history.initialize({instance_id:stored.id,rule:historyRule,simulation_time_ms:stored.simulation_time_ms,revision:stored.revision,state:stored});
           continue;
         }
-        if(version===5)throw Error('ENVELOPE_REQUIRED');
+        if(version>=5)throw Error('ENVELOPE_REQUIRED');
         const match=stored;
         if (version < 2) this.upgradeLegacy(match);
         this.history.initialize({instance_id:match.id,rule:historyRule,simulation_time_ms:match.last_advanced_ms,revision:match.revision,state:match});
@@ -45,7 +45,7 @@ export class GameDatabase extends VersionedGameDomain {
         this.validateCurrentState(match);
         this.saveInstance(packGame(match),{kind:'worker',id:'shared-core-cutover',principal_id:null},'shared-core-cutover');
       }
-      this.db.exec('PRAGMA user_version=5');
+      this.db.exec('PRAGMA user_version=6');
     }); } catch(error) { this.db.close();throw new Error('UNSUPPORTED_GAME_SAVE: restore a compatible backup or run the exact game module version that wrote this database.',{cause:error}); }
   }
 

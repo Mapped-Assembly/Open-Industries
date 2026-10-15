@@ -66,3 +66,9 @@ The `Game runtime` CI workflow runs native/material/shared tests on Linux and Wi
 including actual HTTP/MCP and desktop/mobile two-account recovery; screenshots are uploaded as
 `adopted-runtime-desktop-mobile-evidence`. Scene-authoring CI remains a separate regression gate.
 These tests exercise modeled software behavior, not physical sensor or process validation.
+
+## All initial waste recovery (SQLite 6)
+
+`game-all-waste-test.ts`, included in `test:mcp-game`, drives two real accounts through robot collection, paid inspection and all six additional recipes in file-backed SQLite. Each route checks exact constituent and energy conservation, fault rollback, pause/cancel, processing restart, immutable retries, consumed-input refusal, private views and usable-output inspection/use. Battery-suspect residues retain quarantine through reinspection and reject repeated isolation. Machine power/energy/readiness and missing evidence are refused.
+
+Policy unit tests cover grades, condition, purity, unknown contaminants, glass origin, tiny inputs, hazard restrictions and HDPE temperature bounds. A schema-5 envelope/receipt test verifies that opening schema 6 changes only its compatibility marker. Existing captured-save migrations and all cable tests remain in the suite. The paired desktop/mobile browser test exercises steel recovery and vehicle isolation through production HTTP/MCP controls.
