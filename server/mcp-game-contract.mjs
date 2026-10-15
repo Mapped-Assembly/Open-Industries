@@ -1,4 +1,6 @@
 import Ajv from 'ajv';
+import { jsonSchemas } from '@openindustries/material-science/protocol';
+import { catalog, scienceVersions } from './game-materials.mjs';
 import { depositKinds, worldVersions } from './game-world.mjs';
 
 const object = (properties, required = Object.keys(properties)) => ({ type: 'object', additionalProperties: false, properties, required });
@@ -6,7 +8,7 @@ const uuid = { type: 'string', pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0
 const nullable = schema => ({ anyOf: [schema, { type: 'null' }] });
 const integer = maximum => ({ type: 'integer', minimum: 0, maximum });
 const array = (items, maxItems) => ({ type: 'array', items, maxItems });
-const version = { const: 3 };
+const version = { const: 4 };
 const mass = { copper_g: integer(10000), hdpe_g: integer(10000), dirt_g: integer(10000) };
 const observation = object({ id: uuid, sensor: { const: 'cable-assay-v1' }, ...mass });
 const machine = object({ id: uuid, kind: { const: 'cable-separator' }, status: { enum: ['ready', 'destroyed'] },
@@ -15,8 +17,8 @@ const batch = object({ id: uuid, form: { enum: ['cable', 'wire', 'flakes', 'resi
   state: { enum: ['available', 'reserved', 'consumed'] }, ...mass, observation_id: nullable(uuid),
   source_job_id: nullable(uuid), output_role: nullable({ enum: ['conductor', 'insulation', 'residue'] }),
   grade: { enum: ['assayed-feedstock', 'recovered-ungraded'] } });
-const job = object({ id: uuid, machine_id: uuid, input_batch_id: uuid, recipe: { const: 'strip-cable' },
-  recipe_version: { const: 'dump-v1' }, state: { enum: ['running', 'paused', 'completed', 'cancelled'] },
+const job = object({ id: uuid, machine_id: uuid, input_batch_id: uuid, recipe: { enum: ['strip-cable', 'recover-cable-residue', 'inspect-batch', 'inspect-component'] },
+  recipe_version: { enum: ['dump-v1', 'balance-v2', 'bench-v1'] }, state: { enum: ['running', 'paused', 'completed', 'cancelled'] },
   pause_reason: nullable({ enum: ['requested', 'power'] }),
   cancellation_reason: nullable({ enum: ['requested', 'machine_destroyed', 'match_abandoned'] }),
   duration_ms: integer(20000), work_ms: integer(20000), energy_mj: integer(10000000) });
@@ -41,11 +43,13 @@ const base = object({ id: uuid, ready_to_finish: { type: 'boolean' },
 const status = { enum: ['waiting', 'active', 'completed'] };
 export const gameSnapshotSchema = object({
   match_id: uuid, revision: { type: 'integer', minimum: 1 }, status, completion: nullable(object({ reason: { enum: ['abandoned', 'invite-expired', 'recovery-complete'] }, winner_slot: { type: 'null' } })),
-  world, base, invite_expires_at_ms: nullable(integer(Number.MAX_SAFE_INTEGER)),
+  world, base, science: object({ versions: object(Object.fromEntries(Object.entries(scienceVersions).map(([k, v]) => [k, { const: v }]))),
+    batches: array(object({ id: uuid, revision: { type: 'integer', minimum: 1 }, evidence: jsonSchemas.batch }), 512),
+    components: array(jsonSchemas.component, 10), observations: array(jsonSchemas.observation, 256) }), invite_expires_at_ms: nullable(integer(Number.MAX_SAFE_INTEGER)),
   server_time_ms: integer(Number.MAX_SAFE_INTEGER), scheduler_healthy: { type: 'boolean' },
   players: array(object({ slot: { enum: [1, 2] }, you: { type: 'boolean' } }), 2),
   deposits: array(object({ id: uuid, collected: { type: 'boolean' }, observation: nullable(observation) }), 1),
-  machines: array(machine, 1), batches: array(batch, 4), jobs: array(job, 256),
+  machines: array(machine, 1), batches: array(batch, 512), jobs: array(job, 256),
 });
 const snapshotResult = { version, balance_version: { const: 'dump-world-v1' }, snapshot: gameSnapshotSchema };
 const commandResult = object({ ...snapshotResult, command_id: uuid, invite_code: nullable(uuid) });
@@ -54,6 +58,9 @@ const actions = {
   inspect_deposit: { deposit_id: uuid },
   collect_deposit: { deposit_id: uuid },
   start_processing: { batch_id: uuid, machine_id: uuid },
+  inspect_batch: { batch_id: uuid },
+  inspect_component: { component_id: uuid },
+  start_material_process: { batch_id: uuid, machine_id: uuid, recipe_id: { type: 'string', minLength: 1, maxLength: 100 } },
   pause_job: { job_id: uuid },
   resume_job: { job_id: uuid },
   cancel_job: { job_id: uuid },
@@ -63,20 +70,25 @@ const actions = {
   finish_recovery: {},
 };
 export const gameContract = {
-  version: 3, contract: 'city-dump-runtime-v3', balance_version: 'dump-world-v1',
+  version: 4, contract: 'city-dump-runtime-v4', balance_version: 'dump-world-v1',
   transport: 'stdio', authentication: 'openindustries-sqlite-session', persistence: 'sqlite-wal',
   scheduler: 'independent-runtime-service', snapshot_scope: 'participant-public-state-and-own-private-state',
   retry_policy: 'same-command-id-and-identical-payload-returns-original-receipt',
   polling: 'full-snapshot-replaces-local-state', ready_for_recovery: true, ready_for_full_game: false,
   supported: ['two-player-invite', 'private-deposit-assay', 'finite-collection', 'durable-cable-processing',
-    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion'],
+    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning'],
   unsupported: ['moving-robots', 'combat', 'capture', 'victory', 'property-certification', 'events'],
 };
 const cursor = nullable(uuid);
 export const gameTools = [
+  { name: 'astra.game_science_catalog', description: 'Read the validated material catalog pinned to this participant match. Reference science and bounded game fixtures are distinct.',
+    inputSchema: object({ version, match_id: uuid }), outputSchema: object({ version, catalog: { const: catalog() } }) },
+  { name: 'astra.game_evaluate', description: 'Evaluate only an owned batch or component using server evidence and installed machines. No client-supplied materials, properties, recipes or grants. This is a preview, never a mutation.',
+    inputSchema: object({ version, match_id: uuid, target_id: uuid, query: { enum: ['use', 'process', 'substitution', 'component'] }, design_id: { type: 'string', minLength: 1, maxLength: 100 }, temperature_c: { type: 'number', minimum: -273.15, maximum: 5000 } }),
+    outputSchema: object({ version, match_id: uuid, revision: { type: 'integer', minimum: 1 }, result: jsonSchemas.result }) },
   { name: 'astra.game_list_matches', description: 'List only this account’s matches in stable ID order, at most 20 per page. Resume with next_cursor; no private opponent data or invite secrets are returned.',
     inputSchema: object({ version, cursor }), outputSchema: object({ version, matches: array(object({ match_id: uuid, status, slot: { enum: [1, 2] }, created_at_ms: integer(Number.MAX_SAFE_INTEGER) }), 20), next_cursor: cursor }) },
-  { name: 'astra.game_describe', description: 'Discover city-dump runtime v3 scope and authority requirements. This static contract does not assert deployment readiness or full-game support.',
+  { name: 'astra.game_describe', description: 'Discover city-dump runtime v4 scope and authority requirements. This static contract does not assert deployment readiness or full-game support.',
     inputSchema: object({ version }), outputSchema: object(Object.fromEntries(Object.entries(gameContract).map(([key, value]) => [key, { const: value }]))) },
   { name: 'astra.game_create_match', description: 'Create a waiting two-player city-dump match. Requires ASTRA_GAME_TOOLS_ENABLED=true, an OpenIndustries game session and the independent SQLite runtime service. Returns a one-use invite code for deliberate sharing.',
     inputSchema: object({ version, command_id: uuid }), outputSchema: object({ ...snapshotResult, command_id: uuid, invite_code: uuid }) },

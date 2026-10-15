@@ -6,6 +6,9 @@ import { promisify } from 'node:util';
 import { gameFail, validateGameRequest, validateGameResult } from './mcp-game-contract.mjs';
 import { makeWorld, provisionPlayer, starterBase, worldProjection } from './game-world.mjs';
 
+import { initializeScience, materialBatch, scienceProjection, processPlan, processOutputs, inspectAtBench, evaluateScience, catalog, scienceVersions } from './game-materials.mjs';
+import { planProcess } from '@openindustries/material-science/engine';
+
 const derive = promisify(scrypt);
 const hash = value => createHash('sha256').update(value).digest('hex');
 export const canonical = value => JSON.stringify(value, function (_key, item) {
@@ -19,12 +22,10 @@ export function cablePlan(input) {
   const { copper_g: copper, hdpe_g: hdpe, dirt_g: dirt } = input;
   if (![copper, hdpe, dirt].every(n => Number.isInteger(n) && n >= 0)
     || copper + hdpe + dirt < 1 || copper + hdpe + dirt > 10000 || copper * 2 < copper + hdpe + dirt) gameFail('INVALID_FEEDSTOCK');
-  const conductor = Math.floor(copper * 19 / 20), insulation = Math.floor(hdpe * 6 / 7);
-  return { duration_ms: (copper + hdpe + dirt) * 2, outputs: [
-    { output_role: 'conductor', form: 'wire', copper_g: conductor, hdpe_g: 0, dirt_g: 0 },
-    { output_role: 'insulation', form: 'flakes', copper_g: 0, hdpe_g: insulation, dirt_g: 0 },
-    { output_role: 'residue', form: 'residue', copper_g: copper - conductor, hdpe_g: hdpe - insulation, dirt_g: dirt },
-  ] };
+  const plan = planProcess(materialBatch({ id: 'cable-fixture', form: 'cable', ...input }, true), 'strip-cable',
+    { kind: 'cable-separator', enabled: true, availablePowerW: 500, availableEnergyJ: 10000, maximumTemperatureC: null });
+  if (plan.status !== 'eligible') gameFail('INVALID_FEEDSTOCK');
+  return { duration_ms: plan.durationMs, outputs: processOutputs(plan) };
 }
 
 /** No external IO inside transactions. SQLite serializes writers across processes. */
@@ -36,7 +37,7 @@ export class GameDatabase {
     if (path !== ':memory:' && process.platform !== 'win32') chmodSync(path, 0o600);
     this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;');
     const version = this.db.prepare('PRAGMA user_version').get().user_version;
-    if (![0, 1, 2].includes(version)) { this.db.close(); throw new Error('UNSUPPORTED_SQLITE_SCHEMA'); }
+    if (![0, 1, 2, 3].includes(version)) { this.db.close(); throw new Error('UNSUPPORTED_SQLITE_SCHEMA'); }
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS accounts(id TEXT PRIMARY KEY, username TEXT NOT NULL UNIQUE, salt TEXT NOT NULL, password_hash TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS sessions(token_hash TEXT PRIMARY KEY, owner TEXT NOT NULL REFERENCES accounts(id), expires INTEGER NOT NULL);
@@ -72,7 +73,14 @@ export class GameDatabase {
       }
       this.db.exec('PRAGMA user_version=2');
     });
+    if (version < 3) this.transaction(() => {
+      for (const row of this.db.prepare('SELECT state FROM matches').all()) {
+        const match = JSON.parse(row.state); initializeScience(match); match.revision++; this.save(match);
+      }
+      this.db.exec('PRAGMA user_version=3');
+    });
   }
+
   transaction(fn) {
     this.db.exec('BEGIN IMMEDIATE');
     try { const result = fn(); this.db.exec('COMMIT'); return result; }
@@ -118,6 +126,8 @@ export class GameDatabase {
     return JSON.parse(row.state);
   }
   save(match) {
+    initializeScience(match);
+    if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
     for (const p of match.players) {
       for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
         const total = (p.deposit.collected ? 0 : p.deposit[constituent])
@@ -126,6 +136,10 @@ export class GameDatabase {
       }
       if (p.machine.energy_mj < 0 || p.machine.energy_mj > p.base.power.capacity_mj || p.machine.energy_mj + p.machine.dissipated_mj
         + p.base.power.spilled_mj + p.jobs.reduce((sum, j) => sum + j.energy_mj, 0) !== p.base.power.initial_mj + p.base.power.generated_mj) gameFail('INVARIANT_FAILED');
+      if (canonical(p.components.map(c => ({ kind: c.kind, quantity: c.quantity, unit_mass_g: c.unitMassG }))) !== canonical(p.base.inventory)
+        || p.components.some(c => c.owner !== p.owner || c.allocation !== 'component-only')) gameFail('INVARIANT_FAILED');
+      for (const b of p.batches) if (b.material.massG !== b.copper_g + b.hdpe_g + b.dirt_g
+        || canonical(b.material.constituents) !== canonical(materialBatch(b).constituents)) gameFail('INVARIANT_FAILED');
       const allocations = [...p.base.assets.flatMap(a => a.components.map(c => ({ ...c, allocation_id: a.id }))), ...p.base.inventory.map(c => ({ ...c, allocation_id: 'store' }))];
       if (canonical(allocations) !== canonical(p.base.starter_ledger) || p.base.assets.filter(a => a.kind === 'tower').length !== 1
         || p.base.assets.filter(a => a.kind === 'robot').length !== 2) gameFail('INVARIANT_FAILED');
@@ -134,6 +148,7 @@ export class GameDatabase {
   }
   cancel(p, job, reason) {
     if (!live(job)) return;
+    if (job.kind === 'component-inspection') { job.state = 'cancelled'; job.pause_reason = null; job.cancellation_reason = reason; return; }
     const batch = p.batches.find(b => b.id === job.input_batch_id);
     if (!batch || batch.state !== 'reserved') gameFail('INVARIANT_FAILED');
     batch.state = 'available'; job.state = 'cancelled'; job.pause_reason = null; job.cancellation_reason = reason;
@@ -154,10 +169,14 @@ export class GameDatabase {
       let spent = 0;
       for (const job of p.jobs.filter(j => j.state === 'running')) {
         const requested = Math.min(job.duration_ms - job.work_ms, Math.max(0, now - job.last_tick_ms));
-        const delta = Math.min(requested, Math.floor(p.machine.energy_mj / (500 - solar)));
-        job.work_ms += delta; job.energy_mj += delta * 500; spent += delta * 500;
+        const delta = Math.min(requested, (job.power_w ?? 500) <= solar ? requested : Math.floor(p.machine.energy_mj / ((job.power_w ?? 500) - solar)));
+        const completedAt = job.last_tick_ms + delta;
+        job.work_ms += delta; job.energy_mj += delta * (job.power_w ?? 500); spent += delta * (job.power_w ?? 500);
         job.last_tick_ms = Math.max(job.last_tick_ms, now);
         if (job.work_ms === job.duration_ms) {
+          if (job.kind?.endsWith('inspection')) {
+            inspectAtBench(match, p, job, completedAt); job.state = 'completed'; changed = true; continue;
+          }
           const input = p.batches.find(b => b.id === job.input_batch_id);
           if (!input || input.state !== 'reserved') gameFail('INVARIANT_FAILED');
           input.state = 'consumed'; job.state = 'completed'; changed = true;
@@ -181,13 +200,13 @@ export class GameDatabase {
     const p = match.players.find(p => p.owner === owner);
     if (!p) gameFail('NOT_AVAILABLE');
     return { match_id: match.id, revision: match.revision, status: match.status, completion: match.completion,
-      world: worldProjection(match), base: p.base, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
+      world: worldProjection(match), base: p.base, science: scienceProjection(match, p), invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
       server_time_ms: Math.max(this.clock(), match.last_advanced_ms), scheduler_healthy: this.healthy(),
       players: match.players.map(p => ({ slot: p.slot, you: p.owner === owner })),
       deposits: [{ id: p.deposit.id, collected: p.deposit.collected, observation: p.deposit.observation
         ? { id: p.deposit.observation, sensor: 'cable-assay-v1', ...mass(p.deposit) } : null }],
-      machines: [p.machine], batches: p.batches,
-      jobs: p.jobs.map(({ last_tick_ms, outputs, ...visible }) => visible),
+      machines: [p.machine], batches: p.batches.map(({ material, material_revision, ...visible }) => visible),
+      jobs: p.jobs.map(({ last_tick_ms, outputs, kind, power_w, ...visible }) => visible),
     };
   }
   tick() {
@@ -209,12 +228,13 @@ export class GameDatabase {
     return this.transaction(() => {
       const owner = this.identity(token), operation = name.replace('astra.game_', '');
       const request = canonical({ name, arguments: args });
+      const readOnly = ['read_match', 'science_catalog', 'evaluate'].includes(operation);
       if (operation === 'list_matches') {
         const rows = this.db.prepare('SELECT m.state,m.created,p.slot FROM matches m JOIN members p ON p.match_id=m.id WHERE p.owner=? AND (? IS NULL OR m.id>?) ORDER BY m.id LIMIT 21').all(owner, args.cursor, args.cursor);
         const matches = rows.slice(0, 20).map(row => { const m = JSON.parse(row.state); this.advance(m); this.save(m); return { match_id: m.id, status: m.status, slot: row.slot, created_at_ms: row.created }; });
-        return validateGameResult(name, { version: 3, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
+        return validateGameResult(name, { version: 4, matches, next_cursor: rows.length > 20 ? matches.at(-1).match_id : null });
       }
-      if (operation !== 'read_match') {
+      if (!readOnly) {
         const receipt = this.db.prepare('SELECT * FROM receipts WHERE owner=? AND command_id=?').get(owner, args.command_id);
         if (receipt) { if (receipt.request !== request) gameFail('COMMAND_ID_REUSED'); return JSON.parse(receipt.result); }
       }
@@ -225,7 +245,7 @@ export class GameDatabase {
         invite = randomUUID();
         match = { id: randomUUID(), revision: 1, status: 'waiting', invite_hash: hash(invite), invite_expires: this.clock() + 3600000,
           last_advanced_ms: this.clock(), completion: null, world: makeWorld(), players: [] };
-        match.players.push(provisionPlayer(owner, 1, match.world));
+        match.players.push(provisionPlayer(owner, 1, match.world)); initializeScience(match);
         this.db.prepare('INSERT INTO matches VALUES(?,?,?,?,?,?)').run(match.id, owner, match.status, this.clock(), match.last_advanced_ms, JSON.stringify(match));
         this.db.prepare('INSERT INTO members VALUES(?,?,1)').run(match.id, owner);
       } else {
@@ -238,8 +258,13 @@ export class GameDatabase {
           if (!own) gameFail('NOT_AVAILABLE');
           if (operation === 'command' && match.revision !== args.expected_revision) gameFail('CONFLICT');
         }
-        this.advance(match);
-        if (operation !== 'read_match') {
+        this.advance(match); initializeScience(match);
+        if (operation === 'science_catalog' || operation === 'evaluate') {
+          if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
+          const result = operation === 'science_catalog' ? { version: 4, catalog: catalog() } : { version: 4, match_id: match.id, revision: match.revision, result: evaluateScience(own, args, gameFail) };
+          this.save(match); return validateGameResult(name, result);
+        }
+        if (!readOnly) {
           const action = operation === 'command' ? args.action : operation;
           if (!['join_match', 'abandon_match', 'rotate_invite'].includes(action) && match.status !== 'active') gameFail('MATCH_INACTIVE');
           if (action === 'abandon_match' && match.status === 'completed') gameFail('MATCH_INACTIVE');
@@ -256,10 +281,10 @@ export class GameDatabase {
         }
       }
       this.save(match);
-      const result = { version: 3, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
-        ...(operation !== 'read_match' ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
+      const result = { version: 4, balance_version: 'dump-world-v1', snapshot: this.snapshot(match, owner),
+        ...(!readOnly ? { command_id: args.command_id } : {}), ...(operation === 'command' || invite ? { invite_code: invite ?? null } : {}) };
       validateGameResult(name, result);
-      if (operation !== 'read_match') this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(owner, args.command_id, match.id, request, JSON.stringify(result));
+      if (!readOnly) this.db.prepare('INSERT INTO receipts VALUES(?,?,?,?,?)').run(owner, args.command_id, match.id, request, JSON.stringify(result));
       return result;
     });
   }
@@ -275,13 +300,27 @@ export class GameDatabase {
         p.batches.push({ id: randomUUID(), form: 'cable', state: 'available', ...mass(p.deposit), observation_id: p.deposit.observation,
           source_job_id: null, output_role: null, grade: 'assayed-feedstock' });
       }
-    } else if (action === 'start_processing') {
+    } else if (action === 'inspect_batch' || action === 'inspect_component') {
+      const component = action === 'inspect_component';
+      const target = (component ? p.components : p.batches).find(b => b.id === (component ? args.component_id : args.batch_id));
+      if (!target) gameFail('NOT_AVAILABLE');
+      const bench = p.base.assets.find(a => a.kind === 'bench');
+      if ((!component && target.state !== 'available') || bench.status !== 'ready' || p.machine.status !== 'ready' || p.machine.energy_mj < 300000 || p.jobs.some(live)) gameFail('NOT_READY');
+      p.base.ready_to_finish = false;
+      if (!component) target.state = 'reserved';
+      p.jobs.push({ id: randomUUID(), machine_id: bench.id, input_batch_id: target.id, recipe: component ? 'inspect-component' : 'inspect-batch', recipe_version: 'bench-v1',
+        kind: component ? 'component-inspection' : 'batch-inspection', power_w: 100, state: 'running', pause_reason: null, cancellation_reason: null, duration_ms: 3000, work_ms: 0, energy_mj: 0,
+        last_tick_ms: Math.max(this.clock(), match.last_advanced_ms), outputs: [] });
+    } else if (action === 'start_processing' || action === 'start_material_process') {
       const batch = p.batches.find(b => b.id === args.batch_id);
       if (!batch || p.machine.id !== args.machine_id) gameFail('NOT_AVAILABLE');
-      if (batch.state !== 'available' || batch.form !== 'cable' || p.machine.status !== 'ready' || p.machine.energy_mj < 500 || p.jobs.some(live)) gameFail('NOT_READY');
-      if (batch.observation_id !== p.deposit.observation || !p.deposit.collected || canonical(mass(batch)) !== canonical(mass(p.deposit))) gameFail('INSPECTION_REQUIRED');
-      const plan = cablePlan(batch); batch.state = 'reserved';
-      p.jobs.push({ id: randomUUID(), machine_id: p.machine.id, input_batch_id: batch.id, recipe: 'strip-cable', recipe_version: 'dump-v1',
+      if (batch.state !== 'available' || p.machine.status !== 'ready' || p.machine.energy_mj < 500 || p.jobs.some(live)) gameFail('NOT_READY');
+      const recipe = action === 'start_processing' ? 'strip-cable' : args.recipe_id;
+      const evaluated = processPlan(p, batch, recipe);
+      if (evaluated.status === 'needs-inspection') gameFail('INSPECTION_REQUIRED');
+      if (evaluated.status !== 'eligible') gameFail('INVALID_FEEDSTOCK');
+      const plan = { duration_ms: evaluated.durationMs, outputs: processOutputs(evaluated) }; batch.state = 'reserved'; p.base.ready_to_finish = false;
+      p.jobs.push({ id: randomUUID(), machine_id: p.machine.id, input_batch_id: batch.id, recipe, recipe_version: match.science.recipes,
         state: 'running', pause_reason: null, cancellation_reason: null, duration_ms: plan.duration_ms, work_ms: 0, energy_mj: 0,
         last_tick_ms: Math.max(this.clock(), match.last_advanced_ms), outputs: plan.outputs });
     } else if (['pause_job', 'resume_job', 'cancel_job'].includes(action)) {
@@ -303,9 +342,9 @@ export class GameDatabase {
       for (const player of match.players) for (const job of player.jobs) this.cancel(player, job, 'match_abandoned');
       this.complete(match, 'abandoned');
     } else if (action === 'finish_recovery') {
-      if (!p.jobs.some(j => j.state === 'completed') || p.jobs.some(live)) gameFail('NOT_READY');
+      if (!p.jobs.some(j => j.state === 'completed' && !j.kind?.endsWith('inspection')) || p.jobs.some(live)) gameFail('NOT_READY');
       p.base.ready_to_finish = true;
-      if (match.players.every(player => player.base.ready_to_finish)) this.complete(match, 'recovery-complete');
+      if (match.players.every(player => player.base.ready_to_finish && !player.jobs.some(live))) this.complete(match, 'recovery-complete');
     } else gameFail('INVALID_REQUEST');
   }
   close() { this.db.close(); }
