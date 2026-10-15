@@ -10,7 +10,9 @@
     "tests/simulation/**/*.ts",
     "server/simulation/**/*.mjs",
     "server/domains/**/*.ts",
-    "server/simulation-service.ts"
+    "server/simulation-service.ts",
+    "server/field-lab-service.ts",
+    "scripts/field-lab-durable-test.ts"
   ],
   "exclude": []
 }

@@ -204,3 +204,12 @@ If you use OpenIndustries in research, publications, or other academic work, ple
   note = {Open-source software}
 }
 ```
+
+
+### Durable FIELD-LAB runtime
+
+The [FIELD-LAB-01 service](docs/architecture/field-lab-runtime.md) runs a modeled one-operator
+lab day with SQLite jobs, finite supplies/deliveries and exact water/energy accounting.
+Run `npm run test:field-lab` for durable evidence matching all six frozen scenarios, or
+`npm run field-lab:server` for the local authenticated API. Scene animation, scientific
+validation and physical instrument control have separate boundaries documented there.

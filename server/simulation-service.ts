@@ -8,23 +8,28 @@ import { SimulationCommandError } from './simulation/commands.mjs';
 import { SimulationContractError } from './simulation/registry.js';
 import { SimulationJobError } from './simulation/jobs.js';
 import { SimulationEventError } from './simulation/events.mjs';
+import { FieldLabDatabase } from './simulation/field-lab-runtime.js';
+import { fieldLabModule, fieldLabPin } from './domains/field-lab.js';
+import { DomainCommandError } from './simulation/registry.js';
 import { workCellPin } from './domains/work-cell.js';
 
 /** Server-to-server neutral service; browser/session transport remains an application concern. */
 export async function startSimulationService({
   database,
+  domain = 'work-cell',
   port = 8791,
   allowSignup = false,
   tickMs = 1000,
   clock = Date.now,
 }: {
   database: string;
+  domain?: 'work-cell' | 'field-lab';
   port?: number;
   allowSignup?: boolean;
   tickMs?: number;
   clock?: () => number;
 }) {
-  const db = new SimulationDatabase(database, { clock });
+  const db = domain==='field-lab' ? new FieldLabDatabase(database,{clock}) : new SimulationDatabase(database, { clock });
   let authPending = 0;
   const attempts = new Map<string, { count: number; expires: number }>();
   const server = createServer(async (req, res) => {
@@ -40,10 +45,12 @@ export async function startSimulationService({
       if (req.headers.origin || req.url?.includes('?'))
         throw new SimulationRuntimeError('INVALID_REQUEST');
       const token = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization ?? '')?.[1] ?? '';
+      if (req.method === 'GET' && req.url === '/simulation/describe' && domain==='field-lab')
+        return send(200,{version:1,module:fieldLabPin,command_schema:fieldLabModule.commandSchema,snapshot_schema:fieldLabModule.projectionSchema,modeled_only:true});
       if (req.method === 'GET' && req.url === '/health')
         return send(200, {
           version: 1,
-          module: workCellPin,
+          module: domain==='field-lab'?fieldLabPin:workCellPin,
           scheduler_healthy: db.healthy(),
           registration_enabled: allowSignup,
         });
@@ -116,7 +123,7 @@ export async function startSimulationService({
         error instanceof SimulationCommandError ||
         error instanceof SimulationContractError ||
         error instanceof SimulationJobError ||
-        error instanceof SimulationEventError;
+        error instanceof SimulationEventError || error instanceof DomainCommandError;
       const code = known ? error.code : 'UNAVAILABLE';
       const publicCodes = new Set([
         'AUTH_REQUIRED',
@@ -128,6 +135,7 @@ export async function startSimulationService({
         'CATCHUP_REQUIRED',
         'LIMIT_REACHED',
         'CURSOR_EXPIRED',
+        'INVALID_SCENARIO','INSTRUMENT_BUSY','JOB_NOT_AVAILABLE','RESOURCE_REQUIRED','JOB_TERMINAL','JOB_NOT_RUNNING','JOB_NOT_PAUSED','DAY_COMPLETE',
       ]);
       const safe = publicCodes.has(code) ? code : 'UNAVAILABLE';
       return send(

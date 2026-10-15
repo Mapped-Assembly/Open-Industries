@@ -23,6 +23,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run test:field-lab
       - name: Replay FIELD-LAB-01
         run: node benchmarks/field-lab/run.mjs deliverables/field-lab
       - uses: actions/upload-artifact@v4

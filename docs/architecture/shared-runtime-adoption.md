@@ -169,7 +169,16 @@ explicit projections and finite initialization. Select worker/resource policies 
 pin; add explicit versioned migration and compatibility tests before accepting older saves.
 Never load executable module paths from client input or default unknown versions to latest.
 
-Full FIELD-LAB adoption remains #10, evidence/model validity remains #11, and authoritative
-scene/CAD bindings remain #12. They can depend on epic #27 / #33 and the shared contracts,
-worker, resource and history APIs introduced here; this work creates no second lab viewer,
-physical-control claim, collision certification or scientific validation path.
+FIELD-LAB adoption under #10 is detailed below. Evidence/model validity remains #11, and
+authoritative live scene/CAD binding remains #12. These domains reuse epic #27 / #33; no
+physical-control, collision certification or scientific validation claim follows from software adoption.
+
+## FIELD-LAB-01 adoption (#10)
+
+The versioned [field-lab runtime](field-lab-runtime.md) now uses the same envelope, event clock,
+job checkpoints, balanced resource ledger, command executor, native SQLite authority and
+post-state history. Its separate schema-101 database supports one operator and finite lab
+jobs, scheduled deliveries, modeled outputs, water/energy shortfalls and waste/spill. Actual
+HTTP, independent process/restart tests and a file-backed six-scenario baseline provide lab
+adoption evidence; the work-cell remains the small neutral exemplar. Scientific validation
+and live scene/CAD authority binding stay with #11/#12.

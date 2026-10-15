@@ -114,3 +114,22 @@ ffmpeg -framerate 10 -i deliverables/field-lab/frames/%04d.png -c:v libx264 -crf
 ```
 
 The repository workflow `.github/workflows/field-lab.yml` runs the reproducible replay on Linux and Windows, and publishes the output directory as a CI artifact. Linux additionally runs browser verification and render capture. The artifact contains inputs, versions, checksums, logs, numerical results, capability states and render evidence.
+
+## Durable runtime adoption (#10)
+
+The historical numerical harness above remains frozen. The current repository additionally
+runs its six scenarios through a versioned one-operator SQLite lab domain on the shared
+simulation core. Jobs, reservations, distinct opening/district/solar lots, paid progress,
+utility shortfalls, waste/spill, scheduled delivery and modeled outputs are durable.
+
+`npm run test:field-lab` compares every complete timeline against the frozen reference using
+real SQLite, reopens the database and verifies saved-state hashes and immutable receipts.
+It writes `deliverables/field-lab/durable-results.json`; CI publishes that evidence on Linux
+and Windows. `npm run test:simulation` also exercises actual authenticated lab HTTP, two
+processes racing for the final kit, receipt-fault rollback, independent timer progress,
+pre-COMMIT process death, restart, delivery idempotence and clock rollback.
+
+See [the lab runtime contract](../../docs/architecture/field-lab-runtime.md) for the exact
+15-minute booking convention, controls, units, backup boundaries, local service and limits.
+The original scene animation is still illustrative: declared hashed instance/job bindings do
+not establish live scene synchronization (#12) or scientific/physical validity (#11).
