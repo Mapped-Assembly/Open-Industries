@@ -13,7 +13,7 @@ All four products use existing persistent manufacturing jobs, exact reservations
 | raid-launcher | steel chassis, copper conductor, HDPE housing, 2 traction treads | 2 motors, 2 wheels, controller, robot battery, 2 fasteners |
 | steel-slug | 250 g eligible homogeneous steel stock | none; metal press, 4 s at 250 W (1 kJ) |
 
-The same steel bracket/conductor/housing/traction predicates used by machine construction apply here. The aluminum variant gives 140 rather than 100 health and costs 750 rather than 500 J to deploy. This is a declared part-specific balance tradeoff; it does not infer physical armor or thermal properties from material names. The steel chassis and rubber treads gate the launcher platform rather than acting as interchangeable currency.
+The same steel bracket/conductor/housing/traction predicates used by machine construction apply to assembly parts. Steel slugs have their own game-only 250 g mass predicate: homogeneous stock, paid inspection, sound condition, no detected hazard and `game-steel-v1` grade; the 1 kg bracket geometry threshold does not apply to ammunition. The aluminum variant gives 140 rather than 100 health and costs 750 rather than 500 J to deploy. This is a declared part-specific balance tradeoff; it does not infer physical armor or thermal properties from material names. The steel chassis and rubber treads gate the launcher platform rather than acting as interchangeable currency.
 
 ## Operating limits
 

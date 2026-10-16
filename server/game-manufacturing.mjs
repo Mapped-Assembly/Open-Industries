@@ -160,7 +160,7 @@ const recipes = [
 ];
 // Unit recipes consume the same graded products and tested reclaimed hardware as machinery.
 recipes.push(
-	part("steel-slug", "steel-bracket", 250, "metal-press"),
+	part("steel-slug", "steel-slug", 250, "metal-press"),
 	assembly(
 		"sentry-turret",
 		"defense",
@@ -330,11 +330,27 @@ export function manufacturingPlan(p, args) {
 			missing.push("Select an owned material batch.");
 			continue;
 		}
-		const check = evaluateUse(
-			b.material,
-			demand.use,
-			demand.use === "hdpe-housing" ? 60 : 20,
-		);
+		// Ammunition is a game abstraction, with its own mass predicate rather than bracket geometry.
+		const check =
+			demand.use === "steel-slug"
+				? {
+						status:
+							b.material.inspection === "graded" &&
+							b.material.grade === "game-steel-v1" &&
+							b.material.form === "stock" &&
+							b.material.condition === "sound" &&
+							b.material.hazard === "none-detected" &&
+							b.material.constituents.length === 1 &&
+							b.material.constituents[0].material === "steel"
+								? "eligible"
+								: "ineligible",
+						code: "AMMUNITION_STOCK_REQUIRED",
+					}
+				: evaluateUse(
+						b.material,
+						demand.use,
+						demand.use === "hdpe-housing" ? 60 : 20,
+					);
 		if (
 			b.state !== "available" ||
 			check.status !== "eligible" ||

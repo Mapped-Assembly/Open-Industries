@@ -1,3 +1,4 @@
+import { manufacturingPlan } from "../../server/game-manufacturing.mjs";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import test from "node:test";
@@ -147,4 +148,51 @@ test("client requests cannot assign damage, health, loadouts, statistics or frac
 	damageUnit(p, u.id, 1000);
 	assert.equal(u.health, 0);
 	assertUnits(p, fail);
+});
+
+test("250 g ammunition stock is independent of the 1 kg bracket geometry and still requires exact paid steel evidence", () => {
+	const { p } = fixture();
+	const press = {
+		id: randomUUID(),
+		kind: "metal-press",
+		state: "installed",
+		enabled: true,
+	};
+	p.production.products.push(press);
+	const b: any = {
+		id: randomUUID(),
+		state: "available",
+		material: {
+			massG: 250,
+			inspection: "graded",
+			grade: "game-steel-v1",
+			condition: "sound",
+			hazard: "none-detected",
+			form: "stock",
+			constituents: [{ material: "steel", massG: 250 }],
+		},
+	};
+	p.batches.push(b);
+	const args = {
+		recipe_id: "steel-slug",
+		batch_ids: [b.id],
+		product_ids: [],
+		component_ids: [],
+	};
+	assert.equal(manufacturingPlan(p, args).status, "eligible");
+	for (const [key, bad] of [
+		["grade", null],
+		["inspection", "uninspected"],
+		["hazard", "unknown"],
+		["massG", 249],
+		["form", "wire"],
+		["condition", "damaged"],
+	] as const) {
+		const old = b.material[key];
+		b.material[key] = bad;
+		assert.equal(manufacturingPlan(p, args).status, "ineligible", key);
+		b.material[key] = old;
+	}
+	b.material.constituents = [{ material: "aluminum", massG: 250 }];
+	assert.equal(manufacturingPlan(p, args).status, "ineligible");
 });
