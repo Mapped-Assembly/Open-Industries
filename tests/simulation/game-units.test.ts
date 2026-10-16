@@ -206,7 +206,7 @@ test("salvage returns ungraded lots that conform to the actual participant snaps
 		const owner = randomUUID(),
 			match = db.newMatch(owner, randomUUID());
 		db.join(match, randomUUID());
-		const p = match.players[0],
+		const p: any = match.players[0],
 			output = {
 				id: randomUUID(),
 				kind: "sentry-turret",
@@ -227,9 +227,9 @@ test("salvage returns ungraded lots that conform to the actual participant snaps
 			fail,
 		);
 		db.prepareState(match);
-		const snapshot = db.snapshot(match, owner),
+		const snapshot: any = db.snapshot(match, owner),
 			validate = new Ajv({ strict: false }).compile(gameSnapshotSchema);
-		assert(validate(snapshot), JSON.stringify(validate.errors));
+		assert.equal(validate(snapshot), true, JSON.stringify(validate.errors));
 		assert(
 			snapshot.batches.every((b: any) => b.grade === "recovered-ungraded"),
 		);
