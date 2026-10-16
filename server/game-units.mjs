@@ -223,7 +223,7 @@ export function commandUnit(match, p, args, now, fail) {
 				observation_id: null,
 				source_job_id: null,
 				output_role: "usable",
-				grade: "salvaged-ungraded",
+				grade: "recovered-ungraded",
 				hazard_truth: "none-detected",
 				manufacturing_stock_rule: "manufacturing-v1",
 				salvaged_from: a.id,

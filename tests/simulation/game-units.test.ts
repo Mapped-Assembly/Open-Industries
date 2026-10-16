@@ -1,3 +1,6 @@
+import Ajv from "ajv";
+import { GameDatabase } from "../../server/game-sqlite.mjs";
+import { gameSnapshotSchema } from "../../server/mcp-game-contract.mjs";
 import { manufacturingPlan } from "../../server/game-manufacturing.mjs";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
@@ -195,4 +198,43 @@ test("250 g ammunition stock is independent of the 1 kg bracket geometry and sti
 	}
 	b.material.constituents = [{ material: "aluminum", massG: 250 }];
 	assert.equal(manufacturingPlan(p, args).status, "ineligible");
+});
+
+test("salvage returns ungraded lots that conform to the actual participant snapshot contract", () => {
+	const db = new GameDatabase(":memory:", { clock: () => 1000 });
+	try {
+		const owner = randomUUID(),
+			match = db.newMatch(owner, randomUUID());
+		db.join(match, randomUUID());
+		const p = match.players[0],
+			output = {
+				id: randomUUID(),
+				kind: "sentry-turret",
+				category: "defense",
+				state: "installed",
+				enabled: false,
+				contents: { steel: 2000, copper: 100, hdpe: 200 },
+				components: [],
+				source_job_id: randomUUID(),
+			};
+		p.production = { version: "manufacturing-v1", products: [output] };
+		installUnit(p, output);
+		commandUnit(
+			match,
+			p,
+			{ action: "salvage_unit", unit_id: output.id },
+			1000,
+			fail,
+		);
+		db.prepareState(match);
+		const snapshot = db.snapshot(match, owner),
+			validate = new Ajv({ strict: false }).compile(gameSnapshotSchema);
+		assert(validate(snapshot), JSON.stringify(validate.errors));
+		assert(
+			snapshot.batches.every((b: any) => b.grade === "recovered-ungraded"),
+		);
+		assert.equal(snapshot.units.units[0].state, "salvaged");
+	} finally {
+		db.close();
+	}
 });
