@@ -117,7 +117,7 @@ export function stopRobot(match, p, r, reason) {
   j.state = 'cancelled'; j.reason = reason; r.job_id = null;
 }
 export function commandRobot(match, p, args, now, fail) {
-  const r = p.robots.find(r => r.id === args.robot_id);
+  const r = p.robots.find(r => r.id === args.robot_id && !r.retired && !(p.production?.products.some(a=>a.id===r.id && (!a.enabled||a.state!=='installed'))));
   if (!r) fail('NOT_AVAILABLE');
   if (args.action === 'interrupt_robot') {
     if (!live(robotJob(p, r))) fail('NOT_READY');
@@ -282,6 +282,7 @@ export function checkRobotInvariants(match, fail) {
   for (const d of match.world.deposits) { sum(initial, valid(d.stock.initial)); sum(current, valid(d.stock.remaining)); }
   for (const p of match.players) {
     for (const b of p.batches.filter(b => b.state !== 'consumed')) sum(current, valid(contentsOf(b)));
+    for (const a of p.production?.products ?? []) if (a.state !== 'consumed') sum(current, valid(a.contents));
     for (const j of p.robot_jobs) if (j.reserved) { if (!live(j)) fail('INVARIANT_FAILED'); sum(current, valid(j.reserved.contents)); }
     for (const r of p.robots) {
       for (const b of r.cargo) sum(current, valid(b.contents));

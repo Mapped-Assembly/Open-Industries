@@ -1,3 +1,4 @@
+import { manufacturingCatalog, manufacturingVersion, manufacturingPlan, enqueueManufacturing, isManufacturing, productionLive, cancelManufacturing, finishManufacturing, settleManufacturing, manufacturingProjection, assertManufacturing, salvageStarterAsset, productionSolar, chargingPower, productionProducts } from '../game-manufacturing.mjs';
 import { isRecoveryRecipe, recoveryVersion } from '../game-recovery.mjs';
 import { initializeScience, materialBatch, scienceProjection, processPlan, processOutputs, inspectAtBench, evaluateScience, catalog, scienceVersions } from '../game-materials.mjs';
 import { initializeRobots, robotVersion, contentsOf, grams, commandRobot, stopRobot, settleRobots, robotStepLimit, chargingRobot, advanceRobots, robotProjection, checkRobotInvariants, robotsBusy } from '../game-robots.mjs';
@@ -28,7 +29,7 @@ export const canonical = (value) =>
         )
       : item;
   });
-const live = (job) => job.state === 'running' || job.state === 'paused';
+const live = (job) => ['waiting','running','paused'].includes(job.state);
 const conserved = (expected, actual) => {
   try {
     assertResourceConservation(expected, actual);
@@ -320,8 +321,10 @@ export class VersionedGameDomain extends LegacyGameDomain {
     if (match.robot_version !== robotVersion) gameFail('INVARIANT_FAILED');
     this.assertState(match);
   }
-  prepareState(match) { initializeScience(match); }
+  prepareState(match) { initializeScience(match); for (const p of match.players) if (p.production) p.base.power.solar_w = productionSolar(p); }
   scienceRead(match, owner, operation, args) {
+    if (operation === 'manufacturing_catalog') return { version: 5, catalog: manufacturingCatalog() };
+    if (operation === 'manufacturing_preview') return { version: 5, match_id: match.id, revision: match.revision, result: manufacturingPlan(this.member(match, owner), args) };
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
     return operation === 'science_catalog'
       ? { version: 5, catalog: catalog() }
@@ -331,6 +334,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
     if (match.robot_version) checkRobotInvariants(match, gameFail);
     for (const p of match.players) {
+      assertManufacturing(p, gameFail);
       if (!match.robot_version) for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
         const total = (p.deposit.collected ? 0 : p.deposit[constituent])
           + p.batches.filter(b => b.state !== 'consumed').reduce((sum, b) => sum + b[constituent], 0);
@@ -342,17 +346,19 @@ export class VersionedGameDomain extends LegacyGameDomain {
         || p.components.some(c => c.owner !== p.owner || c.allocation !== 'component-only')) gameFail('INVARIANT_FAILED');
       for (const job of p.jobs) if ((isRecoveryRecipe(job.recipe) && job.recipe_version !== recoveryVersion)
         || (job.recipe_version === recoveryVersion && !isRecoveryRecipe(job.recipe))) gameFail('INVARIANT_FAILED');
+      for(const b of p.batches)if(b.manufacturing_stock_rule&&b.manufacturing_stock_rule!==manufacturingVersion)gameFail('INVARIANT_FAILED');
       for (const b of p.batches) if (b.recovery_rule && (b.recovery_rule !== recoveryVersion
         || !isRecoveryRecipe(b.recovery_recipe))) gameFail('INVARIANT_FAILED');
       for (const b of p.batches) if (b.material.massG !== grams(contentsOf(b))
         || canonical(b.material.constituents) !== canonical(materialBatch(b).constituents)) gameFail('INVARIANT_FAILED');
       const allocations = [...p.base.assets.flatMap(a => a.components.map(c => ({ ...c, allocation_id: a.id }))), ...p.base.inventory.map(c => ({ ...c, allocation_id: 'store' }))];
-      if (canonical(allocations) !== canonical(p.base.starter_ledger) || p.base.assets.filter(a => a.kind === 'tower').length !== 1
+      if ((!p.production && canonical(allocations) !== canonical(p.base.starter_ledger)) || p.base.assets.filter(a => a.kind === 'tower').length !== 1
         || p.base.assets.filter(a => a.kind === 'robot').length !== 2) gameFail('INVARIANT_FAILED');
     }
   }
   cancel(p, job, reason) {
     if (!live(job)) return;
+    if (isManufacturing(job)) { cancelManufacturing(p, job, reason, reason === 'machine_destroyed'); return; }
     if (job.kind === 'component-inspection') { job.state = 'cancelled'; job.pause_reason = null; job.cancellation_reason = reason; return; }
     const batch = p.batches.find(b => b.id === job.input_batch_id);
     if (!batch || batch.state !== 'reserved') gameFail('INVARIANT_FAILED');
@@ -400,6 +406,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     match.last_advanced_ms = now;
   }
   finishProcess(match, p, job, now) {
+    if (isManufacturing(job)) { finishManufacturing(p, job); return; }
     if (job.kind?.endsWith('inspection')) inspectAtBench(match, p, job, now);
     else {
       const input = p.batches.find(b => b.id === job.input_batch_id);
@@ -457,7 +464,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     const p = match.players.find(p => p.owner === owner);
     if (!p) gameFail('NOT_AVAILABLE');
     return { match_id: match.id, revision: match.revision, status: match.status, completion: match.completion,
-      world: worldProjection(match), base: p.base, science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
+      world: worldProjection(match), base: p.base, manufacturing: manufacturingProjection(p), science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
       server_time_ms: Math.max(this.clock(), match.last_advanced_ms), scheduler_healthy: this.healthy(),
       players: match.players.map(p => ({ slot: p.slot, you: p.owner === owner })),
       deposits: [{ id: p.deposit.id, collected: p.deposit.collected, observation: p.deposit.observation
@@ -465,12 +472,21 @@ export class VersionedGameDomain extends LegacyGameDomain {
       machines: [p.machine], batches: p.batches.map(b => ({ id: b.id, form: b.form, state: b.state, mass_g: grams(contentsOf(b)),
         ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, b.field_collected && b.material.inspection !== 'graded' ? null : contentsOf(b)[k] ?? 0])),
         observation_id: b.observation_id, source_job_id: b.source_job_id, output_role: b.output_role, grade: b.grade })),
-      jobs: p.jobs.map(({ last_tick_ms, outputs, kind, power_w, ...visible }) => visible),
+      jobs: p.jobs.filter(j => !isManufacturing(j)).map(({ last_tick_ms, outputs, kind, power_w, ...visible }) => visible),
     };
   }
   command(match, p, args) {
     const { action } = args;
-    if (action === 'inspect_deposit' || action === 'collect_deposit') {
+    if (action === 'enqueue_manufacturing') {
+      enqueueManufacturing(p, args, Math.max(this.clock(), match.last_advanced_ms), gameFail);
+    } else if (action === 'salvage_starter_asset') {
+      salvageStarterAsset(p, args.asset_id, gameFail);
+    } else if (action === 'set_production_machine' || action === 'destroy_manufactured_product') {
+      const product = productionProducts(p).find(a => a.id === (args.product_id??args.machine_id) && (a.state === 'installed' || (action === 'destroy_manufactured_product' && a.state === 'available')));
+      if (!product || (action === 'set_production_machine' && !['machine','upgrade'].includes(product.category))) gameFail('NOT_AVAILABLE');
+      if (action === 'set_production_machine') product.enabled = args.enabled;
+      else { product.state = 'destroyed'; product.enabled = false; for (const j of p.jobs.filter(j => isManufacturing(j) && j.machine_id === product.id)) cancelManufacturing(p,j,'machine_destroyed',true); const robot=p.robots.find(r=>r.id===product.id); if(robot) { if(robot.job_id||robot.cargo.length)gameFail('NOT_READY'); robot.retired=true;robot.spent_mj+=robot.energy_mj;robot.energy_mj=0; } }
+    } else if (action === 'inspect_deposit' || action === 'collect_deposit') {
       if (p.deposit.id !== args.deposit_id) gameFail('NOT_AVAILABLE');
       if (!match.legacy_recovery) gameFail('ROBOT_REQUIRED');
       if (p.deposit.collected) gameFail('DEPOSIT_EMPTY');
@@ -498,24 +514,25 @@ export class VersionedGameDomain extends LegacyGameDomain {
         last_tick_ms: Math.max(this.clock(), match.last_advanced_ms), outputs: [] });
     } else if (action === 'start_processing' || action === 'start_material_process') {
       const batch = p.batches.find(b => b.id === args.batch_id);
-      if (!batch || p.machine.id !== args.machine_id) gameFail('NOT_AVAILABLE');
+      if (!batch || (p.machine.id !== args.machine_id && !productionProducts(p).some(a=>a.id===args.machine_id&&a.state==='installed'&&a.enabled))) gameFail('NOT_AVAILABLE');
       if (batch.state !== 'available' || p.machine.status !== 'ready' || p.machine.energy_mj < 500 || p.jobs.some(live)) gameFail('NOT_READY');
       const recipe = action === 'start_processing' ? 'strip-cable' : args.recipe_id;
-      const evaluated = processPlan(p, batch, recipe, match);
+      const evaluated = processPlan(p, batch, recipe, match, args.machine_id);
       if (evaluated.status === 'needs-inspection') gameFail('INSPECTION_REQUIRED');
       if (evaluated.status !== 'eligible') gameFail('INVALID_FEEDSTOCK');
       const plan = { duration_ms: evaluated.durationMs, outputs: processOutputs(evaluated, batch) }; batch.state = 'reserved'; p.base.ready_to_finish = false;
-      p.jobs.push({ id: randomUUID(), machine_id: p.machine.id, input_batch_id: batch.id, recipe, recipe_version: isRecoveryRecipe(recipe) ? recoveryVersion : match.science.recipes,
+      p.jobs.push({ id: randomUUID(), machine_id: args.machine_id, input_batch_id: batch.id, recipe, recipe_version: isRecoveryRecipe(recipe) ? recoveryVersion : match.science.recipes,
         state: 'running', pause_reason: null, cancellation_reason: null, duration_ms: plan.duration_ms, work_ms: 0, energy_mj: 0,
         last_tick_ms: Math.max(this.clock(), match.last_advanced_ms), outputs: plan.outputs });
     } else if (['pause_job', 'resume_job', 'cancel_job'].includes(action)) {
       const job = p.jobs.find(j => j.id === args.job_id);
       if (!job) gameFail('NOT_AVAILABLE');
       if (!live(job)) gameFail('NOT_READY');
+      if (action === 'resume_job' && isManufacturing(job)) { if (job.state !== 'paused') gameFail('NOT_READY'); job.pause_reason = 'resume'; settleManufacturing(p, Math.max(this.clock(),match.last_advanced_ms)); return; }
       if (action === 'cancel_job') this.cancel(p, job, 'requested');
       else if (action === 'pause_job') { job.state = 'paused'; job.pause_reason = 'requested'; }
       else {
-        if (job.state !== 'paused' || p.machine.status !== 'ready' || p.machine.energy_mj < 500) gameFail('NOT_READY');
+        if (job.state !== 'paused' || p.jobs.some(other=>other!==job&&other.state==='running') || p.machine.status !== 'ready' || p.machine.energy_mj < 500) gameFail('NOT_READY');
         job.state = 'running'; job.pause_reason = null; job.last_tick_ms = Math.max(this.clock(), match.last_advanced_ms);
       }
     } else if (action === 'dismantle_machine') {
