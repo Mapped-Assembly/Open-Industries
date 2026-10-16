@@ -32,7 +32,7 @@ export function initializeScience(match) {
 export const availableMachine = p => ({ kind: p.machine.kind, enabled: p.machine.status === 'ready', availablePowerW: p.machine.power_w,
   availableEnergyJ: Math.floor(p.machine.energy_mj / 1000), maximumTemperatureC: null });
 export function processPlan(p, batch, recipe, match, machineId = p.machine.id) {
-  if (p.jobs.some(j => j.state === 'running' || j.state === 'paused')) return ResultSchema.parse({ status: 'ineligible', code: 'MACHINE_BUSY', message: 'Finish or cancel the current job before starting another process.', nextActions: ['finish-or-cancel-current-job'] });
+  if (p.jobs.some(j => j.state === 'waiting' || j.state === 'running' || j.state === 'paused')) return ResultSchema.parse({ status: 'ineligible', code: 'MACHINE_BUSY', message: 'Finish or cancel the current job before starting another process.', nextActions: ['finish-or-cancel-current-job'] });
   if (machineId !== p.machine.id) { const required = listRecipes().find(r=>r.id===recipe)?.machine; const station = required && productionStation(p,required); return ResultSchema.parse(planProcess(batch.material,recipe,{kind:required??'unavailable',enabled:station?.id===machineId && station.enabled && (required!=='polymer-processor'||!!productionStation(p,'furnace')?.enabled) && p.machine.status==='ready',availablePowerW:500,availableEnergyJ:Math.floor(p.machine.energy_mj/1000),maximumTemperatureC:required==='polymer-processor'?200:required==='metal-press'?1000:null})); }
   return ResultSchema.parse(recoveryPlan(p,batch,recipe,match) ?? planProcess(batch.material, recipe, availableMachine(p)));
 }
