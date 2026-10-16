@@ -473,7 +473,7 @@ try {
 		db.close();
 		db = new GameDatabase(path, { clock: () => now });
 		assert.deepEqual(db.loadInstance(id), saved);
-		assert.deepEqual(db.history.replay(id).state, saved);
+		db.transaction(() => assert.deepEqual(db.history.replay(id).state, saved));
 		console.log(
 			"PASS real recovered/graded stock -> both turrets and raid launcher; metered deployment, ammo capacity, ownership/privacy, repair, destruction, salvage, rollback, competing connections, restart and immutable retry",
 		);
