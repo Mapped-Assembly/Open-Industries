@@ -12,7 +12,7 @@ export { canonical, cablePlan } from './domains/game.mjs';
 /** No external IO inside transactions. SQLite serializes writers across processes. */
 export class GameDatabase extends VersionedGameDomain {
   constructor(path, { clock = Date.now } = {}) {
-    super(path,{clock,supportedVersions:[0,1,2,3,4,5,6,7]});
+    super(path,{clock,supportedVersions:[0,1,2,3,4,5,6,7,8]});
     const version=Number(this.db.prepare('PRAGMA user_version').get().user_version);
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS matches(id TEXT PRIMARY KEY, host TEXT NOT NULL REFERENCES accounts(id), status TEXT NOT NULL, created INTEGER NOT NULL, last_tick INTEGER NOT NULL, state TEXT NOT NULL CHECK(json_valid(state)));
@@ -45,7 +45,7 @@ export class GameDatabase extends VersionedGameDomain {
         this.validateCurrentState(match);
         this.saveInstance(packGame(match),{kind:'worker',id:'shared-core-cutover',principal_id:null},'shared-core-cutover');
       }
-      this.db.exec('PRAGMA user_version=7');
+      this.db.exec('PRAGMA user_version=8');
     }); } catch(error) { this.db.close();throw new Error('UNSUPPORTED_GAME_SAVE: restore a compatible backup or run the exact game module version that wrote this database.',{cause:error}); }
   }
 

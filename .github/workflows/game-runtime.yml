@@ -39,6 +39,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:manufacturing
+      - run: npm run test:units
   downstream-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20

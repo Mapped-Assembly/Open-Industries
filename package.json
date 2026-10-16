@@ -69,7 +69,8 @@
     "test:materials": "node --import tsx --test packages/material-science/tests/*.test.ts && node --import tsx scripts/game-materials-test.ts",
     "field-lab:server": "node --env-file-if-exists=.env --import tsx server/field-lab-service.ts",
     "test:field-lab": "node --import tsx scripts/field-lab-durable-test.ts",
-    "test:manufacturing": "node --import tsx scripts/game-manufacturing-test.ts"
+    "test:manufacturing": "node --import tsx scripts/game-manufacturing-test.ts",
+    "test:units": "node --import tsx scripts/game-manufacturing-test.ts --units"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

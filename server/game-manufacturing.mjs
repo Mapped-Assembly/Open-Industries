@@ -1,3 +1,4 @@
+import { installUnit } from "./game-units.mjs";
 import { randomUUID } from "node:crypto";
 import { evaluateUse } from "@openindustries/material-science/engine";
 import { contentsOf, grams } from "./game-robots.mjs";
@@ -157,6 +158,60 @@ const recipes = [
 		],
 	),
 ];
+// Unit recipes consume the same graded products and tested reclaimed hardware as machinery.
+recipes.push(
+	part("steel-slug", "steel-bracket", 250, "metal-press"),
+	assembly(
+		"sentry-turret",
+		"defense",
+		"fabricator",
+		[
+			["steel-bracket", 2],
+			["copper-conductor", 1],
+			["hdpe-housing", 1],
+		],
+		[
+			["motor", 1],
+			["camera", 1],
+			["controller", 1],
+			["fastener", 2],
+		],
+	),
+	assembly(
+		"armored-turret",
+		"defense",
+		"fabricator",
+		[
+			["steel-bracket", 2],
+			["copper-conductor", 1],
+			["aluminum-housing", 1],
+		],
+		[
+			["motor", 1],
+			["camera", 1],
+			["controller", 1],
+			["fastener", 2],
+		],
+	),
+	assembly(
+		"raid-launcher",
+		"defense",
+		"fabricator",
+		[
+			["steel-chassis", 1],
+			["copper-conductor", 1],
+			["hdpe-housing", 1],
+			["traction-tread", 2],
+		],
+		[
+			["motor", 2],
+			["wheel", 2],
+			["controller", 1],
+			["robot-battery", 1],
+			["fastener", 2],
+		],
+	),
+);
 export const manufacturingCatalog = () => ({
 	version: manufacturingVersion,
 	recipes: structuredClone(recipes),
@@ -216,6 +271,20 @@ export function manufacturingPlan(p, args) {
 	if (p.production?.version && p.production.version !== manufacturingVersion)
 		throw Error("UNSUPPORTED_MANUFACTURING_PIN");
 	const station = productionStation(p, r.station);
+	if (
+		["sentry-turret", "armored-turret", "raid-launcher"].includes(r.id) &&
+		(p.units?.length ?? 0) +
+			p.jobs.filter(
+				(j) =>
+					isManufacturing(j) &&
+					productionLive(j) &&
+					["sentry-turret", "armored-turret", "raid-launcher"].includes(
+						j.recipe,
+					),
+			).length >=
+			16
+	)
+		missing.push("Unit history limit reached.");
 	if (
 		!station ||
 		station.state === "destroyed" ||
@@ -463,6 +532,7 @@ export function finishManufacturing(p, j) {
 		source_job_id: j.id,
 	};
 	p.production.products.push(output);
+	installUnit(p, output);
 	if (r.category === "robot") {
 		const home = p.base.assets.find((a) => a.kind === "battery").position;
 		p.robots.push({

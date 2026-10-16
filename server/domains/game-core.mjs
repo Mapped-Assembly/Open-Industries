@@ -56,7 +56,7 @@ function metadata(match){
   for(const p of match.players){
     for(const a of p.base.assets)put(a.id,a.kind,p.owner,a.position);
     for(const b of p.batches)put(b.id,'batch',p.owner,null);
-    for(const a of p.production?.products??[])put(a.id,a.category,p.owner,p.base.assets.find(a=>a.kind==='bench').position);
+    for(const a of p.production?.products??[])put(a.id,a.category,p.owner,p.units?.find(u=>u.id===a.id)?.position??p.base.assets.find(a=>a.kind==='bench').position);
     for(const c of p.components)put(c.id,'component',p.owner,null);
     for(const [kind,records]of[['bench',p.observations],['field',p.surveys]])for(const o of records){
       const target=kind==='bench'?o.targetId:o.target_id;
