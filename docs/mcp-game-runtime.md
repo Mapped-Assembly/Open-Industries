@@ -161,3 +161,6 @@ bounds synchronous history verification so account login and reconnect remain re
 while both crews poll. Compaction preserves exact current replay and immutable command
 receipts; an overtaken pagination cursor requires a fresh snapshot. The neutral fixture's
 existing history defaults are unchanged.
+
+
+Defensive platforms, ammunition and their lifecycle are documented in [game-units.md](game-units.md). SQLite schema 8 adds the compatibility guard; full combat remains unavailable.

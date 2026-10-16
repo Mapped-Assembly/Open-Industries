@@ -174,7 +174,7 @@ test("compatible glass provenance and paid output fixtures gate uses and tempera
 	assert.notEqual(evaluateUse(material, "hdpe-housing", 90).status, "eligible");
 });
 
-test("schema-6 envelope upgrades its compatibility gate without rewriting state or receipts", async () => {
+for (const previousSchema of [6, 7]) test(`schema-${previousSchema} envelope upgrades its compatibility gate without rewriting state or receipts`, async () => {
 	const { mkdtemp, rm } = await import("node:fs/promises"),
 		{ tmpdir } = await import("node:os"),
 		{ join } = await import("node:path");
@@ -195,10 +195,10 @@ test("schema-6 envelope upgrades its compatibility gate without rewriting state 
 			created = db.dispatch(a.token, "astra.game_create_match", command);
 		const before = db.db.prepare("SELECT state FROM matches").get()!.state,
 			receipts = db.db.prepare("SELECT request,result FROM receipts").all();
-		db.db.exec("PRAGMA user_version=6");
+		db.db.exec(`PRAGMA user_version=${previousSchema}`);
 		db.close();
 		db = new GameDatabase(path, { clock: () => 1000 });
-		assert.equal(db.db.prepare("PRAGMA user_version").get()!.user_version, 7);
+		assert.equal(db.db.prepare("PRAGMA user_version").get()!.user_version, 8);
 		assert.equal(
 			db.db.prepare("SELECT state FROM matches").get()!.state,
 			before,

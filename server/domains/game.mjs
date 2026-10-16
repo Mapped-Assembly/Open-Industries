@@ -1,3 +1,4 @@
+import { commandUnit, unitProjection, assertUnits, damageUnit, unitProfiles } from '../game-units.mjs';
 import { manufacturingCatalog, manufacturingVersion, manufacturingPlan, enqueueManufacturing, isManufacturing, productionLive, cancelManufacturing, finishManufacturing, settleManufacturing, manufacturingProjection, assertManufacturing, salvageStarterAsset, productionSolar, chargingPower, productionProducts } from '../game-manufacturing.mjs';
 import { isRecoveryRecipe, recoveryVersion } from '../game-recovery.mjs';
 import { initializeScience, materialBatch, scienceProjection, processPlan, processOutputs, inspectAtBench, evaluateScience, catalog, scienceVersions } from '../game-materials.mjs';
@@ -335,6 +336,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     if (match.robot_version) checkRobotInvariants(match, gameFail);
     for (const p of match.players) {
       assertManufacturing(p, gameFail);
+      assertUnits(p, gameFail);
       if (!match.robot_version) for (const constituent of ['copper_g', 'hdpe_g', 'dirt_g']) {
         const total = (p.deposit.collected ? 0 : p.deposit[constituent])
           + p.batches.filter(b => b.state !== 'consumed').reduce((sum, b) => sum + b[constituent], 0);
@@ -464,7 +466,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     const p = match.players.find(p => p.owner === owner);
     if (!p) gameFail('NOT_AVAILABLE');
     return { match_id: match.id, revision: match.revision, status: match.status, completion: match.completion,
-      world: worldProjection(match), base: p.base, manufacturing: manufacturingProjection(p), science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
+      world: worldProjection(match), base: p.base, units: unitProjection(match,p,Math.max(this.clock(),match.last_advanced_ms)), manufacturing: manufacturingProjection(p), science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
       server_time_ms: Math.max(this.clock(), match.last_advanced_ms), scheduler_healthy: this.healthy(),
       players: match.players.map(p => ({ slot: p.slot, you: p.owner === owner })),
       deposits: [{ id: p.deposit.id, collected: p.deposit.collected, observation: p.deposit.observation
@@ -477,7 +479,9 @@ export class VersionedGameDomain extends LegacyGameDomain {
   }
   command(match, p, args) {
     const { action } = args;
-    if (action === 'enqueue_manufacturing') {
+    if (['deploy_unit','set_unit_enabled','load_unit_ammunition','repair_unit','salvage_unit'].includes(action)) {
+      commandUnit(match,p,args,Math.max(this.clock(),match.last_advanced_ms),gameFail);
+    } else if (action === 'enqueue_manufacturing') {
       enqueueManufacturing(p, args, Math.max(this.clock(), match.last_advanced_ms), gameFail);
     } else if (action === 'salvage_starter_asset') {
       salvageStarterAsset(p, args.asset_id, gameFail);
@@ -485,7 +489,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
       const product = productionProducts(p).find(a => a.id === (args.product_id??args.machine_id) && (a.state === 'installed' || (action === 'destroy_manufactured_product' && a.state === 'available')));
       if (!product || (action === 'set_production_machine' && !['machine','upgrade'].includes(product.category))) gameFail('NOT_AVAILABLE');
       if (action === 'set_production_machine') product.enabled = args.enabled;
-      else { product.state = 'destroyed'; product.enabled = false; for (const j of p.jobs.filter(j => isManufacturing(j) && j.machine_id === product.id)) cancelManufacturing(p,j,'machine_destroyed',true); const robot=p.robots.find(r=>r.id===product.id); if(robot) { if(robot.job_id||robot.cargo.length)gameFail('NOT_READY'); robot.retired=true;robot.spent_mj+=robot.energy_mj;robot.energy_mj=0; } }
+      else { if(p.units?.some(u=>u.ammunition_ids.includes(product.id)||u.repair_product_ids.includes(product.id)))gameFail('NOT_READY'); if(unitProfiles[product.kind])damageUnit(p,product.id,Number.MAX_SAFE_INTEGER); product.state = 'destroyed'; product.enabled = false; for (const j of p.jobs.filter(j => isManufacturing(j) && j.machine_id === product.id)) cancelManufacturing(p,j,'machine_destroyed',true); const robot=p.robots.find(r=>r.id===product.id); if(robot) { if(robot.job_id||robot.cargo.length)gameFail('NOT_READY'); robot.retired=true;robot.spent_mj+=robot.energy_mj;robot.energy_mj=0; } }
     } else if (action === 'inspect_deposit' || action === 'collect_deposit') {
       if (p.deposit.id !== args.deposit_id) gameFail('NOT_AVAILABLE');
       if (!match.legacy_recovery) gameFail('ROBOT_REQUIRED');

@@ -1,3 +1,4 @@
+import { installUnit } from "./game-units.mjs";
 import { randomUUID } from "node:crypto";
 import { evaluateUse } from "@openindustries/material-science/engine";
 import { contentsOf, grams } from "./game-robots.mjs";
@@ -157,6 +158,60 @@ const recipes = [
 		],
 	),
 ];
+// Unit recipes consume the same graded products and tested reclaimed hardware as machinery.
+recipes.push(
+	part("steel-slug", "steel-slug", 250, "metal-press"),
+	assembly(
+		"sentry-turret",
+		"defense",
+		"fabricator",
+		[
+			["steel-bracket", 2],
+			["copper-conductor", 1],
+			["hdpe-housing", 1],
+		],
+		[
+			["motor", 1],
+			["camera", 1],
+			["controller", 1],
+			["fastener", 2],
+		],
+	),
+	assembly(
+		"armored-turret",
+		"defense",
+		"fabricator",
+		[
+			["steel-bracket", 2],
+			["copper-conductor", 1],
+			["aluminum-housing", 1],
+		],
+		[
+			["motor", 1],
+			["camera", 1],
+			["controller", 1],
+			["fastener", 2],
+		],
+	),
+	assembly(
+		"raid-launcher",
+		"defense",
+		"fabricator",
+		[
+			["steel-chassis", 1],
+			["copper-conductor", 1],
+			["hdpe-housing", 1],
+			["traction-tread", 2],
+		],
+		[
+			["motor", 2],
+			["wheel", 2],
+			["controller", 1],
+			["robot-battery", 1],
+			["fastener", 2],
+		],
+	),
+);
 export const manufacturingCatalog = () => ({
 	version: manufacturingVersion,
 	recipes: structuredClone(recipes),
@@ -217,6 +272,20 @@ export function manufacturingPlan(p, args) {
 		throw Error("UNSUPPORTED_MANUFACTURING_PIN");
 	const station = productionStation(p, r.station);
 	if (
+		["sentry-turret", "armored-turret", "raid-launcher"].includes(r.id) &&
+		(p.units?.length ?? 0) +
+			p.jobs.filter(
+				(j) =>
+					isManufacturing(j) &&
+					productionLive(j) &&
+					["sentry-turret", "armored-turret", "raid-launcher"].includes(
+						j.recipe,
+					),
+			).length >=
+			16
+	)
+		missing.push("Unit history limit reached.");
+	if (
 		!station ||
 		station.state === "destroyed" ||
 		station.status === "destroyed"
@@ -261,11 +330,27 @@ export function manufacturingPlan(p, args) {
 			missing.push("Select an owned material batch.");
 			continue;
 		}
-		const check = evaluateUse(
-			b.material,
-			demand.use,
-			demand.use === "hdpe-housing" ? 60 : 20,
-		);
+		// Ammunition is a game abstraction, with its own mass predicate rather than bracket geometry.
+		const check =
+			demand.use === "steel-slug"
+				? {
+						status:
+							b.material.inspection === "graded" &&
+							b.material.grade === "game-steel-v1" &&
+							b.material.form === "stock" &&
+							b.material.condition === "sound" &&
+							b.material.hazard === "none-detected" &&
+							b.material.constituents.length === 1 &&
+							b.material.constituents[0].material === "steel"
+								? "eligible"
+								: "ineligible",
+						code: "AMMUNITION_STOCK_REQUIRED",
+					}
+				: evaluateUse(
+						b.material,
+						demand.use,
+						demand.use === "hdpe-housing" ? 60 : 20,
+					);
 		if (
 			b.state !== "available" ||
 			check.status !== "eligible" ||
@@ -463,6 +548,7 @@ export function finishManufacturing(p, j) {
 		source_job_id: j.id,
 	};
 	p.production.products.push(output);
+	installUnit(p, output);
 	if (r.category === "robot") {
 		const home = p.base.assets.find((a) => a.kind === "battery").position;
 		p.robots.push({

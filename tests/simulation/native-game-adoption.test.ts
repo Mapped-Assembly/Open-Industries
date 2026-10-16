@@ -40,7 +40,7 @@ test('captured native v3 upgrades once, preserves paid work/IDs/receipt bytes an
     const original=JSON.parse(String(fixture.tables.matches[0].state)), id=original.id;
     db=new GameDatabase(path,{clock:()=>fixture.time});
     const migrated=db.load(id);
-    assert.equal(db.db.prepare('PRAGMA user_version').get()!.user_version,7);
+    assert.equal(db.db.prepare('PRAGMA user_version').get()!.user_version,8);
     assert.equal(migrated.legacy_recovery,true);
     assert.equal(migrated.robot_version,'robots-v1');
     assert.equal(migrated.world.seed,original.world.seed);

@@ -76,3 +76,6 @@ Policy unit tests cover grades, condition, purity, unknown contaminants, glass o
 ## Manufacturing (SQLite 7)
 
 `npm run test:manufacturing` runs the complete file-backed two-account machine/robot/defense/upgrade chain described in [manufacturing queues](game-manufacturing-queues.md), with dedicated Linux/Windows jobs. It covers exact component reuse, constituent offcuts, reservation faults, pause/cancel/failure, disabled equipment, heater interlocks, storage and power waits, persistence/retry, and competing connections. The shared-clock tests compare long downtime with short ticks under energy starvation. Existing 80 simulation regressions remain alongside the manufacturing policy tests. Desktop/mobile client CI drives real BOM preview, manufacturing, press construction and enable/disable controls.
+
+
+Defensive platforms, ammunition and their lifecycle are documented in [game-units.md](game-units.md). SQLite schema 8 adds the compatibility guard; full combat remains unavailable.

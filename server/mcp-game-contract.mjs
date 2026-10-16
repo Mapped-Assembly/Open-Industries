@@ -1,3 +1,4 @@
+import { unitVersion, unitProfiles } from './game-units.mjs';
 import { manufacturingCatalog, manufacturingVersion } from './game-manufacturing.mjs';
 import { recoveryRecipes, recoveryVersion } from './game-recovery.mjs';
 import Ajv from 'ajv';
@@ -15,7 +16,7 @@ const version = { const: 5 };
 const mass = { copper_g: integer(10000), hdpe_g: integer(10000), dirt_g: integer(10000) };
 const observation = object({ id: uuid, sensor: { const: 'cable-assay-v1' }, ...mass });
 const machine = object({ id: uuid, kind: { const: 'cable-separator' }, status: { enum: ['ready', 'destroyed'] },
-  power_w: { const: 500 }, energy_mj: integer(20000000), dissipated_mj: integer(20000000) });
+  power_w: { const: 500 }, energy_mj: integer(20000000), dissipated_mj: integer(Number.MAX_SAFE_INTEGER) });
 const batch = object({ id: uuid, form: { enum: ['cable', 'wire', 'flakes', 'residue', 'mixed', 'stock', 'granulate', 'tread'] },
   state: { enum: ['available', 'reserved', 'consumed'] }, mass_g: integer(10000), ...Object.fromEntries(Object.entries(mass).map(([k, v]) => [k, nullable(v)])), observation_id: nullable(uuid),
   source_job_id: nullable(uuid), output_role: nullable({ enum: ['conductor', 'insulation', 'residue', 'usable'] }),
@@ -62,10 +63,12 @@ const production = object({ version: { const: manufacturingVersion }, storage_us
 const manufacturingInputs = { recipe_id:text(100),batch_ids:array(uuid,1),product_ids:array(uuid,16),component_ids:array(uuid,32) };
 const previewCommon = {status:{enum:['eligible','ineligible']},code:text(60),message:text(2000),next_actions:array(text(100),8),recipe_id:text(100)};
 const manufacturingResult = {type:'object',oneOf:[object({...previewCommon,status:{const:'eligible'},station_id:uuid,duration_ms:integer(20000),power_w:integer(1000),energy_j:integer(20000),materials:array(materialInput,1),products:array(uuid,16),components:array(componentInput,32)}),object({...previewCommon,status:{const:'ineligible'}})]};
+const unitState = object({id:uuid,kind:{enum:Object.keys(unitProfiles)},state:{enum:['stowed','deployed','destroyed','salvaged']},enabled:{type:'boolean'},position:nullable(position),health:integer(160),ammunition_ids:array(uuid,4),repair_product_ids:array(uuid,4),last_fired_ms:nullable(integer(Number.MAX_SAFE_INTEGER)),ammunition_count:integer(4),ammunition_capacity:integer(4),operational_ready:{type:'boolean'},can_fire:{const:false},blocked_reasons:array(text(100),8),targets:array(object({id:uuid,kind:{const:'tower'},distance_cells:nullable({type:'number',minimum:0,maximum:120}),in_range:{type:'boolean'},eligible:{const:false},reason:text(100)}),1)});
+const unitProjectionSchema=object({version:{const:unitVersion},profiles:{const:unitProfiles},combat_available:{const:false},units:array(unitState,16)});
 const status = { enum: ['waiting', 'active', 'completed'] };
 export const gameSnapshotSchema = object({
   match_id: uuid, revision: { type: 'integer', minimum: 1 }, status, completion: nullable(object({ reason: { enum: ['abandoned', 'invite-expired', 'recovery-complete'] }, winner_slot: { type: 'null' } })),
-  world, base, field, manufacturing: production, legacy_recovery: { type: 'boolean' }, science: object({ versions: object(Object.fromEntries(Object.entries(scienceVersions).map(([k, v]) => [k, { const: v }]))),
+  world, base, field, units:unitProjectionSchema, manufacturing: production, legacy_recovery: { type: 'boolean' }, science: object({ versions: object(Object.fromEntries(Object.entries(scienceVersions).map(([k, v]) => [k, { const: v }]))),
     batches: array(object({ id: uuid, revision: { type: 'integer', minimum: 1 }, evidence: jsonSchemas.batch }), 512),
     components: array(jsonSchemas.component, 128), observations: array(jsonSchemas.observation, 256) }), invite_expires_at_ms: nullable(integer(Number.MAX_SAFE_INTEGER)),
   server_time_ms: integer(Number.MAX_SAFE_INTEGER), scheduler_healthy: { type: 'boolean' },
@@ -73,11 +76,12 @@ export const gameSnapshotSchema = object({
   deposits: array(object({ id: uuid, collected: { type: 'boolean' }, observation: nullable(observation) }), 1),
   machines: array(machine, 1), batches: array(batch, 512), jobs: array(job, 256),
 });
-gameSnapshotSchema.required = gameSnapshotSchema.required.filter(k=>k!=='manufacturing');
+gameSnapshotSchema.required = gameSnapshotSchema.required.filter(k=>!['manufacturing','units'].includes(k));
 const snapshotResult = { version, balance_version: { const: 'dump-world-v1' }, snapshot: gameSnapshotSchema };
 const commandResult = object({ ...snapshotResult, command_id: uuid, invite_code: nullable(uuid) });
 const common = { version, command_id: uuid, match_id: uuid, expected_revision: { type: 'integer', minimum: 1, maximum: 999999999 } };
 const actions = {
+  deploy_unit:{unit_id:uuid,position}, set_unit_enabled:{unit_id:uuid,enabled:{type:'boolean'}}, load_unit_ammunition:{unit_id:uuid,ammunition_id:uuid},repair_unit:{unit_id:uuid,product_id:uuid},salvage_unit:{unit_id:uuid},
   enqueue_manufacturing: manufacturingInputs, salvage_starter_asset:{asset_id:uuid}, set_production_machine:{machine_id:uuid,enabled:{type:'boolean'}}, destroy_manufactured_product:{product_id:uuid},
   survey_robot: { robot_id: uuid, deposit_id: uuid, sensor: { enum: sensorCatalog.map(s => s.id) } },
   collect_robot: { robot_id: uuid, deposit_id: uuid, observation_id: uuid, material_class: { enum: materialClasses } },
@@ -103,7 +107,7 @@ export const gameContract = {
   retry_policy: 'same-command-id-and-identical-payload-returns-original-receipt',
   polling: 'full-snapshot-replaces-local-state', ready_for_recovery: true, ready_for_full_game: false,
   supported: ['two-player-invite', 'private-deposit-assay', 'finite-collection', 'durable-cable-processing',
-    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning', 'robot-routing', 'private-field-sensing', 'finite-reservations', 'cargo-hauling', 'shared-power-charging', 'interrupt-retreat', 'sensor-upgrade-catalog', 'all-initial-waste-recovery', 'cold-hazard-isolation', 'machine-construction', 'manufacturing-queues', 'tested-component-assembly'],
+    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning', 'robot-routing', 'private-field-sensing', 'finite-reservations', 'cargo-hauling', 'shared-power-charging', 'interrupt-retreat', 'sensor-upgrade-catalog', 'all-initial-waste-recovery', 'cold-hazard-isolation', 'machine-construction', 'manufacturing-queues', 'tested-component-assembly', 'unit-manufacturing', 'unit-deployment', 'unit-ammunition', 'unit-repair-salvage'],
   unsupported: ['sensor-kit-manufacturing', 'combat', 'capture', 'victory', 'property-certification', 'events'],
 };
 const cursor = nullable(uuid);
@@ -155,6 +159,8 @@ export const gameErrors = {
   INSPECTION_REQUIRED: 'A server-issued inspection is required before collection or processing.',
   MANUFACTURING_REQUIREMENTS: 'Review the owned bill of materials for missing evidence, components or machines before enqueueing.',
   INVALID_FEEDSTOCK: 'The inspected input is unavailable for this recipe. Evaluate the owned batch for its reason and next actions.',
+  UNIT_POWER: 'Insufficient shared base power. Recharge the process battery before commissioning or servicing this unit.',
+  UNIT_SITE: 'Choose an unoccupied traversable home-side cell reachable from your tower.',
   NOT_READY: 'The batch, machine or job is not ready for this operation. Read the current snapshot.',
   INVARIANT_FAILED: 'The operation was rolled back because stored game state was inconsistent.',
   OUTCOME_UNKNOWN: 'The operation may have committed. Retry the identical command_id and payload, then read the match.',

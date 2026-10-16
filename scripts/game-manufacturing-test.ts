@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import { damageUnit, unitProfiles } from "../server/game-units.mjs";
 import { GameDatabase, canonical } from "../server/game-sqlite.mjs";
 
 const dir = await mkdtemp(join(tmpdir(), "oi-manufacturing-")),
@@ -135,12 +136,18 @@ try {
 				.slice(0, d.quantity)
 				.map((p: any) => p.id),
 		);
-		const component_ids = s.science.components
-			.filter(
-				(c: any) =>
-					r.components.some((d: any) => d.kind === c.kind) && c.tested,
-			)
-			.map((c: any) => c.id);
+		const component_ids = r.components.flatMap((d: any) => {
+			let remaining = d.quantity;
+			const ids = [];
+			for (const c of s.science.components.filter(
+				(c: any) => c.kind === d.kind && c.tested,
+			)) {
+				if (remaining <= 0) break;
+				ids.push(c.id);
+				remaining -= c.quantity;
+			}
+			return ids;
+		});
 		return { recipe_id: recipe, batch_ids, product_ids, component_ids };
 	};
 	const enqueue = (recipe: string) => {
@@ -240,135 +247,367 @@ try {
 	make("steel-bracket");
 	make("copper-conductor");
 	make("fabricator");
-	make("steel-bracket");
-	make("hdpe-housing");
-	make("copper-conductor");
-	make("polymer-processor");
-	// Actual heater + polymer process admission and interruption, not just an installed-machine label.
-	const flakes = read().batches.find(
-		(b: any) => b.form === "flakes" && b.state === "available",
-	);
-	assert(flakes);
-	const polymer = read().manufacturing.products.find(
-		(p: any) => p.kind === "polymer-processor",
-	);
-	act("start_material_process", {
-		batch_id: flakes.id,
-		machine_id: polymer.id,
-		recipe_id: "mold-hdpe",
-	});
-	tick(1000);
-	act("set_production_machine", { machine_id: furnace.id, enabled: false });
-	tick(1000);
-	assert.equal(read().jobs.at(-1).pause_reason, "machine-disabled");
-	act("set_production_machine", { machine_id: furnace.id, enabled: true });
-	tick(30000);
-	assert.equal(read().jobs.at(-1).state, "completed");
-	act("salvage_starter_asset", { asset_id: read().field.robots[0].id });
-	inspectStock();
-	make("copper-conductor");
-	make("hdpe-housing");
-	make("traction-tread");
-	make("traction-tread");
-	const robot = make("scavenger-robot");
-	assert.equal(
-		read().field.robots.find((r: any) => r.id === robot.id).energy_mj,
-		0,
-	);
-	act("recharge_robot", { robot_id: robot.id });
-	tick(180000);
-	assert.equal(
-		read().field.robots.find((r: any) => r.id === robot.id).energy_mj,
-		8000000,
-	);
-	make("steel-bracket");
-	make("steel-bracket");
-	make("traction-tread");
-	make("scrap-barricade");
-	make("steel-bracket");
-	make("glass-filler");
-	make("solar-reflector");
-	assert.equal(read().base.power.solar_w, 150);
-	make("steel-bracket");
-	make("copper-conductor");
-	make("hdpe-housing");
-	make("charging-port");
-	make("steel-bracket");
-	make("copper-conductor");
-	act("salvage_starter_asset", {
-		asset_id: read().base.assets.find((a: any) => a.kind === "solar").id,
-	});
-	inspectStock();
-	const solar = make("solar-array");
-	assert.equal(read().base.power.solar_w, 150);
-	const doomed = enqueue("aluminum-housing");
-	tick(1000);
-	act("destroy_manufactured_product", { product_id: press.id });
-	tick(1000);
-	assert.equal(
-		read().manufacturing.jobs.find((j: any) => j.id === doomed.id).state,
-		"failed",
-	);
-	// A zero-energy fixture moves existing charge into the irreversible dissipation account.
-	act("set_production_machine", { machine_id: solar.id, enabled: false });
-	const native = db.load(id),
-		own = native.players[0];
-	own.machine.dissipated_mj += own.machine.energy_mj;
-	own.machine.energy_mj = 0;
-	db.save(native);
-	const starved = enqueue("copper-conductor");
-	tick(1000);
-	assert.equal(read().manufacturing.jobs.at(-1).reason, "power");
-	act("set_production_machine", { machine_id: solar.id, enabled: true });
-	tick(60000);
-	assert.equal(
-		read().manufacturing.jobs.find((j: any) => j.id === starved.id).state,
-		"completed",
-	);
-	while (read().manufacturing.storage_used < 16) make("copper-conductor");
-	const blocked = enqueue("copper-conductor");
-	tick(20000);
-	assert.equal(read().manufacturing.jobs.at(-1).reason, "storage-full");
-	const discarded = read().manufacturing.products.find(
-		(p: any) => p.kind === "copper-conductor" && p.state === "available",
-	);
-	act("destroy_manufactured_product", { product_id: discarded.id });
-	tick(20000);
-	assert.equal(
-		read().manufacturing.jobs.find((j: any) => j.id === blocked.id).state,
-		"completed",
-	);
-	const competing = selection("copper-conductor"),
-		fresh = read(),
-		intent = {
-			...command(),
-			match_id: id,
-			expected_revision: fresh.revision,
-			action: "enqueue_manufacturing",
-			...competing,
-		};
-	const db2 = new GameDatabase(path, { clock: () => now });
-	try {
-		const receipt = call("command", intent);
-		assert.deepEqual(db2.dispatch(a, "astra.game_command", intent), receipt);
+
+	if (process.argv.includes("--units")) {
+		// All bulk stock above was recovered, processed and graded through real commands.
+		for (const r of read().field.robots) {
+			act("recharge_robot", { robot_id: r.id });
+			tick(180000);
+			act("salvage_starter_asset", { asset_id: r.id });
+		}
+		inspectStock();
+		for (let i = 0; i < 2; i++) make("steel-bracket");
+		make("copper-conductor");
+		make("hdpe-housing");
+		const turret = make("sentry-turret");
+		const ownUnit = () =>
+			read().units.units.find((u: any) => u.id === turret.id);
+		assert.equal(ownUnit().state, "stowed");
+		assert.equal(ownUnit().enabled, false);
+		assert.equal(ownUnit().ammunition_count, 0);
+		make("steel-slug");
+		const ammo = read().manufacturing.products.find(
+			(p: any) => p.kind === "steel-slug",
+		);
+		const invalidBefore = canonical(db.loadInstance(id));
 		assert.throws(
 			() =>
-				db2.dispatch(a, "astra.game_command", {
-					...intent,
-					command_id: randomUUID(),
-				}),
-			{ code: "CONFLICT" },
+				act("deploy_unit", { unit_id: turret.id, position: { x: 55, y: 24 } }),
+			{ code: "UNIT_SITE" },
 		);
-	} finally {
-		db2.close();
+		assert.equal(canonical(db.loadInstance(id)), invalidBefore);
+		assert.throws(
+			() =>
+				act("deploy_unit", { unit_id: turret.id, position: { x: 39, y: 8 } }),
+			{ code: "UNIT_SITE" },
+		);
+		assert.throws(
+			() =>
+				act("deploy_unit", { unit_id: turret.id, position: { x: 8, y: 24 } }),
+			{ code: "UNIT_SITE" },
+		);
+		const enemyRequest = {
+			...command(),
+			match_id: id,
+			expected_revision: read().revision,
+			action: "deploy_unit",
+			unit_id: turret.id,
+			position: { x: 70, y: 24 },
+		};
+		assert.throws(() => call("command", enemyRequest, b), {
+			code: "NOT_AVAILABLE",
+		});
+		const deployRequest = {
+			...command(),
+			match_id: id,
+			expected_revision: read().revision,
+			action: "deploy_unit",
+			unit_id: turret.id,
+			position: { x: 38, y: 24 },
+		};
+		const energy = read().machines[0].energy_mj,
+			deployReceipt = call("command", deployRequest);
+		assert.equal(read().machines[0].energy_mj, energy - 500000);
+		assert.deepEqual(call("command", deployRequest), deployReceipt);
+		act("load_unit_ammunition", { unit_id: turret.id, ammunition_id: ammo.id });
+		assert.throws(
+			() =>
+				act("load_unit_ammunition", {
+					unit_id: turret.id,
+					ammunition_id: ammo.id,
+				}),
+			{ code: "NOT_AVAILABLE" },
+		);
+		act("set_unit_enabled", { unit_id: turret.id, enabled: true });
+		assert.equal(ownUnit().operational_ready, true);
+		assert.equal(ownUnit().can_fire, false);
+		assert(ownUnit().blocked_reasons.includes("combat-not-implemented"));
+		assert.equal(ownUnit().targets[0].in_range, false);
+		assert.throws(() => act("salvage_unit", { unit_id: turret.id }), {
+			code: "NOT_READY",
+		});
+		assert.throws(
+			() => act("destroy_manufactured_product", { product_id: ammo.id }),
+			{ code: "NOT_READY" },
+		);
+		act("set_unit_enabled", { unit_id: turret.id, enabled: false });
+		const patch = make("steel-bracket");
+		assert.throws(
+			() => act("repair_unit", { unit_id: turret.id, product_id: patch.id }),
+			{ code: "NOT_READY" },
+		);
+		const damaged = db.load(id);
+		damageUnit(damaged.players[0], turret.id, 50);
+		db.save(damaged);
+		act("repair_unit", { unit_id: turret.id, product_id: patch.id });
+		assert.equal(ownUnit().health, 90);
+		assert.throws(
+			() => act("repair_unit", { unit_id: turret.id, product_id: patch.id }),
+			{ code: "NOT_AVAILABLE" },
+		);
+		const privateJson = JSON.stringify(
+			call("read_match", { version: 5, match_id: id }, b),
+		);
+		for (const secret of [turret.id, ammo.id, patch.id])
+			assert(!privateJson.includes(secret));
+		const otherDb = new GameDatabase(path, { clock: () => now });
+		try {
+			const unload = {
+				...command(),
+				match_id: id,
+				expected_revision: read().revision,
+				action: "salvage_unit",
+				unit_id: turret.id,
+			};
+			db.db.exec(
+				"CREATE TRIGGER unit_fault BEFORE INSERT ON receipts BEGIN SELECT RAISE(ABORT,'unit-fault'); END",
+			);
+			const rollback = canonical(db.loadInstance(id));
+			assert.throws(() => call("command", unload));
+			assert.equal(canonical(db.loadInstance(id)), rollback);
+			db.db.exec("DROP TRIGGER unit_fault");
+			const receipt = call("command", unload);
+			assert.deepEqual(
+				otherDb.dispatch(a, "astra.game_command", unload),
+				receipt,
+			);
+			assert.throws(
+				() =>
+					otherDb.dispatch(a, "astra.game_command", {
+						...unload,
+						command_id: randomUUID(),
+					}),
+				{ code: "CONFLICT" },
+			);
+			db.close();
+			db = new GameDatabase(path, { clock: () => now });
+			assert.deepEqual(call("command", unload), receipt);
+			assert.equal(ownUnit().state, "salvaged");
+			assert.equal(
+				read().manufacturing.products.find((p: any) => p.id === ammo.id).state,
+				"available",
+			);
+			assert.equal(
+				read().manufacturing.products.find((p: any) => p.id === patch.id).state,
+				"available",
+			);
+			assert(
+				read().science.components.some(
+					(c: any) => c.kind === "camera" && !c.tested,
+				),
+			);
+			assert.throws(() => act("salvage_unit", { unit_id: turret.id }), {
+				code: "NOT_AVAILABLE",
+			});
+		} finally {
+			otherDb.close();
+		}
+		inspectStock();
+		// Build the aluminum variant using reclaimed tested detectors, then verify its declared health effect.
+		for (let i = 0; i < 2; i++) make("steel-bracket");
+		make("copper-conductor");
+		make("aluminum-housing");
+		const armored = make("armored-turret");
+		assert.equal(
+			read().units.units.find((u: any) => u.id === armored.id).health,
+			140,
+		);
+		assert.equal(unitProfiles["sentry-turret"].max_health, 100);
+		act("destroy_manufactured_product", { product_id: armored.id });
+		assert.equal(
+			read().units.units.find((u: any) => u.id === armored.id).state,
+			"destroyed",
+		);
+		act("salvage_unit", { unit_id: armored.id });
+		inspectStock();
+		make("copper-conductor");
+		make("hdpe-housing");
+		make("traction-tread");
+		make("traction-tread");
+		const launcher = make("raid-launcher");
+		const native = db.load(id),
+			own = native.players[0];
+		own.machine.dissipated_mj += own.machine.energy_mj;
+		own.machine.energy_mj = 0;
+		db.save(native);
+		assert.throws(
+			() =>
+				act("deploy_unit", {
+					unit_id: launcher.id,
+					position: { x: 47, y: 24 },
+				}),
+			{ code: "UNIT_POWER" },
+		);
+		tick(20000);
+		act("deploy_unit", { unit_id: launcher.id, position: { x: 47, y: 24 } });
+		act("load_unit_ammunition", {
+			unit_id: launcher.id,
+			ammunition_id: ammo.id,
+		});
+		make("steel-slug");
+		const ammo2 = read().manufacturing.products.find(
+			(p: any) => p.kind === "steel-slug" && p.state === "available",
+		);
+		act("load_unit_ammunition", {
+			unit_id: launcher.id,
+			ammunition_id: ammo2.id,
+		});
+		assert.throws(
+			() =>
+				act("load_unit_ammunition", {
+					unit_id: launcher.id,
+					ammunition_id: randomUUID(),
+				}),
+			{ code: "NOT_READY" },
+		);
+		act("set_unit_enabled", { unit_id: launcher.id, enabled: true });
+		const beforeTick = read().units;
+		tick(120000);
+		assert.deepEqual(read().units, beforeTick); // No phantom idle firing, ammo use or tower damage.
+		act("set_unit_enabled", { unit_id: launcher.id, enabled: false });
+		const destroyed = db.load(id);
+		damageUnit(destroyed.players[0], launcher.id, 1000);
+		db.save(destroyed);
+		act("salvage_unit", { unit_id: launcher.id });
+		const saved = db.loadInstance(id);
+		db.close();
+		db = new GameDatabase(path, { clock: () => now });
+		assert.deepEqual(db.loadInstance(id), saved);
+		db.transaction(() => assert.deepEqual(db.history.replay(id).state, saved));
+		console.log(
+			"PASS real recovered/graded stock -> both turrets and raid launcher; metered deployment, ammo capacity, ownership/privacy, repair, destruction, salvage, rollback, competing connections, restart and immutable retry",
+		);
+	} else {
+		make("steel-bracket");
+		make("hdpe-housing");
+		make("copper-conductor");
+		make("polymer-processor");
+		// Actual heater + polymer process admission and interruption, not just an installed-machine label.
+		const flakes = read().batches.find(
+			(b: any) => b.form === "flakes" && b.state === "available",
+		);
+		assert(flakes);
+		const polymer = read().manufacturing.products.find(
+			(p: any) => p.kind === "polymer-processor",
+		);
+		act("start_material_process", {
+			batch_id: flakes.id,
+			machine_id: polymer.id,
+			recipe_id: "mold-hdpe",
+		});
+		tick(1000);
+		act("set_production_machine", { machine_id: furnace.id, enabled: false });
+		tick(1000);
+		assert.equal(read().jobs.at(-1).pause_reason, "machine-disabled");
+		act("set_production_machine", { machine_id: furnace.id, enabled: true });
+		tick(30000);
+		assert.equal(read().jobs.at(-1).state, "completed");
+		act("salvage_starter_asset", { asset_id: read().field.robots[0].id });
+		inspectStock();
+		make("copper-conductor");
+		make("hdpe-housing");
+		make("traction-tread");
+		make("traction-tread");
+		const robot = make("scavenger-robot");
+		assert.equal(
+			read().field.robots.find((r: any) => r.id === robot.id).energy_mj,
+			0,
+		);
+		act("recharge_robot", { robot_id: robot.id });
+		tick(180000);
+		assert.equal(
+			read().field.robots.find((r: any) => r.id === robot.id).energy_mj,
+			8000000,
+		);
+		make("steel-bracket");
+		make("steel-bracket");
+		make("traction-tread");
+		make("scrap-barricade");
+		make("steel-bracket");
+		make("glass-filler");
+		make("solar-reflector");
+		assert.equal(read().base.power.solar_w, 150);
+		make("steel-bracket");
+		make("copper-conductor");
+		make("hdpe-housing");
+		make("charging-port");
+		make("steel-bracket");
+		make("copper-conductor");
+		act("salvage_starter_asset", {
+			asset_id: read().base.assets.find((a: any) => a.kind === "solar").id,
+		});
+		inspectStock();
+		const solar = make("solar-array");
+		assert.equal(read().base.power.solar_w, 150);
+		const doomed = enqueue("aluminum-housing");
+		tick(1000);
+		act("destroy_manufactured_product", { product_id: press.id });
+		tick(1000);
+		assert.equal(
+			read().manufacturing.jobs.find((j: any) => j.id === doomed.id).state,
+			"failed",
+		);
+		// A zero-energy fixture moves existing charge into the irreversible dissipation account.
+		act("set_production_machine", { machine_id: solar.id, enabled: false });
+		const native = db.load(id),
+			own = native.players[0];
+		own.machine.dissipated_mj += own.machine.energy_mj;
+		own.machine.energy_mj = 0;
+		db.save(native);
+		const starved = enqueue("copper-conductor");
+		tick(1000);
+		assert.equal(read().manufacturing.jobs.at(-1).reason, "power");
+		act("set_production_machine", { machine_id: solar.id, enabled: true });
+		tick(60000);
+		assert.equal(
+			read().manufacturing.jobs.find((j: any) => j.id === starved.id).state,
+			"completed",
+		);
+		while (read().manufacturing.storage_used < 16) make("copper-conductor");
+		const blocked = enqueue("copper-conductor");
+		tick(20000);
+		assert.equal(read().manufacturing.jobs.at(-1).reason, "storage-full");
+		const discarded = read().manufacturing.products.find(
+			(p: any) => p.kind === "copper-conductor" && p.state === "available",
+		);
+		act("destroy_manufactured_product", { product_id: discarded.id });
+		tick(20000);
+		assert.equal(
+			read().manufacturing.jobs.find((j: any) => j.id === blocked.id).state,
+			"completed",
+		);
+		const competing = selection("copper-conductor"),
+			fresh = read(),
+			intent = {
+				...command(),
+				match_id: id,
+				expected_revision: fresh.revision,
+				action: "enqueue_manufacturing",
+				...competing,
+			};
+		const db2 = new GameDatabase(path, { clock: () => now });
+		try {
+			const receipt = call("command", intent);
+			assert.deepEqual(db2.dispatch(a, "astra.game_command", intent), receipt);
+			assert.throws(
+				() =>
+					db2.dispatch(a, "astra.game_command", {
+						...intent,
+						command_id: randomUUID(),
+					}),
+				{ code: "CONFLICT" },
+			);
+		} finally {
+			db2.close();
+		}
+		act("cancel_job", { job_id: read().manufacturing.jobs.at(-1).id });
+		console.log(
+			"PASS full machine chain, tested reclaimed hardware, empty-battery robot, defenses/upgrades, heater interlock, charging/solar, failure, starvation, storage, concurrent reservation and exactly-once retries",
+		);
+		console.log(
+			"PASS manufacturing reservation rollback, exact offcuts, cancellation, paid energy, restart/retry, press construction, machine pause/resume and ownership",
+		);
 	}
-	act("cancel_job", { job_id: read().manufacturing.jobs.at(-1).id });
-	console.log(
-		"PASS full machine chain, tested reclaimed hardware, empty-battery robot, defenses/upgrades, heater interlock, charging/solar, failure, starvation, storage, concurrent reservation and exactly-once retries",
-	);
-	console.log(
-		"PASS manufacturing reservation rollback, exact offcuts, cancellation, paid energy, restart/retry, press construction, machine pause/resume and ownership",
-	);
 } finally {
 	db.close();
 	await rm(dir, { recursive: true, force: true });
