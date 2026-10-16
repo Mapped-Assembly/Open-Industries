@@ -1,3 +1,4 @@
+import { isManufacturing, settleManufacturing, manufacturingAllocations, reservedComponentQuantity, chargingPower, productionSolar, productionStation } from '../game-manufacturing.mjs';
 import { createHash } from 'node:crypto';
 import { VersionedGameDomain,canonical } from './game.mjs';
 import { gameFail,gameSnapshotSchema,validateGameRequest } from '../mcp-game-contract.mjs';
@@ -22,7 +23,7 @@ export function nativeGame(instance){
     p.jobs=[];p.robot_jobs=[];p.observations=[];p.surveys=[];
     for(const job of instance.state.schedule.jobs.filter(j=>j.owner_id===p.owner)){
       const checkpoint=clone(job.checkpoint);
-      const state=job.state==='waiting-for-resource'?'paused':job.state;
+      const state=job.state==='queued'?'waiting':job.state==='waiting-for-resource'?'paused':job.state;
       const native={id:job.id,...checkpoint,work_ms:job.progress_ms,state};
       if(job.kind==='process')native.pause_reason=state==='paused'?job.reason:null;
       else native.reason=job.reason;
@@ -37,10 +38,10 @@ export function nativeGame(instance){
 function coreJobs(match){
   return match.players.flatMap(p=>[['process',p.jobs],['robot',p.robot_jobs]].flatMap(([kind,jobs])=>jobs.map(j=>{
     const {id,state,work_ms,...checkpoint}=clone(j);
-    const reason=kind==='process'?(state==='cancelled'?checkpoint.cancellation_reason??'cancelled':checkpoint.pause_reason):checkpoint.reason;
+    const reason=kind==='process'?(['cancelled','failed'].includes(state)?checkpoint.cancellation_reason??'cancelled':checkpoint.pause_reason):checkpoint.reason;
     delete checkpoint.pause_reason;delete checkpoint.reason;
-    const waiting=state==='paused'&&['power','base-busy','charging-port'].includes(reason);
-    return {id,owner_id:p.owner,kind,state:waiting?'waiting-for-resource':state,reason:reason??null,progress_ms:work_ms,checkpoint};
+    const waiting=state==='paused'&&['power','base-busy','charging-port','machine-disabled','storage-full'].includes(reason);
+    return {id,owner_id:p.owner,kind,state:state==='waiting'?'queued':waiting?'waiting-for-resource':state,reason:reason??null,progress_ms:work_ms,checkpoint};
   })));
 }
 /** Stable typed entities/observations preserve native IDs and private evidence at the common boundary. */
@@ -55,6 +56,7 @@ function metadata(match){
   for(const p of match.players){
     for(const a of p.base.assets)put(a.id,a.kind,p.owner,a.position);
     for(const b of p.batches)put(b.id,'batch',p.owner,null);
+    for(const a of p.production?.products??[])put(a.id,a.category,p.owner,p.base.assets.find(a=>a.kind==='bench').position);
     for(const c of p.components)put(c.id,'component',p.owner,null);
     for(const [kind,records]of[['bench',p.observations],['field',p.surveys]])for(const o of records){
       const target=kind==='bench'?o.targetId:o.target_id;
@@ -85,11 +87,12 @@ export function gameAllocations(match){
     }
     for(const j of p.robot_jobs)if(j.reserved)add(`reservation:${j.id}`,'reserved',p.owner,j.id,'g',10000,j.reserved.contents);
     for(const b of p.batches)if(b.state!=='consumed'){
-      const job=p.jobs.find(j=>j.input_batch_id===b.id&&live(j));
+      const job=p.jobs.find(j=>(j.input_batch_id===b.id||j.material_inputs?.some(m=>m.id===b.id))&&['waiting','running','paused'].includes(j.state));
       add(job?`wip:${job.id}`:`batch:${b.id}`,job?'wip':'stock',p.owner,job?.id??null,'g',null,contentsOf(b));
     }
+    for (const row of manufacturingAllocations(p)) add(row.id,row.job?'reserved':'stock',p.owner,row.job,row.unit,null,row.contents);
     for(const asset of p.base.assets){const counts={};for(const c of asset.components)counts[`part.${c.kind}`]=(counts[`part.${c.kind}`]??0)+c.quantity;add(`asset:${asset.id}`,'stock',p.owner,null,'count',null,counts);}
-    const counts={};for(const c of p.base.inventory)counts[`part.${c.kind}`]=(counts[`part.${c.kind}`]??0)+c.quantity;add(`store:${p.owner}`,'stock',p.owner,null,'count',null,counts);
+    const counts={};for(const c of p.components)counts[`part.${c.kind}`]=(counts[`part.${c.kind}`]??0)+c.quantity-reservedComponentQuantity(p,c.id);add(`store:${p.owner}`,'stock',p.owner,null,'count',null,counts);
   }
   return {accounts,balances};
 }
@@ -140,15 +143,27 @@ export function packGame(match,prior,context,elapsed=0){
 /** Select the next physical event; the common driver owns iteration, time and work budgets. */
 function eventPlan(match,remaining,at){
   const policy=policyAt(at);let changed=settleRobots(match,at),dt=remaining;
+  for (const p of match.players) {
+    changed = settleManufacturing(p,at) || changed;
+    for (const j of p.jobs.filter(j=>!isManufacturing(j)&&['form-steel','form-aluminum','mold-hdpe'].includes(j.recipe)&&['running','paused'].includes(j.state))) {
+      const required=j.recipe==='mold-hdpe'?'polymer-processor':'metal-press',station=productionStation(p,required);
+      if(!station||station.state==='destroyed'){policy.cancel(p,j,'machine_destroyed');changed=true;continue;}
+      const enabled=station.enabled&&(j.recipe!=='mold-hdpe'||productionStation(p,'furnace')?.enabled);
+      if(!enabled&&j.pause_reason!=='requested'){if(j.state!=='paused'||j.pause_reason!=='machine-disabled')changed=true;j.state='paused';j.pause_reason='machine-disabled';}
+      else if(enabled&&j.pause_reason==='machine-disabled'&&!p.jobs.some(other=>other!==j&&other.state==='running')){j.state='running';j.pause_reason=null;changed=true;}
+    }
+  }
   const plans=match.players.map(p=>{
     const solar=p.machine.status==='ready'?p.base.power.solar_w:0;
     let job=p.jobs.find(j=>j.state==='running');
     if(job&&job.work_ms===job.duration_ms){policy.finishProcess(match,p,job,at);changed=true;job=undefined;}
     const power=job?.power_w??(job?500:0);
     if(job&&power>solar&&p.machine.energy_mj<power-solar){job.state='paused';job.pause_reason='power';changed=true;job=undefined;}
-    const robot=!job&&p.machine.status==='ready'?chargingRobot(p):undefined;
-    const chargeRate=robot?(p.machine.energy_mj>=500-solar?500:solar):0;
+    const powerWait=p.jobs.find(j=>isManufacturing(j)&&j.state==='paused'&&j.pause_reason==='power');
+    const robot=!job&&!powerWait&&p.machine.status==='ready'?chargingRobot(p):undefined;
+    const portPower=chargingPower(p),chargeRate=robot?(p.machine.energy_mj>=portPower-solar?portPower:Math.min(portPower,solar)):0;
     let limit=robotStepLimit(p);
+    if(powerWait&&solar>0){const required=Math.min(500000,(powerWait.duration_ms-powerWait.work_ms)*powerWait.power_w);if(required>p.machine.energy_mj)limit=Math.min(limit,Math.ceil((required-p.machine.energy_mj)/solar));}
     if(job)limit=Math.min(limit,job.duration_ms-job.work_ms,power>solar?Math.floor(p.machine.energy_mj/(power-solar)):Infinity);
     if(robot&&chargeRate)limit=Math.min(limit,Math.ceil((robot.capacity_mj-robot.energy_mj)/chargeRate),chargeRate>solar?Math.floor(p.machine.energy_mj/(chargeRate-solar)):Infinity);
     dt=Math.min(dt,limit);return {p,solar,job,robot,chargeRate};
@@ -209,11 +224,11 @@ export function gameDomainModule(reject=code=>{gameFail(code);throw Error('UNREA
     validateInvariants(instance){
       if(canonical(instance.pin)!==canonical(sharedGamePin))gameFail('INVARIANT_FAILED');
       const match=nativeGame(instance),schedule=instance.state.schedule;
-      if(match.players.length<1||match.players.length>2||new Set(match.players.map(p=>p.slot)).size!==match.players.length||match.players.some(p=>![1,2].includes(p.slot)||p.base.power.solar_w!==100||p.base.power.capacity_mj!==20000000||p.base.power.initial_mj!==20000000))gameFail('INVARIANT_FAILED');
+      if(match.players.length<1||match.players.length>2||new Set(match.players.map(p=>p.slot)).size!==match.players.length||match.players.some(p=>![1,2].includes(p.slot)||p.base.power.solar_w!==productionSolar(p)||p.base.power.capacity_mj!==20000000||p.base.power.initial_mj!==20000000))gameFail('INVARIANT_FAILED');
       if(schedule.instance_id!==instance.id||schedule.cursor_ms!==instance.simulation_time_ms||schedule.cursor_ms>schedule.observed_at_ms)gameFail('INVARIANT_FAILED');
       validateEventJobs(schedule.jobs);
       for(const job of schedule.jobs){
-        if(!['process','robot'].includes(job.kind)||!['running','waiting-for-resource','paused','completed','cancelled'].includes(job.state)||!match.players.some(p=>p.owner===job.owner_id))gameFail('INVARIANT_FAILED');
+        if(!['process','robot'].includes(job.kind)||!['queued','running','waiting-for-resource','paused','completed','cancelled','failed'].includes(job.state)||!match.players.some(p=>p.owner===job.owner_id))gameFail('INVARIANT_FAILED');
         if(job.kind==='process'&&(!Number.isSafeInteger(job.checkpoint.duration_ms)||job.checkpoint.duration_ms<1||job.progress_ms>job.checkpoint.duration_ms||(job.state==='completed'&&job.progress_ms!==job.checkpoint.duration_ms)))gameFail('INVARIANT_FAILED');
         if(job.kind==='robot'&&(!Array.isArray(job.checkpoint.phases)||!Number.isSafeInteger(job.checkpoint.phase_index)||job.checkpoint.phase_index<0||job.checkpoint.phase_index>job.checkpoint.phases.length||!Number.isSafeInteger(job.checkpoint.phase_work_ms)||job.checkpoint.phase_work_ms<0))gameFail('INVARIANT_FAILED');
       }

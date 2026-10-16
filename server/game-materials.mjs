@@ -1,3 +1,4 @@
+import { productionStation } from './game-manufacturing.mjs';
 import { recoveryVersion, recoveryRecipes, recoveryPlan, recoveryOutputMetadata, recoveryInspection } from './game-recovery.mjs';
 import { randomUUID } from 'node:crypto';
 import { BatchSchema, ComponentSchema, ObservationSchema, CATALOG_VERSION, BALANCE_VERSION } from '@openindustries/material-science/schema';
@@ -30,13 +31,14 @@ export function initializeScience(match) {
 }
 export const availableMachine = p => ({ kind: p.machine.kind, enabled: p.machine.status === 'ready', availablePowerW: p.machine.power_w,
   availableEnergyJ: Math.floor(p.machine.energy_mj / 1000), maximumTemperatureC: null });
-export function processPlan(p, batch, recipe, match) {
+export function processPlan(p, batch, recipe, match, machineId = p.machine.id) {
   if (p.jobs.some(j => j.state === 'running' || j.state === 'paused')) return ResultSchema.parse({ status: 'ineligible', code: 'MACHINE_BUSY', message: 'Finish or cancel the current job before starting another process.', nextActions: ['finish-or-cancel-current-job'] });
+  if (machineId !== p.machine.id) { const required = listRecipes().find(r=>r.id===recipe)?.machine; const station = required && productionStation(p,required); return ResultSchema.parse(planProcess(batch.material,recipe,{kind:required??'unavailable',enabled:station?.id===machineId && station.enabled && (required!=='polymer-processor'||!!productionStation(p,'furnace')?.enabled) && p.machine.status==='ready',availablePowerW:500,availableEnergyJ:Math.floor(p.machine.energy_mj/1000),maximumTemperatureC:required==='polymer-processor'?200:required==='metal-press'?1000:null})); }
   return ResultSchema.parse(recoveryPlan(p,batch,recipe,match) ?? planProcess(batch.material, recipe, availableMachine(p)));
 }
 export function processOutputs(plan, input) {
   const streams = [...plan.outputs, ...(plan.residue.massG ? [{ ...plan.residue, id: 'residue', form: 'residue' }] : [])];
-  return streams.map(s => ({ output_role: s.id, form: s.form, ...recoveryOutputMetadata(plan,input,s), contents: Object.fromEntries(s.constituents.map(c => [c.material, c.massG])), ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, s.constituents.find(c => c.material === k)?.massG ?? 0])) }));
+  return streams.map(s => ({ output_role: s.id, form: s.form, ...recoveryOutputMetadata(plan,input,s), ...(['form-steel','form-aluminum','mold-hdpe'].includes(plan.recipeId)?{manufacturing_stock_rule:'manufacturing-v1',hazard_truth:'none-detected',source_deposit_id:input.source_deposit_id??null}:{}), contents: Object.fromEntries(s.constituents.map(c => [c.material, c.massG])), ...Object.fromEntries(['copper', 'hdpe', 'dirt'].map(k => [`${k}_g`, s.constituents.find(c => c.material === k)?.massG ?? 0])) }));
 }
 export function scienceProjection(match, p) {
   return { versions: match.science, observations: p.observations, components: p.components,
@@ -60,7 +62,7 @@ export function inspectAtBench(match, p, job, now) {
         { kind: 'density', value: 8950, unit: 'kg/m3', validFromC: 20, validToC: 20, uncertainty: { lower: 8800, upper: 9100 }, basis: 'measurement-fixture', source: 'bench-v1/copper-wire-test-fixture' },
       ];
     }
-    recoveryInspection(target,target.material,match);
+    recoveryInspection(target.manufacturing_stock_rule==='manufacturing-v1'?{...target,recovery_rule:'starter-recovery-v1'}:target,target.material,match);
     BatchSchema.parse(target.material);
   }
   const observation = ObservationSchema.parse({ id: randomUUID(), owner: p.owner, targetId: target.id,
@@ -79,6 +81,6 @@ export function evaluateScience(p, args, fail, match) {
   else if (component) result = evaluateComponent(target, args.design_id);
   else if (args.query === 'use') result = evaluateUse(target.material, args.design_id, args.temperature_c);
   else if (args.query === 'substitution') result = evaluateSubstitution(target.material, args.design_id, args.temperature_c);
-  else result = processPlan(p, target, args.design_id, match);
+  else { const required = listRecipes().find(r=>r.id===args.design_id)?.machine; const installed = required && productionStation(p,required); result = processPlan(p, target, args.design_id, match, installed?.id ?? p.machine.id); }
   return ResultSchema.parse(result);
 }

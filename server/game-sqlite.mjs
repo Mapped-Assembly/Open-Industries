@@ -12,7 +12,7 @@ export { canonical, cablePlan } from './domains/game.mjs';
 /** No external IO inside transactions. SQLite serializes writers across processes. */
 export class GameDatabase extends VersionedGameDomain {
   constructor(path, { clock = Date.now } = {}) {
-    super(path,{clock,supportedVersions:[0,1,2,3,4,5,6]});
+    super(path,{clock,supportedVersions:[0,1,2,3,4,5,6,7]});
     const version=Number(this.db.prepare('PRAGMA user_version').get().user_version);
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS matches(id TEXT PRIMARY KEY, host TEXT NOT NULL REFERENCES accounts(id), status TEXT NOT NULL, created INTEGER NOT NULL, last_tick INTEGER NOT NULL, state TEXT NOT NULL CHECK(json_valid(state)));
@@ -45,7 +45,7 @@ export class GameDatabase extends VersionedGameDomain {
         this.validateCurrentState(match);
         this.saveInstance(packGame(match),{kind:'worker',id:'shared-core-cutover',principal_id:null},'shared-core-cutover');
       }
-      this.db.exec('PRAGMA user_version=6');
+      this.db.exec('PRAGMA user_version=7');
     }); } catch(error) { this.db.close();throw new Error('UNSUPPORTED_GAME_SAVE: restore a compatible backup or run the exact game module version that wrote this database.',{cause:error}); }
   }
 
@@ -172,7 +172,7 @@ export class GameDatabase extends VersionedGameDomain {
     return this.transaction(() => {
       const owner = this.identity(token), operation = name.replace('astra.game_', '');
       const request = canonical({ name, arguments: args });
-      const readOnly = ['read_match','science_catalog','evaluate'].includes(operation);
+      const readOnly = ['read_match','science_catalog','evaluate','manufacturing_catalog','manufacturing_preview'].includes(operation);
       if (operation === 'list_matches') {
         const rows = this.db.prepare('SELECT m.state,m.created,p.slot FROM matches m JOIN members p ON p.match_id=m.id WHERE p.owner=? AND (? IS NULL OR m.id>?) ORDER BY m.id LIMIT 21').all(owner, args.cursor, args.cursor);
         const matches = rows.slice(0, 20).map(row => { const m = this.load(JSON.parse(row.state).id); this.advance(m); this.save(m); return { match_id: m.id, status: m.status, slot: row.slot, created_at_ms: row.created }; });
@@ -201,7 +201,7 @@ export class GameDatabase extends VersionedGameDomain {
           if (operation === 'command' && match.revision !== args.expected_revision) gameFail('CONFLICT');
         }
         this.advance(match);
-        if (operation === 'science_catalog' || operation === 'evaluate') {
+        if (['science_catalog','evaluate','manufacturing_catalog','manufacturing_preview'].includes(operation)) {
           const result = this.scienceRead(match,owner,operation,args);
           this.save(match);
           return validateGameResult(name,result);

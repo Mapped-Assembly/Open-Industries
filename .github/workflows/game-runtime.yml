@@ -25,6 +25,20 @@ jobs:
       - run: npm run test:simulation
       - run: npm run test:mcp-game
       - run: npm run test:mcp
+  manufacturing:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:manufacturing
   downstream-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20

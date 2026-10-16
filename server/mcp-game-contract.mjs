@@ -1,3 +1,4 @@
+import { manufacturingCatalog, manufacturingVersion } from './game-manufacturing.mjs';
 import { recoveryRecipes, recoveryVersion } from './game-recovery.mjs';
 import Ajv from 'ajv';
 import { jsonSchemas } from '@openindustries/material-science/protocol';
@@ -19,24 +20,25 @@ const batch = object({ id: uuid, form: { enum: ['cable', 'wire', 'flakes', 'resi
   state: { enum: ['available', 'reserved', 'consumed'] }, mass_g: integer(10000), ...Object.fromEntries(Object.entries(mass).map(([k, v]) => [k, nullable(v)])), observation_id: nullable(uuid),
   source_job_id: nullable(uuid), output_role: nullable({ enum: ['conductor', 'insulation', 'residue', 'usable'] }),
   grade: { enum: ['assayed-feedstock', 'recovered-ungraded'] } });
-const job = object({ id: uuid, machine_id: uuid, input_batch_id: uuid, recipe: { enum: ['strip-cable', 'recover-cable-residue', 'inspect-batch', 'inspect-component', ...recoveryRecipes().map(r=>r.id)] },
+const job = object({ id: uuid, machine_id: uuid, input_batch_id: uuid, recipe: { enum: ['strip-cable', 'recover-cable-residue', 'form-steel', 'form-aluminum', 'mold-hdpe', 'inspect-batch', 'inspect-component', ...recoveryRecipes().map(r=>r.id)] },
   recipe_version: { enum: ['dump-v1', 'balance-v2', 'bench-v1', recoveryVersion] }, state: { enum: ['running', 'paused', 'completed', 'cancelled'] },
-  pause_reason: nullable({ enum: ['requested', 'power'] }),
+  pause_reason: nullable({ enum: ['requested', 'power', 'machine-disabled'] }),
   cancellation_reason: nullable({ enum: ['requested', 'machine_destroyed', 'match_abandoned'] }),
   duration_ms: integer(20000), work_ms: integer(20000), energy_mj: integer(10000000) });
 const position = object({ x: integer(96), y: integer(56) });
 const text = maxLength => ({ type: 'string', maxLength });
 const fieldJobActions = ['survey_robot', 'collect_robot', 'return_robot', 'recharge_robot', 'interrupt_robot', 'retreat_robot'];
 const field = object({ version: { const: robotVersion }, sensor_version: { const: fieldVersion }, sensor_catalog: { const: sensorCatalog }, transferred_mj: integer(Number.MAX_SAFE_INTEGER),
-  robots: array(object({ id: uuid, position, home: position, capacity_mj: { const: 8000000 }, energy_mj: integer(8000000), initial_mj: { const: 8000000 },
+  robots: array(object({ id: uuid, retired:{type:'boolean'}, position, home: position, capacity_mj: { const: 8000000 }, energy_mj: integer(8000000), initial_mj: integer(8000000),
     charged_mj: integer(Number.MAX_SAFE_INTEGER), spent_mj: integer(Number.MAX_SAFE_INTEGER), payload_g: { const: 10000 }, sensors: array({ enum: sensorCatalog.map(s => s.id) }, 4), job_id: nullable(uuid),
-    cargo: array(object({ id: uuid, mass_g: integer(10000), form: { enum: ['cable', 'mixed'] }, inspection: { const: 'uninspected' }, destination: { const: 'inspection-bench' } }), 16) }), 2),
+    cargo: array(object({ id: uuid, mass_g: integer(10000), form: { enum: ['cable', 'mixed'] }, inspection: { const: 'uninspected' }, destination: { const: 'inspection-bench' } }), 16) }), 8),
   jobs: array(object({ id: uuid, robot_id: uuid, action: { enum: fieldJobActions }, state: { enum: ['running', 'paused', 'completed', 'cancelled'] }, reason: nullable(text(40)),
     started_at_ms: integer(Number.MAX_SAFE_INTEGER), phase: { enum: ['travel', 'survey', 'collect', 'unload', 'charge', 'complete', 'completed', 'cancelled'] }, target_id: nullable(uuid),
     work_ms: integer(Number.MAX_SAFE_INTEGER), energy_mj: integer(Number.MAX_SAFE_INTEGER), charged_mj: integer(Number.MAX_SAFE_INTEGER), route: array(position, 5400) }), 96),
   observations: array(object({ id: uuid, target_id: uuid, target_revision: { type: 'integer', minimum: 1 }, sensor: { enum: sensorCatalog.map(s => s.id) }, sensor_version: { const: fieldVersion }, position,
     timestamp_ms: integer(Number.MAX_SAFE_INTEGER), range: { type: 'number', minimum: 0, maximum: 120 }, quality: { enum: ['clear', 'dirty', 'occluded', 'low-signal'] }, confidence_bps: integer(10000),
     candidate_classes: array({ enum: materialClasses }, 7), cues: array(text(160), 8), next_actions: array(text(100), 8), uncertainty_meaning: { const: 'bounded-game-fixture-not-hardware-accuracy' } }), 128) });
+field.properties.robots.items.required = field.properties.robots.items.required.filter(k=>k!=='retired');
 const rect = { x: integer(96), y: integer(56), width: integer(96), height: integer(56) };
 const component = { kind: { type: 'string', maxLength: 40 }, quantity: integer(100), unit_mass_g: integer(100000) };
 const world = object({
@@ -50,25 +52,33 @@ const world = object({
 const base = object({ id: uuid, ready_to_finish: { type: 'boolean' },
   assets: array(object({ id: uuid, kind: { enum: ['tower', 'robot', 'solar', 'battery', 'bench', 'fabricator', 'separator'] }, label: { type: 'string', maxLength: 60 }, position,
     components: array(object(component), 10), status: { enum: ['ready', 'parked', 'destroyed'] } }), 8),
-  inventory: array(object(component), 10),
+  inventory: array(object(component), 128),
   starter_ledger: array(object({ ...component, allocation_id: { type: 'string', maxLength: 36 } }), 40),
-  power: object({ solar_w: { const: 100 }, capacity_mj: { const: 20000000 }, initial_mj: { const: 20000000 }, generated_mj: integer(Number.MAX_SAFE_INTEGER), spilled_mj: integer(Number.MAX_SAFE_INTEGER) }),
+  power: object({ solar_w: integer(1000), capacity_mj: { const: 20000000 }, initial_mj: { const: 20000000 }, generated_mj: integer(Number.MAX_SAFE_INTEGER), spilled_mj: integer(Number.MAX_SAFE_INTEGER) }),
 });
+const materialInput = object({ id: uuid, mass_g: integer(10000), material: { enum: ['copper','steel','aluminum','hdpe','glass','rubber'] } });
+const componentInput = object({ id: uuid, kind: text(100), quantity: integer(100), unit_mass_g: integer(100000) });
+const production = object({ version: { const: manufacturingVersion }, storage_used: integer(128), storage_slots: { const: 16 }, products: array(object({ id: uuid, kind: text(100), category: { enum: ['part','machine','robot','upgrade','defense'] }, state: { enum: ['available','reserved','installed','destroyed','consumed'] }, enabled: { type:'boolean' }, contents: { type:'object',additionalProperties:integer(1000000) }, components:array(componentInput,128),source_job_id:uuid,mass_g:integer(1000000) }),128), jobs:array(object({id:uuid,machine_id:uuid,recipe:text(100),state:{enum:['waiting','running','paused','completed','cancelled','failed']},reason:nullable(text(60)),duration_ms:integer(20000),work_ms:integer(20000),energy_mj:integer(10000000),material_inputs:array(materialInput,1),product_inputs:array(uuid,16),component_inputs:array(componentInput,32)}),64) });
+const manufacturingInputs = { recipe_id:text(100),batch_ids:array(uuid,1),product_ids:array(uuid,16),component_ids:array(uuid,32) };
+const previewCommon = {status:{enum:['eligible','ineligible']},code:text(60),message:text(2000),next_actions:array(text(100),8),recipe_id:text(100)};
+const manufacturingResult = {type:'object',oneOf:[object({...previewCommon,status:{const:'eligible'},station_id:uuid,duration_ms:integer(20000),power_w:integer(1000),energy_j:integer(20000),materials:array(materialInput,1),products:array(uuid,16),components:array(componentInput,32)}),object({...previewCommon,status:{const:'ineligible'}})]};
 const status = { enum: ['waiting', 'active', 'completed'] };
 export const gameSnapshotSchema = object({
   match_id: uuid, revision: { type: 'integer', minimum: 1 }, status, completion: nullable(object({ reason: { enum: ['abandoned', 'invite-expired', 'recovery-complete'] }, winner_slot: { type: 'null' } })),
-  world, base, field, legacy_recovery: { type: 'boolean' }, science: object({ versions: object(Object.fromEntries(Object.entries(scienceVersions).map(([k, v]) => [k, { const: v }]))),
+  world, base, field, manufacturing: production, legacy_recovery: { type: 'boolean' }, science: object({ versions: object(Object.fromEntries(Object.entries(scienceVersions).map(([k, v]) => [k, { const: v }]))),
     batches: array(object({ id: uuid, revision: { type: 'integer', minimum: 1 }, evidence: jsonSchemas.batch }), 512),
-    components: array(jsonSchemas.component, 10), observations: array(jsonSchemas.observation, 256) }), invite_expires_at_ms: nullable(integer(Number.MAX_SAFE_INTEGER)),
+    components: array(jsonSchemas.component, 128), observations: array(jsonSchemas.observation, 256) }), invite_expires_at_ms: nullable(integer(Number.MAX_SAFE_INTEGER)),
   server_time_ms: integer(Number.MAX_SAFE_INTEGER), scheduler_healthy: { type: 'boolean' },
   players: array(object({ slot: { enum: [1, 2] }, you: { type: 'boolean' } }), 2),
   deposits: array(object({ id: uuid, collected: { type: 'boolean' }, observation: nullable(observation) }), 1),
   machines: array(machine, 1), batches: array(batch, 512), jobs: array(job, 256),
 });
+gameSnapshotSchema.required = gameSnapshotSchema.required.filter(k=>k!=='manufacturing');
 const snapshotResult = { version, balance_version: { const: 'dump-world-v1' }, snapshot: gameSnapshotSchema };
 const commandResult = object({ ...snapshotResult, command_id: uuid, invite_code: nullable(uuid) });
 const common = { version, command_id: uuid, match_id: uuid, expected_revision: { type: 'integer', minimum: 1, maximum: 999999999 } };
 const actions = {
+  enqueue_manufacturing: manufacturingInputs, salvage_starter_asset:{asset_id:uuid}, set_production_machine:{machine_id:uuid,enabled:{type:'boolean'}}, destroy_manufactured_product:{product_id:uuid},
   survey_robot: { robot_id: uuid, deposit_id: uuid, sensor: { enum: sensorCatalog.map(s => s.id) } },
   collect_robot: { robot_id: uuid, deposit_id: uuid, observation_id: uuid, material_class: { enum: materialClasses } },
   return_robot: { robot_id: uuid }, recharge_robot: { robot_id: uuid }, interrupt_robot: { robot_id: uuid }, retreat_robot: { robot_id: uuid },
@@ -93,11 +103,13 @@ export const gameContract = {
   retry_policy: 'same-command-id-and-identical-payload-returns-original-receipt',
   polling: 'full-snapshot-replaces-local-state', ready_for_recovery: true, ready_for_full_game: false,
   supported: ['two-player-invite', 'private-deposit-assay', 'finite-collection', 'durable-cable-processing',
-    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning', 'robot-routing', 'private-field-sensing', 'finite-reservations', 'cargo-hauling', 'shared-power-charging', 'interrupt-retreat', 'sensor-upgrade-catalog', 'all-initial-waste-recovery', 'cold-hazard-isolation'],
+    'pause-resume-cancel', 'owner-dismantling', 'abandon-match', 'restart-catch-up', 'finite-dump-map', 'starter-component-ledger', 'solar-recharging', 'match-list', 'invite-rotation', 'mutual-recovery-completion', 'material-catalog', 'bench-inspection', 'material-suitability', 'component-tests', 'residue-recovery', 'match-science-version-pinning', 'robot-routing', 'private-field-sensing', 'finite-reservations', 'cargo-hauling', 'shared-power-charging', 'interrupt-retreat', 'sensor-upgrade-catalog', 'all-initial-waste-recovery', 'cold-hazard-isolation', 'machine-construction', 'manufacturing-queues', 'tested-component-assembly'],
   unsupported: ['sensor-kit-manufacturing', 'combat', 'capture', 'victory', 'property-certification', 'events'],
 };
 const cursor = nullable(uuid);
 export const gameTools = [
+  {name:'astra.game_manufacturing_catalog',description:'Read declared bills of materials, machine requirements, storage limits, time and power fixtures.',inputSchema:object({version,match_id:uuid}),outputSchema:object({version,catalog:{const:manufacturingCatalog()}})},
+  {name:'astra.game_manufacturing_preview',description:'Preview exact owned material, manufactured-part and tested-component IDs without reservation or hidden truth.',inputSchema:object({version,match_id:uuid,...manufacturingInputs}),outputSchema:object({version,match_id:uuid,revision:{type:'integer',minimum:1},result:manufacturingResult})},
   { name: 'astra.game_science_catalog', description: 'Read the validated material catalog pinned to this participant match. Reference science and bounded game fixtures are distinct.',
     inputSchema: object({ version, match_id: uuid }), outputSchema: object({ version, catalog: { const: catalog() } }) },
   { name: 'astra.game_evaluate', description: 'Evaluate only an owned batch or component using server evidence and installed machines. No client-supplied materials, properties, recipes or grants. This is a preview, never a mutation.',
@@ -136,11 +148,12 @@ export const gameErrors = {
   ROBOT_BUSY: 'Interrupt the current robot job or wait for it to finish.',
   ROBOT_ENERGY: 'Recharge first. The robot needs enough energy for the job and a safe return route.',
   ROUTE_BLOCKED: 'No reachable route or sensor viewpoint exists. Choose another site.',
-  SENSOR_UNAVAILABLE: 'This sensor is not installed. Sensor kits require the manufacturing milestone.',
+  SENSOR_UNAVAILABLE: 'This sensor is not installed. NIR/thermal kits require supported tested detector hardware.',
   STALE_TARGET: 'The site changed after this observation. Survey again before reserving material.',
   CLASS_UNSUPPORTED: 'Select a candidate class supported by your saved observation, or collect unclassified material for inspection.',
   CARGO_FULL: 'Return to unload before collecting more material.',
   INSPECTION_REQUIRED: 'A server-issued inspection is required before collection or processing.',
+  MANUFACTURING_REQUIREMENTS: 'Review the owned bill of materials for missing evidence, components or machines before enqueueing.',
   INVALID_FEEDSTOCK: 'The inspected input is unavailable for this recipe. Evaluate the owned batch for its reason and next actions.',
   NOT_READY: 'The batch, machine or job is not ready for this operation. Read the current snapshot.',
   INVARIANT_FAILED: 'The operation was rolled back because stored game state was inconsistent.',
