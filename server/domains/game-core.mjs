@@ -1,3 +1,4 @@
+import {resolveVictory} from "../game-victory.mjs";
 import { resolveCombat } from "../game-combat.mjs";
 import { isManufacturing, settleManufacturing, manufacturingAllocations, reservedComponentQuantity, chargingPower, productionSolar, productionStation } from '../game-manufacturing.mjs';
 import { createHash } from 'node:crypto';
@@ -133,6 +134,7 @@ export function packGame(match,prior,context,elapsed=0){
   if(prior){
     transitionEventJobs(prior.state.schedule.jobs,jobs,{allowCreate:context.actor.kind==='command',allowPrune:context.actor.kind==='command',maxProgress:elapsed});
     const before=nativeGame(prior),credits=creditsFor(before,match,elapsed);
+    if(before.completion?.result_version&&(canonical(before.completion)!==canonical(match.completion)||before.status!==match.status))gameFail('INVARIANT_FAILED');
     resources=canonical(allocation.balances.slice().sort((a,b)=>canonical(a).localeCompare(canonical(b))))===canonical(prior.state.resources.balances.slice().sort((a,b)=>canonical(a).localeCompare(canonical(b))))&&credits.length===0?prior.state.resources:settleResourceBalances(prior.state.resources,{...context,expected_sequence:prior.state.resources.sequence,simulation_time_ms:match.last_advanced_ms,job_ids:jobs.filter(j=>!['completed','cancelled','failed'].includes(j.state)).map(j=>j.id)},completeAccounts(prior.state.resources,allocation.accounts),allocation.balances,credits,(_ledger,proposal)=>approveBalances(before,match,context,elapsed,proposal));
   }else resources=createResourceBalances(match.id,sharedGamePin,allocation.accounts,allocation.balances,match.last_advanced_ms);
   const native=clone(match);delete native.id;delete native.revision;delete native.last_advanced_ms;
@@ -181,6 +183,7 @@ export function advanceGame(instance,wallNow,budget=1000){
     settle(state,at){
       const match=nativeGame(state.instance);
       if(match.status==='waiting'&&match.invite_expires<=state.observed_at_ms){policyAt(at).complete(match,'invite-expired');match.revision++;changed=true;}
+      if(match.status==='active')changed=resolveVictory(match,at,policyAt(at))||changed;
       if(match.status==='active')changed=settleRobots(match,at)||changed;
       policyAt(at).prepareState(match);
       if(canonical(match)!==canonical(nativeGame(state.instance)))state.instance=packGame(match,state.instance,{id:`${instance.id}:settle:${at}:${state.instance.state.resources.sequence}`,actor:{kind:'worker',principal_id:null}});

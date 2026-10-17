@@ -71,7 +71,8 @@
     "test:field-lab": "node --import tsx scripts/field-lab-durable-test.ts",
     "test:manufacturing": "node --import tsx scripts/game-manufacturing-test.ts",
     "test:units": "node --import tsx scripts/game-manufacturing-test.ts --units",
-    "test:combat": "node --import tsx scripts/game-manufacturing-test.ts --combat"
+    "test:combat": "node --import tsx scripts/game-manufacturing-test.ts --combat",
+    "test:victory": "node --import tsx scripts/game-manufacturing-test.ts --victory"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

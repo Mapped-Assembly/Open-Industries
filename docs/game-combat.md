@@ -1,10 +1,10 @@
 # Authoritative combat policy (combat-v1)
 
-Combat is an explicit game abstraction. Damage, health, movement and energy below are balance fixtures, not physical performance claims. Requires matching wire-v5 clients and SQLite schema 9. Back up the complete SQLite database before upgrading both repositories. Schema 8 and earlier envelope state, paid work, IDs, pins, event history and receipt bytes are preserved; the compatibility gate advances without rewriting those records.
+Combat is an explicit game abstraction. Damage, health, movement and energy below are balance fixtures, not physical performance claims. Requires matching wire-v5 clients and SQLite schema 10. Back up the complete SQLite database before upgrading both repositories. Schema 8 and earlier envelope state, paid work, IDs, pins, event history and receipt bytes are preserved; the compatibility gate advances without rewriting those records.
 
 ## Starting combat and public information
 
-Either authenticated member of an active two-player recovery session may issue `start_combat`. This permanently begins combat for that session, clears both recovery-finish flags and initializes combat state without creating resources. A recovery session can still be ended with `abandon_match`. `finish_recovery` is unavailable once combat starts. Tower destruction does **not** select a winner or end the session yet; victory, defeat and simultaneous tower destruction policy belong to tower-defense #19.
+Either authenticated member of an active two-player recovery session may issue `start_combat`. This permanently begins combat for that session, clears both recovery-finish flags and initializes combat state without creating resources. A recovery session can still be ended with `abandon_match`. `finish_recovery` is unavailable once combat starts. Tower destruction now ends the match under [victory-v1](game-victory.md): one destroyed tower awards the other crew the win, while two destroyed in the same pulse is a tie.
 
 Before combat, existing private projections remain private. Starting combat publishes tactical IDs, owner slots, kinds, grid positions, current/max health, outpost ownership and a bounded 32-event combat tail to both participants. This deliberately includes opposing robots, installed industry and deployed platforms. Material evidence, inventories, components, robot cargo, routes, jobs, accounts, invites, seed and ammunition IDs remain private. No third account can read or command the match. Stowed units are private until deployed.
 
@@ -37,7 +37,7 @@ Each shot moves one specific loaded slug from installed to destroyed and detache
 
 | Target | Maximum health | At zero health |
 | --- | ---: | --- |
-| Tower | 300 | Destroyed; no winner yet |
+| Tower | 300 | End the match under victory-v1 |
 | Recovery robot / its sensors | 80 | Stop route/survey/haul, release uncollected reservation once, retire robot, dissipate remaining charge; delivered cargo stays in its wreck allocation |
 | Solar generator | 80 | Stop its metered generation; installed replacement solar may continue |
 | Battery | 100 | Cut the shared process circuit and dissipate remaining charge |
@@ -54,3 +54,5 @@ Turrets and launchers keep their declared 100/140/160 health material effects. T
 `npm run test:simulation` includes isolated command validation, wall/range/cooldown and energy checks, simultaneous fire, hauler reservation cleanup, industry interruption, capture contention, retreat, timed salvage, manufactured target kinds, frequent/sparse shared-clock equivalence and exact replay. `npm run test:combat` starts with real surveyed/recovered/processed/graded stock and tested original hardware, manufactures both turret variants and a raid launcher, then checks two-player combat against the file-backed runtime, rollback, competing SQLite connections, offline advancement/restart, tower damage, solar disruption, capture, retreat, salvage and immutable retries.
 
 The matching tower-defense browser scenario (`npm run test:browser -- --combat`) builds a real turret, defends against the other player's moving recovery robot, verifies damage and ammunition, reloads on mobile, disables the platform near home, then salvages on a server tick. Isolated service tests additionally move a nearby recovery robot away before a remote salvage completion to verify revalidation. It does not claim a complete match or victory flow.
+
+Victory/defeat/tie persistence, final-blow and browser result verification are documented in [game-victory.md](game-victory.md).

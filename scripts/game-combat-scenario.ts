@@ -115,6 +115,45 @@ export function manufacturedCombat(h: any) {
 			.solar_w,
 		0,
 	);
+	if (process.argv.includes("--victory")) {
+		for (let wave = 0; wave < 2; wave++) {
+			act("set_unit_enabled", { unit_id: launcher.id, enabled: false });
+			reload();
+			act("combat_order", {
+				unit_id: launcher.id,
+				order: "attack",
+				target_id: tower,
+			});
+			tick(60000);
+			assert.equal(target("tower").health, 100 - wave * 100);
+		}
+		const result = read().completion;
+		assert.equal(read().status, "completed");
+		assert.equal(result.winner_slot, 1);
+		assert.equal(result.result_version, "victory-v1");
+		assert.deepEqual(
+			call("read_match", { version: 5, match_id: id }, other).snapshot
+				.completion,
+			result,
+		);
+		const physical = canonical(db.load(id).players);
+		tick(180000);
+		assert.equal(canonical(db.load(id).players), physical);
+		assert.deepEqual(read().completion, result);
+		assert.throws(() => act("abandon_match"), { code: "MATCH_INACTIVE" });
+		assert.deepEqual(call("command", request), receipt);
+		db.close();
+		h.replaceDb(new GameDatabase(path, { clock: now }));
+		db = h.getDb();
+		assert.deepEqual(read().completion, result);
+		db.transaction(() =>
+			assert.deepEqual(db.history.replay(id).state, db.loadInstance(id)),
+		);
+		console.log(
+			"PASS actual recovered stock -> manufactured launcher and ammunition -> authoritative tower destruction and victory; exact two-player result, frozen resources, post-match rejection, restart/history and immutable retry",
+		);
+		return;
+	}
 	// Capture neutral ground, then retreat home with the original chassis and remaining materials.
 	const outpost = read().world.outposts[0];
 	act("combat_order", {
