@@ -1,3 +1,4 @@
+import { commandCombat, combatProjection, assertCombat } from "../game-combat.mjs";
 import { commandUnit, unitProjection, assertUnits, damageUnit, unitProfiles } from '../game-units.mjs';
 import { manufacturingCatalog, manufacturingVersion, manufacturingPlan, enqueueManufacturing, isManufacturing, productionLive, cancelManufacturing, finishManufacturing, settleManufacturing, manufacturingProjection, assertManufacturing, salvageStarterAsset, productionSolar, chargingPower, productionProducts } from '../game-manufacturing.mjs';
 import { isRecoveryRecipe, recoveryVersion } from '../game-recovery.mjs';
@@ -334,6 +335,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
   assertState(match) {
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
     if (match.robot_version) checkRobotInvariants(match, gameFail);
+    assertCombat(match, gameFail);
     for (const p of match.players) {
       assertManufacturing(p, gameFail);
       assertUnits(p, gameFail);
@@ -466,7 +468,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     const p = match.players.find(p => p.owner === owner);
     if (!p) gameFail('NOT_AVAILABLE');
     return { match_id: match.id, revision: match.revision, status: match.status, completion: match.completion,
-      world: worldProjection(match), base: p.base, units: unitProjection(match,p,Math.max(this.clock(),match.last_advanced_ms)), manufacturing: manufacturingProjection(p), science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
+      world: worldProjection(match), base: p.base, combat:combatProjection(match,p), units: unitProjection(match,p,Math.max(this.clock(),match.last_advanced_ms)), manufacturing: manufacturingProjection(p), science: scienceProjection(match, p), field: robotProjection(p), legacy_recovery: match.legacy_recovery, invite_expires_at_ms: match.status === 'waiting' && p.slot === 1 ? match.invite_expires : null,
       server_time_ms: Math.max(this.clock(), match.last_advanced_ms), scheduler_healthy: this.healthy(),
       players: match.players.map(p => ({ slot: p.slot, you: p.owner === owner })),
       deposits: [{ id: p.deposit.id, collected: p.deposit.collected, observation: p.deposit.observation
@@ -479,7 +481,9 @@ export class VersionedGameDomain extends LegacyGameDomain {
   }
   command(match, p, args) {
     const { action } = args;
-    if (['deploy_unit','set_unit_enabled','load_unit_ammunition','repair_unit','salvage_unit'].includes(action)) {
+    if (action==='start_combat'||action==='combat_order'||(action==='salvage_unit'&&match.combat_version)) {
+      commandCombat(match,p,args,Math.max(this.clock(),match.last_advanced_ms),gameFail);
+    } else if (['deploy_unit','set_unit_enabled','load_unit_ammunition','repair_unit','salvage_unit'].includes(action)) {
       commandUnit(match,p,args,Math.max(this.clock(),match.last_advanced_ms),gameFail);
     } else if (action === 'enqueue_manufacturing') {
       enqueueManufacturing(p, args, Math.max(this.clock(), match.last_advanced_ms), gameFail);
@@ -551,6 +555,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
       }
       this.complete(match, 'abandoned');
     } else if (action === 'finish_recovery') {
+      if(match.combat_version)gameFail('NOT_READY');
       if (!p.jobs.some(j => j.state === 'completed' && !j.kind?.endsWith('inspection')) || p.jobs.some(live) || robotsBusy(p) || p.robots.some(r => r.cargo.length)) gameFail('NOT_READY');
       p.base.ready_to_finish = true;
       if (match.players.every(player => player.base.ready_to_finish && !player.jobs.some(live) && !robotsBusy(player) && !player.robots.some(r => r.cargo.length))) this.complete(match, 'recovery-complete');

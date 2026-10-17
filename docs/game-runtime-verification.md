@@ -79,3 +79,5 @@ Policy unit tests cover grades, condition, purity, unknown contaminants, glass o
 
 
 Defensive platforms, ammunition and their lifecycle are documented in [game-units.md](game-units.md). SQLite schema 8 adds the compatibility guard; full combat remains unavailable.
+
+Current combat extension: [combat-v1 authority, timing, visibility and interruption policy](game-combat.md). Combat-capable saves require schema 9 and the matching reviewed client.

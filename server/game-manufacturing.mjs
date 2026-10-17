@@ -678,7 +678,7 @@ export function salvageStarterAsset(p, id, fail) {
 }
 /** Metered solar and an additional charging port are modeled upgrades, not energy grants. */
 export function productionSolar(p) {
-	if (!p.production) return 100;
+	if (!p.production) return p.base.assets.some(a=>a.kind==="solar"&&a.status==="ready")?100:0;
 	const solar =
 		p.base.assets.some((a) => a.kind === "solar" && a.status === "ready") ||
 		ready(p, "solar-array");

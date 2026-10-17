@@ -1,3 +1,4 @@
+import { manufacturedCombat } from "./game-combat-scenario.js";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
@@ -248,7 +249,7 @@ try {
 	make("copper-conductor");
 	make("fabricator");
 
-	if (process.argv.includes("--units")) {
+	if (process.argv.includes("--units") || process.argv.includes("--combat")) {
 		// All bulk stock above was recovered, processed and graded through real commands.
 		for (const r of read().field.robots) {
 			act("recharge_robot", { robot_id: r.id });
@@ -321,7 +322,7 @@ try {
 		act("set_unit_enabled", { unit_id: turret.id, enabled: true });
 		assert.equal(ownUnit().operational_ready, true);
 		assert.equal(ownUnit().can_fire, false);
-		assert(ownUnit().blocked_reasons.includes("combat-not-implemented"));
+		assert(ownUnit().blocked_reasons.includes("combat-not-started"));
 		assert.equal(ownUnit().targets[0].in_range, false);
 		assert.throws(() => act("salvage_unit", { unit_id: turret.id }), {
 			code: "NOT_READY",
@@ -464,19 +465,42 @@ try {
 		const beforeTick = read().units;
 		tick(120000);
 		assert.deepEqual(read().units, beforeTick); // No phantom idle firing, ammo use or tower damage.
-		act("set_unit_enabled", { unit_id: launcher.id, enabled: false });
-		const destroyed = db.load(id);
-		damageUnit(destroyed.players[0], launcher.id, 1000);
-		db.save(destroyed);
-		act("salvage_unit", { unit_id: launcher.id });
-		const saved = db.loadInstance(id);
-		db.close();
-		db = new GameDatabase(path, { clock: () => now });
-		assert.deepEqual(db.loadInstance(id), saved);
-		db.transaction(() => assert.deepEqual(db.history.replay(id).state, saved));
-		console.log(
-			"PASS real recovered/graded stock -> both turrets and raid launcher; metered deployment, ammo capacity, ownership/privacy, repair, destruction, salvage, rollback, competing connections, restart and immutable retry",
-		);
+		if (process.argv.includes("--combat")) {
+			manufacturedCombat({
+				db,
+				path,
+				now: () => now,
+				token: a,
+				other: b,
+				id,
+				launcher,
+				read,
+				act,
+				tick,
+				call,
+				make,
+				replaceDb: (next: GameDatabase) => {
+					db = next;
+				},
+				getDb: () => db,
+			});
+		} else {
+			act("set_unit_enabled", { unit_id: launcher.id, enabled: false });
+			const destroyed = db.load(id);
+			damageUnit(destroyed.players[0], launcher.id, 1000);
+			db.save(destroyed);
+			act("salvage_unit", { unit_id: launcher.id });
+			const saved = db.loadInstance(id);
+			db.close();
+			db = new GameDatabase(path, { clock: () => now });
+			assert.deepEqual(db.loadInstance(id), saved);
+			db.transaction(() =>
+				assert.deepEqual(db.history.replay(id).state, saved),
+			);
+			console.log(
+				"PASS real recovered/graded stock -> both turrets and raid launcher; metered deployment, ammo capacity, ownership/privacy, repair, destruction, salvage, rollback, competing connections, restart and immutable retry",
+			);
+		}
 	} else {
 		make("steel-bracket");
 		make("hdpe-housing");
