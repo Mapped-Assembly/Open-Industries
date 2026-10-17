@@ -1,3 +1,4 @@
+import {assertVictory} from "../game-victory.mjs";
 import { commandCombat, combatProjection, assertCombat } from "../game-combat.mjs";
 import { commandUnit, unitProjection, assertUnits, damageUnit, unitProfiles } from '../game-units.mjs';
 import { manufacturingCatalog, manufacturingVersion, manufacturingPlan, enqueueManufacturing, isManufacturing, productionLive, cancelManufacturing, finishManufacturing, settleManufacturing, manufacturingProjection, assertManufacturing, salvageStarterAsset, productionSolar, chargingPower, productionProducts } from '../game-manufacturing.mjs';
@@ -220,6 +221,7 @@ class LegacyGameDomain extends SqliteAuthority {
   }
 
   complete(match, reason) {
+    if(match.completion?.result_version)return;
     match.status = 'completed';
     match.completion = { reason, winner_slot: null };
     match.invite_hash = null;
@@ -276,6 +278,7 @@ class LegacyGameDomain extends SqliteAuthority {
   /** Existing game preconditions shared by old dispatch and the extracted command path. */
 
   checkMutation(match, owner, action) {
+    if(match.status==='completed')gameFail('MATCH_INACTIVE');
     if (
       !['join_match', 'abandon_match', 'rotate_invite'].includes(action) &&
       match.status !== 'active'
@@ -336,6 +339,7 @@ export class VersionedGameDomain extends LegacyGameDomain {
     if (canonical(match.science) !== canonical(scienceVersions)) gameFail('INVARIANT_FAILED');
     if (match.robot_version) checkRobotInvariants(match, gameFail);
     assertCombat(match, gameFail);
+    assertVictory(match, gameFail);
     for (const p of match.players) {
       assertManufacturing(p, gameFail);
       assertUnits(p, gameFail);

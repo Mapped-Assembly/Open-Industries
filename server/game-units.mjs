@@ -287,6 +287,7 @@ export function unitProjection(match, p, now) {
 		units: units(p).map((u) => {
 			const spec = profile(u),
 				reasons = [];
+			if(match.status==='completed')reasons.push('match-completed');
 			if (u.state !== "deployed")
 				reasons.push(u.state === "destroyed" ? "destroyed" : "deploy-first");
 			if (!u.enabled) reasons.push("enable-unit");
