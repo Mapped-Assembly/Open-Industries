@@ -1,3 +1,4 @@
+import { combatTargets, inCombatRange } from "./game-combat.mjs";
 import { randomUUID } from "node:crypto";
 
 /** Bounded game-balance fixtures. These are not physical weapon performance claims. */
@@ -282,7 +283,7 @@ export function unitProjection(match, p, now) {
 	return {
 		version: unitVersion,
 		profiles: structuredClone(unitProfiles),
-		combat_available: false,
+		combat_available: !!match.combat_version,
 		units: units(p).map((u) => {
 			const spec = profile(u),
 				reasons = [];
@@ -297,28 +298,48 @@ export function unitProjection(match, p, now) {
 				reasons.push("insufficient-base-power");
 			if (u.last_fired_ms !== null && now < u.last_fired_ms + spec.cooldown_ms)
 				reasons.push("cooldown");
-			const targets = match.world.towers
+			const candidates = match.combat_version
+				? combatTargets(match).filter(
+						(t) => t.slot !== null && t.slot !== p.slot && t.health > 0,
+					)
+				: match.world.towers;
+			const targets = candidates
 				.filter(
 					(t) =>
 						t.slot !== p.slot && match.players.some((p) => p.slot === t.slot),
 				)
+				.sort(
+					(a, b) =>
+						(u.position
+							? distance(u.position, a.position) -
+								distance(u.position, b.position)
+							: 0) || a.id.localeCompare(b.id),
+				)
+				.slice(0, 16)
 				.map((t) => {
 					const d = u.position ? distance(u.position, t.position) : null;
 					return {
 						id: t.id,
-						kind: "tower",
+						kind: t.kind ?? "tower",
 						distance_cells: d,
 						in_range:
 							d !== null &&
 							d >= spec.minimum_range_cells &&
 							d <= spec.range_cells,
-						eligible: false,
+						eligible:
+							!!match.combat_version &&
+							!reasons.length &&
+							inCombatRange(match, u, t),
 						reason:
 							d === null
 								? "deploy-first"
 								: d < spec.minimum_range_cells || d > spec.range_cells
 									? "out-of-range"
-									: "combat-not-implemented",
+									: match.combat_version
+										? inCombatRange(match, u, t)
+											? "in-range"
+											: "line-of-sight-blocked"
+										: "combat-not-started",
 					};
 				});
 			return {
@@ -326,8 +347,14 @@ export function unitProjection(match, p, now) {
 				ammunition_count: u.ammunition_ids.length,
 				ammunition_capacity: spec.ammunition_capacity,
 				operational_ready: !reasons.length,
-				can_fire: false,
-				blocked_reasons: [...reasons, "combat-not-implemented"],
+				can_fire:
+					!!match.combat_version &&
+					!reasons.length &&
+					targets.some((t) => t.eligible),
+				blocked_reasons: [
+					...reasons,
+					...(!match.combat_version ? ["combat-not-started"] : []),
+				],
 				targets,
 			};
 		}),

@@ -174,7 +174,7 @@ test("compatible glass provenance and paid output fixtures gate uses and tempera
 	assert.notEqual(evaluateUse(material, "hdpe-housing", 90).status, "eligible");
 });
 
-for (const previousSchema of [6, 7]) test(`schema-${previousSchema} envelope upgrades its compatibility gate without rewriting state or receipts`, async () => {
+for (const previousSchema of [6, 7, 8]) test(`schema-${previousSchema} envelope upgrades its compatibility gate without rewriting state or receipts`, async () => {
 	const { mkdtemp, rm } = await import("node:fs/promises"),
 		{ tmpdir } = await import("node:os"),
 		{ join } = await import("node:path");
@@ -198,7 +198,7 @@ for (const previousSchema of [6, 7]) test(`schema-${previousSchema} envelope upg
 		db.db.exec(`PRAGMA user_version=${previousSchema}`);
 		db.close();
 		db = new GameDatabase(path, { clock: () => 1000 });
-		assert.equal(db.db.prepare("PRAGMA user_version").get()!.user_version, 8);
+		assert.equal(db.db.prepare("PRAGMA user_version").get()!.user_version, 9);
 		assert.equal(
 			db.db.prepare("SELECT state FROM matches").get()!.state,
 			before,

@@ -1,3 +1,4 @@
+import { resolveCombat } from "../game-combat.mjs";
 import { isManufacturing, settleManufacturing, manufacturingAllocations, reservedComponentQuantity, chargingPower, productionSolar, productionStation } from '../game-manufacturing.mjs';
 import { createHash } from 'node:crypto';
 import { VersionedGameDomain,canonical } from './game.mjs';
@@ -168,6 +169,7 @@ function eventPlan(match,remaining,at){
     if(robot&&chargeRate)limit=Math.min(limit,Math.ceil((robot.capacity_mj-robot.energy_mj)/chargeRate),chargeRate>solar?Math.floor(p.machine.energy_mj/(chargeRate-solar)):Infinity);
     dt=Math.min(dt,limit);return {p,solar,job,robot,chargeRate};
   });
+  if(match.combat_version&&match.next_combat_ms!==null)dt=Math.min(dt,Math.max(1,match.next_combat_ms-at));
   return {plans,dt,changed};
 }
 /** Shared event-clock worker; domain callbacks calculate physical demand and modeled outputs. */
@@ -204,6 +206,7 @@ export function advanceGame(instance,wallNow,budget=1000){
           if(job&&job.work_ms===job.duration_ms){policy.finishProcess(match,p,job,step.at_ms);changed=true;}
         }
         changed=settleRobots(match,step.at_ms)||changed;
+        changed=resolveCombat(match,step.at_ms,policy)||changed;
       }
       match.last_advanced_ms=step.at_ms;policy.prepareState(match);
       state.instance=packGame(match,state.instance,{id:step.effect_id,actor:{kind:'worker',principal_id:null}},step.duration_ms);
