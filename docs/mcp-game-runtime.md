@@ -2,7 +2,7 @@
 
 Open-Industries owns accounts, match identity, private deposits, inventory, jobs, time and receipts in a SQLite database. The game path does not use Supabase, Postgres, the scene CLI login, provider keys, or a hosted service. The independent Node process advances work even when all browsers and MCP clients disconnect.
 
-This is a two-player recovery session in a finite 96 × 56 municipal dump. The shared map contains fourteen waste sites, roads, obstacles, two bases and neutral outposts. Each crew can survey with its two robots, reserve and haul finite loads, inspect delivered material, process every initial waste family through supported recovery routes, and recharge. All jobs run in SQLite while clients are absent. Manufacturing and construction use the durable owned queue; combat, capture and victory remain unsupported. `ready_for_recovery` is true; `ready_for_full_game` remains false.
+This is a two-player recovery session in a finite 96 × 56 municipal dump. The shared map contains fourteen waste sites, roads, obstacles, two bases and neutral outposts. Each crew can survey with its two robots, reserve and haul finite loads, inspect delivered material, process every initial waste family through supported recovery routes, and recharge. All jobs run in SQLite while clients are absent. Manufacturing and construction use the durable owned queue; combat, capture and persistent victory/tie resolution use the authoritative server. `ready_for_recovery` and `ready_for_full_game` are true. The live service advertises the same exact contract at `/health`; the web backend checks it and the independent scheduler before full-match startup.
 
 ## Run
 

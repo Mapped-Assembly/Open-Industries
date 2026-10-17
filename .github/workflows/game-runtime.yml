@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -83,7 +83,7 @@ jobs:
       - run: npm run test:victory
   downstream-browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       OI_CHECKOUT: ${{ github.workspace }}
     steps:
@@ -111,7 +111,7 @@ jobs:
         working-directory: .integration/tower-defense
       - run: npm run test:browser:results
         working-directory: .integration/tower-defense
-      - run: npm run test:browser -- --combat
+      - run: npm run test:browser:full
         working-directory: .integration/tower-defense
       - uses: actions/upload-artifact@v4
         if: always()

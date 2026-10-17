@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { GameDatabase } from './game-sqlite.mjs';
-import { gameErrors, gameFail, GameToolError } from './mcp-game-contract.mjs';
+import { gameContract, gameErrors, gameFail, GameToolError } from './mcp-game-contract.mjs';
 import { SimulationEventError } from './simulation/events.mjs';
 import { AuthorityError } from './simulation/sqlite-authority.mjs';
 
@@ -16,7 +16,7 @@ export async function startGameService({ database, port = 8790, allowSignup = fa
       // Server-to-server transport only. Browsers must use the game backend.
       if (req.headers.origin || req.url?.includes('?')) return send(403, { error: { code: 'INVALID_REQUEST', message: gameErrors.INVALID_REQUEST } });
       const token = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization || '')?.[1];
-      if (req.method === 'GET' && req.url === '/health') return send(200, { scheduler_healthy: db.healthy(), registration_enabled: allowSignup, version: 5 });
+      if (req.method === 'GET' && req.url === '/health') return send(200, { scheduler_healthy: db.healthy(), registration_enabled: allowSignup, version: 5, contract: gameContract });
       if (req.method === 'GET' && req.url === '/auth/session') { db.identity(token); return send(200, { authenticated: true }); }
       if (req.method !== 'POST' || !['/auth/login', '/auth/register', '/auth/logout', '/game', '/simulation/history'].includes(req.url)) return send(404, { error: { code: 'INVALID_REQUEST', message: gameErrors.INVALID_REQUEST } });
       if (req.headers['content-type']?.split(';')[0] !== 'application/json') gameFail('INVALID_REQUEST');

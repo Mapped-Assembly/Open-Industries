@@ -83,3 +83,9 @@ Defensive platforms, ammunition and their lifecycle are documented in [game-unit
 Current combat extension: [combat-v1 authority, timing, visibility and interruption policy](game-combat.md). Combat-capable saves require schema 9 and the matching reviewed client.
 
 Current final-result extension: [victory-v1 policy and verification](game-victory.md), requiring schema 10 and matching clients.
+
+## Full-match startup verification
+
+The exact wire-v5 contract now advertises `ready_for_full_game: true` and `full-match-startup`. `/health` includes that same public contract alongside live scheduler health. Upgrade engine and client together. SQLite schema 10 and saved result/receipt formats are unchanged. The paired client verifies the complete published game schemas and live service contract before accepting authenticated startup.
+
+The downstream browser job runs `test:browser:full`: two native accounts create/join through the UI, recover finite material, test starter hardware, manufacture a raid launcher and every slug, and destroy the opposing tower. It exercises desktop/mobile results and hard restart during combat and after completion. This path uses no database fixtures, granted inventory or accelerated clock. Separate curated result fixtures still cover loss/tie rendering.
