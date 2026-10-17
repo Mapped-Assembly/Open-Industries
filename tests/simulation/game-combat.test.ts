@@ -393,3 +393,90 @@ test("minimum range, walls, power starvation and a destroyed outpost prevent inv
 		f.db.close();
 	}
 });
+
+test("orders cannot earn salvage or capture time before their admission between existing pulses", () => {
+	const f = fixture();
+	try {
+		const guard = f.make(f.a, "sentry-turret", { x: 20, y: 24 });
+		f.order(f.a, guard, "defend");
+		const u = f.make(f.a, "raid-launcher", { x: 9, y: 24 });
+		u.enabled = false;
+		f.a.production.products.find((p: any) => p.id === u.id).enabled = false;
+		commandCombat(
+			f.match,
+			f.a,
+			{ action: "salvage_unit", unit_id: u.id },
+			1500,
+			fail,
+		);
+		f.tick(2000);
+		assert.equal(u.state, "deployed");
+		f.tick(3000);
+		assert.equal(u.state, "salvaged");
+		const raider = f.make(f.b, "raid-launcher", { x: 48, y: 11 }),
+			post = f.match.world.outposts[0];
+		commandCombat(
+			f.match,
+			f.b,
+			{
+				action: "combat_order",
+				unit_id: raider.id,
+				order: "capture",
+				target_id: post.id,
+			},
+			3500,
+			fail,
+		);
+		for (let at = 4000; at <= 8000; at += 1000) f.tick(at);
+		assert.equal(post.owner_slot, null);
+		assert.equal(f.b.combat_orders[0].progress_ms, 4500);
+		f.tick(9000);
+		assert.equal(post.owner_slot, 2);
+	} finally {
+		f.db.close();
+	}
+});
+test("remote salvage requires a surviving service robot and rechecks its position on the completion tick", () => {
+	const f = fixture();
+	try {
+		const u = f.make(f.a);
+		u.enabled = false;
+		f.a.production.products.find((p: any) => p.id === u.id).enabled = false;
+		assert.throws(
+			() =>
+				commandCombat(
+					f.match,
+					f.a,
+					{ action: "salvage_unit", unit_id: u.id },
+					1000,
+					fail,
+				),
+			/COMBAT_SERVICE/,
+		);
+		const r = f.a.robots[0];
+		r.position = { x: 46, y: 24 };
+		commandCombat(
+			f.match,
+			f.a,
+			{ action: "salvage_unit", unit_id: u.id },
+			1000,
+			fail,
+		);
+		r.position = { x: 40, y: 24 };
+		f.tick(2000);
+		assert.equal(u.state, "deployed");
+		assert.equal(f.a.combat_orders[0].reason, "service-robot-required");
+		r.position = { x: 46, y: 24 };
+		commandCombat(
+			f.match,
+			f.a,
+			{ action: "salvage_unit", unit_id: u.id },
+			2000,
+			fail,
+		);
+		f.tick(3000);
+		assert.equal(u.state, "salvaged");
+	} finally {
+		f.db.close();
+	}
+});

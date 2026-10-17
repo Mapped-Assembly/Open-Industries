@@ -98,7 +98,9 @@ export function combatProjection(match, p) {
 		policy: structuredClone(combatPolicy),
 		next_tick_ms: match.next_combat_ms,
 		targets: combatTargets(match),
-		orders: structuredClone(p.combat_orders ?? []),
+		orders: (p.combat_orders ?? []).map(
+			({ ordered_at_ms, last_tick_ms, ...visible }) => structuredClone(visible),
+		),
 		events: structuredClone(match.combat_events ?? []),
 	};
 }
@@ -180,6 +182,8 @@ export function commandCombat(match, p, args, now, fail) {
 		state: "pending",
 		reason: null,
 		progress_ms: 0,
+		ordered_at_ms: now,
+		last_tick_ms: now,
 	});
 	match.next_combat_ms ??= now + combatPolicy.tick_ms;
 	p.base.ready_to_finish = false;
@@ -266,7 +270,13 @@ export function resolveCombat(match, at, policy) {
 				stop("unavailable");
 				continue;
 			}
+			const elapsed = Math.min(combatPolicy.tick_ms, at - o.last_tick_ms);
+			o.last_tick_ms = at;
 			if (o.order === "salvage") {
+				if (at < o.ordered_at_ms + combatPolicy.salvage_ms) {
+					active = true;
+					continue;
+				}
 				// Service position and inventory/power are revalidated at completion, never reserved twice.
 				try {
 					if (
@@ -345,7 +355,10 @@ export function resolveCombat(match, at, policy) {
 					o.reason = "contested";
 					o.progress_ms = 0;
 				} else {
-					o.progress_ms += combatPolicy.tick_ms;
+					o.progress_ms = Math.min(
+						combatPolicy.capture_ms,
+						o.progress_ms + elapsed,
+					);
 					if (o.progress_ms >= combatPolicy.capture_ms) {
 						match.world.outposts.find((t) => t.id === o.target_id).owner_slot =
 							p.slot;
@@ -471,7 +484,10 @@ export function assertCombat(match, fail) {
 				!["pending", "running", "completed", "cancelled"].includes(o.state) ||
 				!Number.isSafeInteger(o.progress_ms) ||
 				o.progress_ms < 0 ||
-				o.progress_ms > combatPolicy.capture_ms
+				o.progress_ms > combatPolicy.capture_ms ||
+				!Number.isSafeInteger(o.ordered_at_ms) ||
+				!Number.isSafeInteger(o.last_tick_ms) ||
+				o.last_tick_ms < o.ordered_at_ms
 			)
 				fail("INVARIANT_FAILED");
 	}
