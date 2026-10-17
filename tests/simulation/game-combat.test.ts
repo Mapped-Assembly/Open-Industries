@@ -480,3 +480,18 @@ test("remote salvage requires a surviving service robot and rechecks its positio
 		f.db.close();
 	}
 });
+
+test("an enemy-owned outpost does not contest its own recapture without defenders", () => {
+	const f = fixture();
+	try {
+		const u = f.make(f.a, "raid-launcher", { x: 48, y: 11 }),
+			post = f.match.world.outposts[0];
+		post.owner_slot = 2;
+		f.order(f.a, u, "capture", post.id);
+		for (let at = 2000; at <= 6000; at += 1000) f.tick(at);
+		assert.equal(post.owner_slot, 1);
+		assert.equal(f.a.combat_orders[0].state, "completed");
+	} finally {
+		f.db.close();
+	}
+});

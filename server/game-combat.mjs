@@ -346,6 +346,7 @@ export function resolveCombat(match, at, policy) {
 				} else if (
 					targets.some(
 						(other) =>
+							other.id !== t.id &&
 							other.slot !== null &&
 							other.slot !== p.slot &&
 							other.health > 0 &&
