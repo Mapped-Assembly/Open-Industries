@@ -91,7 +91,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: isayahc/tower-defense
-          ref: 5afd4a6dce30728ae62173a66a9a4dd96ef7387e
+          ref: 611c4e7f697d55ab9fa836226b485e22bd5b7013
           path: .integration/tower-defense
       - uses: actions/setup-node@v4
         with:
