@@ -67,6 +67,20 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test:combat
+  victory:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:victory
   downstream-browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -94,6 +108,8 @@ jobs:
       - run: npm run test:integration
         working-directory: .integration/tower-defense
       - run: npx playwright install --with-deps chromium
+        working-directory: .integration/tower-defense
+      - run: npm run test:browser:results
         working-directory: .integration/tower-defense
       - run: npm run test:browser -- --combat
         working-directory: .integration/tower-defense

@@ -1,3 +1,4 @@
+import { resolveVictory } from "./game-victory.mjs";
 import { unitProfiles, damageUnit, commandUnit } from "./game-units.mjs";
 import { route, lineOfSight, stopRobot } from "./game-robots.mjs";
 import { productionSolar } from "./game-manufacturing.mjs";
@@ -453,7 +454,8 @@ export function resolveCombat(match, at, policy) {
 		if (t.health <= amount) destroyTarget(match, t, policy, at);
 	}
 	match.next_combat_ms = active ? at + combatPolicy.tick_ms : null;
-	return combatFingerprint(match) !== before;
+	const finished = resolveVictory(match, at, policy);
+	return finished || combatFingerprint(match) !== before;
 }
 export function assertCombat(match, fail) {
 	if (!match.combat_version) return;

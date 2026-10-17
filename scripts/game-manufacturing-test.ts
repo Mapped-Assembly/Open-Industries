@@ -249,7 +249,11 @@ try {
 	make("copper-conductor");
 	make("fabricator");
 
-	if (process.argv.includes("--units") || process.argv.includes("--combat")) {
+	if (
+		process.argv.includes("--units") ||
+		process.argv.includes("--combat") ||
+		process.argv.includes("--victory")
+	) {
 		// All bulk stock above was recovered, processed and graded through real commands.
 		for (const r of read().field.robots) {
 			act("recharge_robot", { robot_id: r.id });
@@ -465,7 +469,10 @@ try {
 		const beforeTick = read().units;
 		tick(120000);
 		assert.deepEqual(read().units, beforeTick); // No phantom idle firing, ammo use or tower damage.
-		if (process.argv.includes("--combat")) {
+		if (
+			process.argv.includes("--combat") ||
+			process.argv.includes("--victory")
+		) {
 			manufacturedCombat({
 				db,
 				path,
