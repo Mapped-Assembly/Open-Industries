@@ -495,3 +495,22 @@ test("an enemy-owned outpost does not contest its own recapture without defender
 		f.db.close();
 	}
 });
+
+test("idle combat persists clock cursors without invalidating every browser command revision", () => {
+	const f = fixture();
+	try {
+		const u = f.make(f.a, "sentry-turret", { x: 20, y: 24 });
+		f.order(f.a, u, "defend");
+		const first = advanceGame(packGame(f.match), 2000),
+			idle = advanceGame(first, 6000);
+		assert.equal(idle.revision, first.revision);
+		assert.equal(idle.simulation_time_ms, 6000);
+		assert.equal(nativeGame(idle).next_combat_ms, 7000);
+		assert.equal(
+			nativeGame(idle).players[0].combat_orders[0].last_tick_ms,
+			6000,
+		);
+	} finally {
+		f.db.close();
+	}
+});

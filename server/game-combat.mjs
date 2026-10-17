@@ -248,6 +248,16 @@ function destroyTarget(match, t, policy, at) {
 	p.base.power.solar_w = productionSolar(p);
 	log(match, at, "destroyed", null, t.id);
 }
+// Clock cursors and unchanged waits are durable progress, not a new gameplay revision.
+const combatFingerprint = (match) =>
+	JSON.stringify({
+		units: match.players.map((p) => p.units ?? []),
+		orders: match.players.map((p) =>
+			(p.combat_orders ?? []).map(({ last_tick_ms, ...visible }) => visible),
+		),
+		outposts: match.world.outposts,
+		events: match.combat_events,
+	});
 /** One bounded pulse. All shots are decided before any damage: equal-time fire is simultaneous. */
 export function resolveCombat(match, at, policy) {
 	if (
@@ -256,6 +266,7 @@ export function resolveCombat(match, at, policy) {
 		at < match.next_combat_ms
 	)
 		return false;
+	const before = combatFingerprint(match);
 	const hits = new Map();
 	let active = false;
 	for (const p of match.players)
@@ -442,7 +453,7 @@ export function resolveCombat(match, at, policy) {
 		if (t.health <= amount) destroyTarget(match, t, policy, at);
 	}
 	match.next_combat_ms = active ? at + combatPolicy.tick_ms : null;
-	return true;
+	return combatFingerprint(match) !== before;
 }
 export function assertCombat(match, fail) {
 	if (!match.combat_version) return;
