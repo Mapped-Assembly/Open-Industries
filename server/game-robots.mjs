@@ -92,6 +92,8 @@ const phase = job => job.phases[job.phase_index];
 export const robotJob = (p, r) => p.robot_jobs.find(j => j.id === r.job_id);
 export const robotsBusy = p => p.robot_jobs.some(live);
 const jobCost = phases => phases.reduce((n, s) => n + s.duration_ms * s.power_w, 0);
+const sensorAvailable = (p, r, sensor) => r.sensors.includes(sensor.id)
+  || (!!sensor.kit && (p.components ?? []).some(c => c.kind === sensor.kit && c.quantity > 0 && c.tested && c.condition === 'sound'));
 
 function take(contents, amount) {
   const total = grams(contents), result = {}; let assigned = 0;
@@ -149,7 +151,7 @@ export function commandRobot(match, p, args, now, fail) {
   if (match.legacy_recovery && d.kind === 'cable') fail('LEGACY_DEPOSIT');
   if (args.action === 'survey_robot') {
     const sensor = sensorCatalog.find(s => s.id === args.sensor);
-    if (!sensor || !r.sensors.includes(sensor.id)) fail('SENSOR_UNAVAILABLE');
+    if (!sensor || !sensorAvailable(p, r, sensor)) fail('SENSOR_UNAVAILABLE');
     if (p.surveys.length >= 128) fail('LIMIT_REACHED');
     const path = route(match.world, r.position, at => distance(at, d.position) <= sensor.range && lineOfSight(match.world, at, d.position));
     if (!path) fail('ROUTE_BLOCKED');
