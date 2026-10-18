@@ -132,7 +132,7 @@ try {
   const aToken = await account('alice'), bToken = await account('bob');
   let a = connect(aToken), b = connect(bToken), a2 = connect(aToken);
   const contract = await ok(a, 'describe', { version: 5 });
-  assert.equal(contract.persistence, 'sqlite-wal'); assert.equal(contract.ready_for_full_game, false);
+  assert.equal(contract.persistence, 'sqlite-wal'); assert.equal(contract.ready_for_full_game, true);
   assert.equal((await a.rpc('tools/list')).tools.filter((t: any) => t.name.startsWith('astra.game_')).length, 10);
   const create = command();
   const pair = await Promise.all([ok(a, 'create_match', create), ok(a2, 'create_match', create)]);

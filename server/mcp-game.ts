@@ -13,6 +13,8 @@ export async function callGameTool(_root: string, name: string, raw: unknown) {
     if (url.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)
       || url.username || url.password || url.pathname !== '/' || url.search || url.hash) throw new Error();
   } catch { return gameFail('UNAVAILABLE'); }
+  const unavailable = ['astra.game_create_match', 'astra.game_join_match', 'astra.game_command'].includes(name)
+    ? 'OUTCOME_UNKNOWN' : 'UNAVAILABLE';
   try {
     const response = await fetch(new URL('/game', url), {
       method: 'POST', redirect: 'error', signal: AbortSignal.timeout(30000),
@@ -20,7 +22,7 @@ export async function callGameTool(_root: string, name: string, raw: unknown) {
       body: JSON.stringify({ name, arguments: args }),
     });
     const reader = response.body?.getReader();
-    if (!reader) return gameFail('OUTCOME_UNKNOWN');
+    if (!reader) return gameFail(unavailable);
     const chunks: Uint8Array[] = []; let size = 0;
     while (true) {
       const { done, value } = await reader.read(); if (done) break;
@@ -36,6 +38,6 @@ export async function callGameTool(_root: string, name: string, raw: unknown) {
     return validateGameResult(name, data);
   } catch (error) {
     if (error instanceof GameToolError) throw error;
-    return gameFail('OUTCOME_UNKNOWN');
+    return gameFail(unavailable);
   }
 }
