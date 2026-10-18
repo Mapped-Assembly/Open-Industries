@@ -16,7 +16,13 @@ const equipment = [
 ];
 export function starterBase(slot, machineId, towerId) {
   const assets = equipment.map(([kind, label, x, y, components]) => ({ id: kind === 'separator' ? machineId : kind === 'tower' ? towerId : randomUUID(), kind, label, position: point(slot, x, y), components: structuredClone(components), status: kind === 'robot' || kind === 'fabricator' ? 'parked' : 'ready' }));
-  const inventory = parts(['fastener', 20, 10], ['repair-plate', 4, 250], ['insulated-wire', 10, 100]);
+  const inventory = parts(
+    ['fastener', 20, 10],
+    ['repair-plate', 4, 250],
+    ['insulated-wire', 10, 100],
+    ['nir-sensor-kit', 1, 350],
+    ['thermal-sensor-kit', 1, 300],
+  );
   const ledger = [...assets.flatMap(a => a.components.map(c => ({ ...c, allocation_id: a.id }))), ...inventory.map(c => ({ ...c, allocation_id: 'store' }))];
   return { id: randomUUID(), assets, inventory, starter_ledger: ledger, ready_to_finish: false,
     power: { solar_w: 100, capacity_mj: 20000000, initial_mj: 20000000, generated_mj: 0, spilled_mj: 0 } };
