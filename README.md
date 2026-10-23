@@ -114,6 +114,14 @@ Copy [`.env.example`](.env.example) to `.env` when you need configuration. Resta
 
 Only public Supabase browser configuration belongs in `VITE_` variables. Provider credentials and Supabase service-role keys must stay out of the browser bundle.
 
+## Persistent runtime hosting
+
+For an always-on simulation backend, use the [single-server deployment guide](docs/persistent-runtime.md).
+It includes a systemd service, HTTPS proxy configuration, private persistent SQLite storage,
+worker readiness checks, and backup/restore verification. The browser may disconnect while
+supported modeled jobs continue. A host and domain still need to be provisioned; this is
+separate from the browser-only hosted workbench.
+
 ## Technology and repository map
 
 | Part | Technology | Location |

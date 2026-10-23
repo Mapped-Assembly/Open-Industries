@@ -1,0 +1,15 @@
+[Unit]
+Description=Check Open-Industries scheduler readiness
+After=oi-runtime.service
+
+[Service]
+Type=oneshot
+User=oi-runtime
+Group=oi-runtime
+ExecStart=/usr/bin/python3 /opt/open-industries/current/scripts/runtime_health.py http://127.0.0.1:8791
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+LogNamespace=oi-runtime
+TimeoutStartSec=10
