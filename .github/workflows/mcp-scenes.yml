@@ -18,6 +18,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run test:mcp
+      - run: npm run test:local-scenes
       - run: npm run test:form-import
       - run: npm run test:form-workflows
       - run: npm run test:project-files
