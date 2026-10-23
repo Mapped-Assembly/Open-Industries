@@ -1,0 +1,10 @@
+[Unit]
+Description=Periodically check Open-Industries scheduler readiness
+
+[Timer]
+OnBootSec=60s
+OnUnitActiveSec=30s
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

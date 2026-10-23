@@ -47,13 +47,15 @@ export async function startSimulationService({
       const token = /^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization ?? '')?.[1] ?? '';
       if (req.method === 'GET' && req.url === '/simulation/describe' && domain==='field-lab')
         return send(200,{version:1,module:fieldLabPin,command_schema:fieldLabModule.commandSchema,snapshot_schema:fieldLabModule.projectionSchema,modeled_only:true});
-      if (req.method === 'GET' && req.url === '/health')
-        return send(200, {
+      if (req.method === 'GET' && req.url === '/health') {
+        const healthy = db.healthy();
+        return send(healthy ? 200 : 503, {
           version: 1,
           module: domain==='field-lab'?fieldLabPin:workCellPin,
-          scheduler_healthy: db.healthy(),
+          scheduler_healthy: healthy,
           registration_enabled: allowSignup,
         });
+      }
       if (
         req.method !== 'POST' ||
         ![
@@ -175,11 +177,16 @@ export async function startSimulationService({
     db.close();
     throw error;
   }
+  let workerFailed = false;
   const timer = setInterval(() => {
     try {
       db.tick();
+      if (workerFailed) console.info(JSON.stringify({ event: 'simulation_worker_recovered', domain }));
+      workerFailed = false;
     } catch {
-      /* Failed ticks do not renew health. */
+      // Log transitions only, without database contents, credentials or raw exception messages.
+      if (!workerFailed) console.error(JSON.stringify({ event: 'simulation_worker_failed', domain }));
+      workerFailed = true;
     }
   }, tickMs);
   return {

@@ -1,0 +1,37 @@
+name: Persistent runtime deployment
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deployment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:runtime-deployment
+      - name: Validate systemd units
+        run: systemd-analyze verify deploy/runtime/oi-runtime.service deploy/runtime/oi-runtime-health.service deploy/runtime/oi-runtime-health.timer
+      - name: Install Caddy and validate the production proxy configuration
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y caddy
+          caddy validate --config "$PWD/deploy/runtime/Caddyfile" --adapter caddyfile
+      - name: Exercise the installed service and proxy on the runner
+        run: bash scripts/runtime-systemd-smoke.sh
+      - name: Runtime diagnostics
+        if: always()
+        run: |
+          sudo systemctl status oi-runtime oi-runtime-health.timer --no-pager || true
+          sudo journalctl --namespace=oi-runtime --no-pager -n 100 || true
+          sudo journalctl -u caddy --no-pager -n 50 || true

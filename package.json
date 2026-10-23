@@ -73,7 +73,8 @@
     "test:manufacturing": "node --import tsx scripts/game-manufacturing-test.ts",
     "test:units": "node --import tsx scripts/game-manufacturing-test.ts --units",
     "test:combat": "node --import tsx scripts/game-manufacturing-test.ts --combat",
-    "test:victory": "node --import tsx scripts/game-manufacturing-test.ts --victory"
+    "test:victory": "node --import tsx scripts/game-manufacturing-test.ts --victory",
+    "test:runtime-deployment": "tsc -p tsconfig.simulation.json && node --import tsx --test tests/simulation/deployment.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

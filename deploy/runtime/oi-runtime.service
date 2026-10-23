@@ -1,0 +1,40 @@
+[Unit]
+Description=Open-Industries persistent work-cell runtime
+After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=10
+
+[Service]
+Type=exec
+User=oi-runtime
+Group=oi-runtime
+WorkingDirectory=/opt/open-industries/current
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=/etc/open-industries/runtime.env
+ExecStart=/usr/bin/env node --import tsx server/simulation-service.ts
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+UMask=0077
+StateDirectory=open-industries
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/open-industries
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LogNamespace=oi-runtime
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=60
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
