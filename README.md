@@ -2,7 +2,7 @@
 
 **Arrange hardware in a 3D space, animate how it moves, and share the layout for review.**
 
-OpenIndustries is a spatial workbench that runs locally in your browser for planning fabrication shops, manufacturing spaces, and laboratories. Import equipment from [Form](https://github.com/caid-technologies/Form-OSS) or a STEP CAD file, place it in a room at real-world scale, and preview a workflow before moving physical equipment.
+OpenIndustries is a spatial workbench that runs locally in your browser for planning fabrication shops, manufacturing spaces, and laboratories. Import equipment from [Forma OSS](https://github.com/Mapped-Assembly/forma-oss) or a STEP CAD file, place it in a room at real-world scale, and preview a workflow before moving physical equipment.
 
 [Run locally](#run-locally) · [Try the local demo](#try-the-local-demo) · [Documentation](#documentation)
 
@@ -80,8 +80,8 @@ Browser storage is subject to quota and eviction, so export a scene file for a p
 Install **Node.js 22.16 or newer** and Git, then run:
 
 ```bash
-git clone https://github.com/caid-technologies/Form-Industries.git
-cd Form-Industries
+git clone https://github.com/Mapped-Assembly/Open-Industries.git
+cd Open-Industries
 npm ci
 npm run dev
 ```
@@ -131,7 +131,7 @@ separate from the browser-only hosted workbench.
 | STEP conversion | `occt-import-js` / OpenCascade WebAssembly in a worker | [`src/lib/step.ts`](src/lib/step.ts), [`public/step-worker.js`](public/step-worker.js) |
 | GIF export | `gifenc`, rendered in the browser | [`src/lib/gif.ts`](src/lib/gif.ts) |
 | Cloud accounts and persistence | Supabase Auth, Postgres, optional private Storage | [`supabase/`](supabase/), [`src/lib/scene-repository.ts`](src/lib/scene-repository.ts) |
-| Local Form bridge and agent tools | Node.js/Express, Python `caid-forma-core==0.3.5`, MCP | [`server/`](server/), [`opencode.json`](opencode.json) |
+| Local Form bridge and agent tools | Node.js/Express, Python Forma Core (see `requirements-form.txt`), MCP | [`server/`](server/), [`opencode.json`](opencode.json) |
 | Room transfer CLI | Node.js | [`cli/astra.mjs`](cli/astra.mjs) |
 | Verification and examples | Model tests, browser smoke tests, bundled scenes | [`scripts/`](scripts/), [`public/examples/cleanroom/`](public/examples/cleanroom/) |
 

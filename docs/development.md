@@ -32,7 +32,7 @@ For live generation, configure the appropriate provider environment variables in
 
 The repository includes a project-local OpenCode configuration for the Form OSS MCP server. It is local-only and does not affect the Vercel build or browser bundle. OpenIndustries' file import and existing local generation bridge continue to work when Form MCP is not installed or running.
 
-The commands below run inside a separate [Form OSS checkout](https://github.com/caid-technologies/Forma-OSS), using its documented setup:
+The commands below run inside a separate [Form OSS checkout](https://github.com/Mapped-Assembly/forma-oss), using its documented setup:
 
 ```powershell
 py -3 .\scripts\development\setup-opencode.py --root . --workspace "$HOME\form-workspace" --install-cli

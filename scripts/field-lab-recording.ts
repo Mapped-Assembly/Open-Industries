@@ -16,7 +16,7 @@ async function main(): Promise<void> {
   // the next tick. Production retention remains unchanged; cutover is exercised each minute.
   db.history.maxEvents = 1;
   try {
-    const { token } = await db.authenticate({ username: 'scene-recorder', password: 'local-recording-fixture' }, true);
+    let { token } = await db.authenticate({ username: 'scene-recorder', password: 'local-recording-fixture' }, true);
     const cases = ['baseline', 'combined', 'resilience'].map((scenario) => {
       const result = db.create(token, { command_id: `record-${scenario}`, scenario, dispatch: 'automatic' });
       return { scenario, id: (result.snapshot as unknown as LabSceneSnapshot).instance_id, frames: [] as LabSceneFrame[] };
@@ -24,7 +24,11 @@ async function main(): Promise<void> {
     for (let elapsed = 0; elapsed <= labDayMs; elapsed += 60000) {
       now = 1000 + elapsed;
       db.tick();
-      if (elapsed % 3600000 === 0) console.log(`Recording hour ${elapsed / 3600000}/8`);
+      if (elapsed % 3600000 === 0) {
+        // Sessions expire on the modeled clock too; authenticate normally after cutover.
+        ({ token } = await db.authenticate({ username: 'scene-recorder', password: 'local-recording-fixture' }));
+        console.log(`Recording hour ${elapsed / 3600000}/8`);
+      }
       for (const item of cases) {
         const page = db.sceneHistoryPage(token, { instance_id: item.id, cursor: null, limit: 64 }) as {
           events: LabSceneFrame[]; next_cursor: string | null;

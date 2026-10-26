@@ -9,8 +9,8 @@ The Grok, ChatGPT, and Codex fixtures are authored examples using one provider-a
 Use Node 22 or newer:
 
 ```sh
-git clone https://github.com/caid-technologies/OpenIndustries.git
-cd OpenIndustries
+git clone https://github.com/Mapped-Assembly/Open-Industries.git
+cd Open-Industries
 npm ci
 npm run build
 npm run test:mcp-agent-workflows
