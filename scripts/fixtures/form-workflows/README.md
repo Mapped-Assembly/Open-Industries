@@ -29,7 +29,7 @@ Use Python 3.12, git and uv, from the repository root. Python dependencies are o
 needed for recapture, not the normal npm tests.
 
 ```sh
-git clone https://github.com/caid-technologies/Form-OSS.git /tmp/form-upstream
+git clone https://github.com/Mapped-Assembly/forma-oss.git /tmp/form-upstream
 git -C /tmp/form-upstream checkout d594bd3317860eb1225030dcc38d8a2a26f5d291
 git -C /tmp/form-upstream worktree add --detach /tmp/form-legacy 6125a56e16b71de21d38929bc1ec09e94119ec21
 uv venv /tmp/form-capture-env --python 3.12

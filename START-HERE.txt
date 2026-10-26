@@ -25,7 +25,7 @@ see docs/development.md under Local Form generation.
 Cloud scene persistence requires your OI Supabase configuration and owner sign-in.
 
 SNAPSHOT
-Repository: https://github.com/caid-technologies/Open-Industries
+Repository: https://github.com/Mapped-Assembly/Open-Industries
 Commit: b7a35f2a50b8408731f7e651110f23a697ca4fa3
 Branch at packaging: docs/issue-62-verification
 

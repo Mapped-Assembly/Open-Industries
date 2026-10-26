@@ -44,5 +44,5 @@
   "sdk_distribution": "caid-forma-core==0.3.5",
   "sdk_mode": "deterministic simulation",
   "upstream_commit": "d594bd3317860eb1225030dcc38d8a2a26f5d291",
-  "upstream_repository": "https://github.com/caid-technologies/Form-OSS"
+  "upstream_repository": "https://github.com/Mapped-Assembly/forma-oss"
 }

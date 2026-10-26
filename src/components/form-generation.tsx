@@ -29,7 +29,7 @@ export function FormGeneration({ busy, generate }: { busy: boolean; generate: (r
           <button type="submit" disabled={busy || !ready}>Build and import →</button>
         </form>
       </>}
-      <p><a href="https://github.com/caid-technologies/Open-Industries/blob/main/docs/development.md#local-form-generation" target="_blank" rel="noreferrer">Local generation setup</a></p>
+      <p><a href="https://github.com/Mapped-Assembly/Open-Industries/blob/main/docs/development.md#local-form-generation" target="_blank" rel="noreferrer">Local generation setup</a></p>
     </details>
   </section>;
 }

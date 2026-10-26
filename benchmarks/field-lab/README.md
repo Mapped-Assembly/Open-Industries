@@ -1,6 +1,6 @@
 # FIELD-LAB-01 — scarcity benchmark
 
-A fictional rural environmental-water lab, authored and rendered on 2026-10-05 using **Mapped-Assembly/Open-Industries main at `810f182e40011288e6f3280cd34926521481697b`**. This is a versioned integration baseline and gap assessment, not a certification of physical laboratory performance or a test of every CAID service.
+A fictional rural environmental-water lab, authored and rendered on 2026-10-05 using **Mapped-Assembly/Open-Industries main at `810f182e40011288e6f3280cd34926521481697b`**. This is a versioned integration baseline and gap assessment, not a certification of physical laboratory performance or a test of every connected service.
 
 The benchmark is deliberately split into three independently reproducible layers:
 

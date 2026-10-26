@@ -188,7 +188,7 @@ def main():
                 'FORMA_DEPLOYMENT_MODE':'local','FORMA_CAD_WORKSPACE':f'{directory}/cad','PYTHONUNBUFFERED':'1','FORMA_AUTH_MODE':'none'})
             subprocess.run([sys.executable,str(Path(__file__).resolve()),'--upstream',str(args.upstream),'--legacy-upstream',str(args.legacy_upstream),'--output',str(args.output),'--phase',phase],env=env,cwd=directory,check=True)
     # Only source/tool identity and file hashes, never environment dumps.
-    write(args.output/'provenance.json',{'sdk_distribution':'caid-forma-core==0.3.5','upstream_repository':'https://github.com/caid-technologies/Form-OSS',
+    write(args.output/'provenance.json',{'sdk_distribution':'caid-forma-core==0.3.5','upstream_repository':'https://github.com/Mapped-Assembly/forma-oss',
         'legacy_sdk_commit':LEGACY_UPSTREAM,'upstream_commit':UPSTREAM,'agent_client_sha256':hashlib.sha256((args.upstream/'.agents/skills/forma-hardware/scripts/forma.py').read_bytes()).hexdigest(),
         'sdk_mode':'deterministic simulation','agent_mode':'published portable agent compile client + real local MCP handler + isolated SQLite',
         'sanitized_fields':sorted(SANITIZED_FIELDS),'native_agent_apps_executed':False,'live_provider_calls':False,'normalized_fields':['created_at','updated_at','generated_at','timestamp'],

@@ -115,7 +115,7 @@ Unsupported versions and malformed variants must fail with an actionable message
 
 ### Typed import validation
 
-The import models in `src/lib/form-model.ts` follow the [upstream Hardware IR definitions](https://github.com/caid-technologies/Form-OSS/blob/d594bd3317860eb1225030dcc38d8a2a26f5d291/forma_core/workspaces/projects/models.py). Known overview, component, part-definition, BOM, net/pin, validation, mechanical, assembly, architecture, and provenance fields are typed and checked before either envelope or companion-STEP import. Errors identify the failing field, for example `project_ir.bom[0].quantity` or `namespace.mechanical.component_placements[0].size.x_mm`.
+The import models in `src/lib/form-model.ts` follow the [upstream Hardware IR definitions](https://github.com/Mapped-Assembly/forma-oss/blob/main/forma_core/workspaces/projects/models.py). Known overview, component, part-definition, BOM, net/pin, validation, mechanical, assembly, architecture, and provenance fields are typed and checked before either envelope or companion-STEP import. Errors identify the failing field, for example `project_ir.bom[0].quantity` or `namespace.mechanical.component_placements[0].size.x_mm`.
 
 Optional sections may be absent. Nullable overview, mechanical, requirements, architecture, validation and metadata sections remain supported; geometry must still be available to render an asset. A missing raw-IR version keeps the legacy 0.1 default, while namespace documents default to 0.2. Explicit unsupported, empty or non-string versions are rejected. Object revision counters are independent of the Hardware IR version.
 
