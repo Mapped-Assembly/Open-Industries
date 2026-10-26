@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .venv/
+.venv-vision/
 .venv-release/
 python-dist/
 .env

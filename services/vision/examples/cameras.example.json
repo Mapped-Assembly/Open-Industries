@@ -1,0 +1,32 @@
+{
+  "cameras": [
+    {
+      "camera_id": "rendered-overhead",
+      "machine_id": "arm-01",
+      "adapter": "file",
+      "path": "rendered-frame.png",
+      "evidence_kind": "simulation"
+    },
+    {
+      "camera_id": "pi-overhead",
+      "machine_id": "arm-01",
+      "adapter": "http_snapshot",
+      "url": "http://127.0.0.1:8081/emeet/snapshot.jpg",
+      "evidence_kind": "physical"
+    }
+  ],
+  "principals": [
+    {"principal_id": "arm-01-agent", "machines": ["arm-01"], "token_env": "OI_VISION_TOKEN"}
+  ],
+  "profiles": [
+    {"profile_id": "quality", "type": "image_quality"},
+    {
+      "profile_id": "yellow-regions",
+      "type": "color_regions",
+      "label": "yellow-region",
+      "lower_hsv": [20, 100, 100],
+      "upper_hsv": [40, 255, 255],
+      "min_area_px": 30
+    }
+  ]
+}

@@ -114,6 +114,14 @@ Copy [`.env.example`](.env.example) to `.env` when you need configuration. Resta
 
 Only public Supabase browser configuration belongs in `VITE_` variables. Provider credentials and Supabase service-role keys must stay out of the browser bundle.
 
+## Camera observations for machine agents
+
+The optional [Python OpenCV 5 service](docs/vision-service.md) captures configured file
+or HTTP camera snapshots, retains image evidence and immutable observations, and exposes
+machine-scoped `astra.vision_*` MCP tools. Agents can inspect images, measure image
+quality, and detect configured color regions. It supplies perception evidence; task-specific
+recognition and robot control remain consuming-application responsibilities.
+
 ## Persistent runtime hosting
 
 For an always-on simulation backend, use the [single-server deployment guide](docs/persistent-runtime.md).
@@ -183,6 +191,7 @@ The `Publish packages` workflow validates both builds before publishing. Add a c
 - [Revision history and restore](docs/scene-history.md) — compare saved versions, restore a new head, and preserve exact geometry bindings.
 - [Cross-agent walkthrough](docs/mcp-agent-workflows.md) — deterministic Grok/ChatGPT/Codex fixtures, local agent setup, and create/update/reopen commands.
 - [External-agent scene authoring](docs/mcp-scenes.md) — MCP setup, typed tools, revision URLs, and the deterministic cleanroom fixture.
+- [Camera and OpenCV observations](docs/vision-service.md) — reusable camera sources, persistent evidence, machine-scoped agent tools and an executable fixture demo.
 - [Finite resource accounting](docs/architecture/simulation-resources.md) — shared reservation lifecycle, exact units and conserved inventories.
 - [Durable job scheduling](docs/architecture/simulation-jobs.md) — server-time checkpoints, bounded catch-up, resource waits and interruption controls.
 - [Simulation event history](docs/architecture/simulation-events.md) — atomic private history, authorized snapshots and bounded replay/cursor semantics.

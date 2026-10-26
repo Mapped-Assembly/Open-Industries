@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "open-industries-vision"
+version = "0.1.0"
+description = "Camera acquisition and evidence-backed OpenCV observations for Open Industries"
+requires-python = ">=3.11"
+dependencies = ["opencv-python-headless==5.0.0.93", "numpy==2.2.6", "Pillow==11.3.0"]
+
+[project.scripts]
+oi-vision = "oi_vision.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["oi_vision*"]
