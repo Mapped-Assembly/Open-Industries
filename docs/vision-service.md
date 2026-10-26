@@ -5,6 +5,9 @@ evidence and exposing observations through the existing `server/astra-mcp.mjs` h
 This is a perception boundary: the service never sends a robot command or marks a
 task complete. Machine agents can use observations when proposing subsequent work.
 
+The [inspection policy and MCP tools](vision-agent.md) connect this service to the
+existing simulated robot runtime, with durable command recovery and before/after evidence.
+
 ## Installed capabilities
 
 | Component | Implemented behavior |
