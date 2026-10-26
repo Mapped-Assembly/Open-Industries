@@ -122,6 +122,10 @@ machine-scoped `astra.vision_*` MCP tools. Agents can inspect images, measure im
 quality, and detect configured color regions. It supplies perception evidence; task-specific
 recognition and robot control remain consuming-application responsibilities.
 
+The [inspection agent integration](docs/vision-agent.md) connects those observations
+to existing simulated robot commands. Its MCP tools record the visual decision, durable
+command, runtime job result and follow-up image; a runnable demo exercises the full loop.
+
 ## Persistent runtime hosting
 
 For an always-on simulation backend, use the [single-server deployment guide](docs/persistent-runtime.md).

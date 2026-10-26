@@ -7,6 +7,7 @@ import { gameTools } from './mcp-game-contract.mjs';
 import { simulationTools } from './mcp-simulation-contract.mjs';
 import { visionTools } from './mcp-vision-contract.mjs';
 import { callVisionTool } from './mcp-vision.mjs';
+import { agentTools, callAgentTool } from './mcp-agent.mjs';
 import { scrubPortableData as scrub } from '../src/lib/portable-data.mjs';
 
 let sceneRuntime;
@@ -41,6 +42,7 @@ const tools = [
   ...gameTools,
   ...simulationTools,
   ...visionTools,
+  ...agentTools,
   { name: 'astra.read_animation_feedback', description: 'Read the latest scrubbed Mergence authored-animation review for Form iteration.', inputSchema: { type: 'object', properties: {} } },
   { name: 'astra.read_form_project', description: 'Read a local compiled Form project manifest from the Mergence checkout.', inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'Checkout-relative path, usually demo/form-project.json.' } } } },
   { name: 'astra.save_form_project', description: 'Save a Form MCP project_ir back into an existing compiled project manifest.', inputSchema: { type: 'object', properties: { path: { type: 'string' }, project_ir: { type: 'object' } }, required: ['path', 'project_ir'] } },
@@ -49,6 +51,7 @@ const tools = [
 ];
 
 async function callTool(name, args = {}) {
+  if(agentTools.some(tool=>tool.name===name))return callAgentTool(root,name,args);
   if(visionTools.some(tool=>tool.name===name))return callVisionTool(name,args);
   if(simulationTools.some(tool=>tool.name===name))return (await simulationModule()).callSimulationTool(name,args);
   if (gameTools.some(tool => tool.name === name)) return (await gameModule()).callGameTool(root, name, args);
@@ -106,6 +109,10 @@ async function handle(request) {
       return response(request.id, textResult(result));
     }
     catch (error) {
+      if(agentTools.some(tool=>tool.name===request.params?.name)) {
+        const code=error?.name==='AgentToolError'?error.code:'UNAVAILABLE';
+        return response(request.id,{...textResult({error:{code,message:code}}),isError:true});
+      }
       if(visionTools.some(tool=>tool.name===request.params?.name)) {
         const known=error?.name==='VisionToolError';
         return response(request.id,{...textResult({error:{code:known?error.code:'UNAVAILABLE',message:known?error.message:'Vision service is unavailable.'}}),isError:true});
