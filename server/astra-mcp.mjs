@@ -5,6 +5,8 @@ import { callRoomTool, roomTools } from './mcp-rooms.mjs';
 import { sceneTools } from './mcp-scene-contract.mjs';
 import { gameTools } from './mcp-game-contract.mjs';
 import { simulationTools } from './mcp-simulation-contract.mjs';
+import { visionTools } from './mcp-vision-contract.mjs';
+import { callVisionTool } from './mcp-vision.mjs';
 import { scrubPortableData as scrub } from '../src/lib/portable-data.mjs';
 
 let sceneRuntime;
@@ -38,6 +40,7 @@ const tools = [
   ...sceneTools,
   ...gameTools,
   ...simulationTools,
+  ...visionTools,
   { name: 'astra.read_animation_feedback', description: 'Read the latest scrubbed Mergence authored-animation review for Form iteration.', inputSchema: { type: 'object', properties: {} } },
   { name: 'astra.read_form_project', description: 'Read a local compiled Form project manifest from the Mergence checkout.', inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'Checkout-relative path, usually demo/form-project.json.' } } } },
   { name: 'astra.save_form_project', description: 'Save a Form MCP project_ir back into an existing compiled project manifest.', inputSchema: { type: 'object', properties: { path: { type: 'string' }, project_ir: { type: 'object' } }, required: ['path', 'project_ir'] } },
@@ -46,6 +49,7 @@ const tools = [
 ];
 
 async function callTool(name, args = {}) {
+  if(visionTools.some(tool=>tool.name===name))return callVisionTool(name,args);
   if(simulationTools.some(tool=>tool.name===name))return (await simulationModule()).callSimulationTool(name,args);
   if (gameTools.some(tool => tool.name === name)) return (await gameModule()).callGameTool(root, name, args);
   if (sceneTools.some(tool => tool.name === name)) return (await sceneModule()).callSceneTool(root, name, args);
@@ -90,8 +94,22 @@ async function handle(request) {
   if (request.method === 'ping') return response(request.id, {});
   if (request.method === 'tools/list') return response(request.id, { tools });
   if (request.method === 'tools/call') {
-    try { return response(request.id, textResult(await callTool(request.params?.name, request.params?.arguments))); }
+    try {
+      const result = await callTool(request.params?.name, request.params?.arguments);
+      if (request.params?.name === 'astra.vision_read_frame') {
+        const { preview, ...record } = result;
+        const { data, ...metadata } = preview;
+        const formatted = textResult({ ...record, preview: metadata });
+        formatted.content.push({ type: 'image', data, mimeType: preview.mime_type });
+        return response(request.id, formatted);
+      }
+      return response(request.id, textResult(result));
+    }
     catch (error) {
+      if(visionTools.some(tool=>tool.name===request.params?.name)) {
+        const known=error?.name==='VisionToolError';
+        return response(request.id,{...textResult({error:{code:known?error.code:'UNAVAILABLE',message:known?error.message:'Vision service is unavailable.'}}),isError:true});
+      }
       if(simulationTools.some(tool=>tool.name===request.params?.name)) {
         const known=error?.name==='SimulationToolError';
         return response(request.id,{...textResult({error:{code:known?error.code:'UNAVAILABLE',message:known?error.message:'Simulation transport is unavailable.'}}),isError:true});
