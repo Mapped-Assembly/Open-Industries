@@ -16,7 +16,7 @@ await mkdir(publicRoot, { recursive: true });
 await cp(join(repoRoot, 'public'), publicRoot, { recursive: true, force: true });
 const publicAssets = join(publicRoot, 'field-lab-assets');
 await mkdir(publicAssets, { recursive: true });
-for (const file of ['field-lab.oi.json', 'field-lab-results.json']) await copyFile(join(out, file), join(publicAssets, file));
+for (const file of ['field-lab.oi.json', 'field-lab-results.json', 'field-lab-recording.json']) await copyFile(join(out, file), join(publicAssets, file));
 
 const server = await createServer({ root: repoRoot, publicDir: publicRoot, server: { host, port, strictPort: true } });
 await server.listen();
@@ -38,10 +38,11 @@ try {
   await page.waitForFunction(() => window.ready, { timeout: 60000 });
   console.log('Page loaded; ready:', await page.evaluate(() => window.ready));
   const canvas = page.locator('#output');
-  await page.evaluate(() => window.frame(2, 'hero'));
+  const overview = await page.evaluate(() => window.frame(2, 'hero'));
   await canvas.screenshot({ path: join(out, 'field-lab-overview.png') });
-  await page.evaluate(() => window.frame(10));
+  const pipetting = await page.evaluate(() => window.frame(10));
   await canvas.screenshot({ path: join(out, 'field-lab-pipetting.png') });
+  await writeFile(join(out, 'screenshot-events.json'), JSON.stringify({ overview, pipetting }, null, 2));
   let frames = 2;
   if (mode === 'film') {
     const framesRoot = join(out, 'frames');
@@ -60,10 +61,10 @@ try {
       measurementBoundary: 'Frame evaluation plus PNG screenshot capture; not interactive FPS or hardware performance.',
       frames: stats,
     }, null, 2));
-    console.log('Rendering native Open-Industries GIF export');
     const gif = await page.evaluate(() => window.nativeGif());
     await writeFile(join(out, 'field-lab-native.gif'), new Uint8Array(gif.bytes));
-    await writeFile(join(out, 'field-lab-native-metadata.json'), JSON.stringify(gif.metadata, null, 2));
+    await writeFile(join(out, 'field-lab-native-metadata.json'), JSON.stringify(gif.metadata));
+    await writeFile(join(out, 'field-lab-playback-export.json'), JSON.stringify(await page.evaluate(() => window.recording)));
   }
   const renderChecks = {
     errors,
@@ -72,6 +73,7 @@ try {
     renderer: 'Open-Industries createWorld + applyWorldPoses + evaluateWorkspace with benchmark camera, lighting and captions.',
     browser: 'Playwright Chromium with SwiftShader-compatible flags',
     nativeGif: mode === 'film',
+    eventRecordingExport: mode === 'film',
     frames,
     interactiveFps: 'not-tested',
   };

@@ -1,9 +1,16 @@
+import {GIFEncoder,applyPalette,quantize} from 'gifenc';
 import * as THREE from 'three';
 import {createWorld,applyWorldPoses} from '../../src/lib/world';
 import {hydrateManifest,readManifest,evaluateWorkspace} from '../../src/lib/workspace';
-import {renderGif} from '../../src/lib/gif';
+import {sampleLabRecording,validateLabRecording} from '../../src/lib/field-lab-playback';
+import type {LabSceneFrame} from '../../src/lib/field-lab-playback';
 const manifest=await (await fetch('/field-lab-assets/field-lab.oi.json')).json();
 const evidence=await (await fetch('/field-lab-assets/field-lab-results.json')).json();
+const recording=await (await fetch('/field-lab-assets/field-lab-recording.json')).json();
+function canonical(value:any):string{return value===null||typeof value!=='object'?JSON.stringify(value):Array.isArray(value)?'['+value.map(canonical).join(',')+']':'{'+Object.keys(value).sort().map(key=>JSON.stringify(key)+':'+canonical(value[key])).join(',')+'}';}
+const sceneDigest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(canonical(manifest))))).map(v=>v.toString(16).padStart(2,'0')).join('');
+if(recording.schema!=='field-lab-scene-recording/v1')throw Error('Unsupported scene recording');
+for(const c of recording.cases)validateLabRecording(c.frames,sceneDigest);
 const ws=hydrateManifest(readManifest(manifest),[]),assets=ws.items.map(i=>i.asset);
 const world=createWorld(assets,ws.room);world.environment.visible=false;world.scene.background=new THREE.Color('#e8e4d9');
 world.scene.children.forEach(o=>{if(o instanceof THREE.HemisphereLight)o.intensity=2;if(o instanceof THREE.DirectionalLight){o.intensity=2.5;o.position.set(-6,12,9);o.castShadow=true;o.shadow.mapSize.set(2048,2048);o.shadow.camera.left=-12;o.shadow.camera.right=12;o.shadow.camera.top=12;o.shadow.camera.bottom=-12;o.shadow.bias=-.001;o.shadow.normalBias=.025;}});
@@ -20,26 +27,29 @@ function label(name:string,pos:number[],dx=0,dy=0){const p=new THREE.Vector3(...
 function clock(m:number){const h=8+Math.floor(m/60);return `${String(h).padStart(2,'0')}:${String(Math.floor(m%60)).padStart(2,'0')}`;}
 function resource(label:string,value:string,f:number,y:number,color=teal){txt(label,1140,y,12,muted,600);txt(value,1140,y+25,23,dark,600);box(1140,y+36,254,5,'#dbe0d6',2);box(1140,y+36,254*Math.max(0,Math.min(1,f)),5,color,2);}
 function miniChart(y:number){txt('24-SAMPLE DAY / OUTCOMES',1140,y,11,muted,700);const titles=['Normal supply','Missed delivery','Low power','Water ration','Combined','With resilience'];evidence.results.forEach((r:any,i:number)=>{const yy=y+26+i*26;txt(titles[i],1140,yy,11,muted);box(1248,yy-9,117,9,'#e0e3d9',2);box(1248,yy-9,117*r.processed/24,9,i===5?teal:i===0?dark:orange,2);txt(String(r.processed),1375,yy,12,dark,700);});}
-function sampleState(result:any,fraction:number){const n=Math.min(31,Math.max(0,Math.floor(fraction*32)));return result.timeline[n];}
 function render(t:number,mode='film'){
  let scenario='baseline',f=Math.min(t/8,1),detail=t>=8&&t<13,phase='01 / THE FIELD LAB';
  if(t>=13&&t<18.5){scenario='combined';f=(t-13)/5.5;phase='03 / SUPPLY + POWER SHOCK';}
  if(t>=18.5){scenario='resilience';f=(t-18.5)/5.5;phase='04 / KEEP THE LAB RUNNING';}
  if(detail)phase='02 / PIPETTING WITH TIP CAMERA';
- const result=evidence.results.find((r:any)=>r.id===scenario),state=sampleState(result,f);
- const poseTime=(!detail&&state.reasons.length)?0:t%24;const poses=evaluateWorkspace(ws.items,ws.animation,poseTime);applyWorldPoses(world.groups,poses);
+ const result=evidence.results.find((r:any)=>r.id===scenario);
+ const frames=recording.cases.find((c:any)=>c.scenario===scenario).frames as LabSceneFrame[];
+ const frame=sampleLabRecording(frames,Math.min(1,Math.max(0,detail?(t-8)/5/32:f))*28800000);
+ const state={...frame.stock,minute:frame.elapsed_ms/60000,processed:frame.processed,reasons:frame.waiting_reasons};
+ const poseTime=frame.pose_fraction*ws.animation.duration;
+ const poses=evaluateWorkspace(ws.items,{...ws.animation,tracks:ws.animation.tracks.filter(track=>track.instanceId==='pipette')},poseTime);applyWorldPoses(world.groups,poses);
  const courier=world.groups[ws.items.findIndex(i=>i.id==='courier')];courier.visible=scenario==='baseline'&&!detail;
  if(mode==='hero'){detail=false;scenario='baseline';}
  if(detail){camera.position.set(1.4,2.76,1.3);camera.lookAt(-.77,1.52,-1.58);camera.fov=38;}
  else{const swing=mode==='hero'?0:Math.sin(t/24*Math.PI)*.5;camera.position.set(12.1+swing,12.8,16.7);camera.lookAt(.1,.25,.3);camera.fov=36;}
  camera.updateProjectionMatrix();renderer.render(world.scene,camera);
  box(0,0,1440,900,cream);box(0,0,1440,6,dark);txt('FIELD LAB / 01',36,41,13,teal,700);txt('A small lab. A fragile supply line.',36,86,35,dark,600);
- txt('OPEN-INDUSTRIES',1138,40,13,dark,700);txt('RESOURCE SCARCITY BENCHMARK',1138,63,10,muted,600);txt('Main 810f182  •  05 OCT 2026',1138,84,11,muted);
+ txt('OPEN-INDUSTRIES',1138,40,13,dark,700);txt('RESOURCE SCARCITY BENCHMARK',1138,63,10,muted,600);txt('Scene SHA '+sceneDigest.slice(0,16),1138,84,11,muted);
  ctx.drawImage(renderer.domElement,0,108);box(0,108,1110,1,line);box(1110,108,330,688,'#f8f6ee');box(1110,108,1,688,line);
- tag(phase,28,139,scenario==='combined'?orange:dark);tag(detail?'KINEMATIC DETAIL':'8-HOUR SYNTHETIC DAY',28,171,'#708779');
+ tag(phase,28,139,scenario==='combined'?orange:dark);tag(detail?'RECORDED KINEMATICS':'RECORDED SYNTHETIC DAY',28,171,'#708779');
  if(!detail){label('PIPETTING + TIP CAMERA',[-.7,1.77,-1.7],-32,-49);label('WATER',[-5.25,1.8,3.0],-50,-34);label('SOLAR + STORAGE',[5.7,1.35,-1.8],65,-34);label('LOCAL REPAIR',[5.7,1.05,1.2],40,26);label('SAMPLE INTAKE',[-2.7,1.55,1.5],-56,39);}
  else{const gi=ws.items.findIndex(i=>i.id==='pipette');const cp=assets[gi].parts.find(p=>p.name==='camera')!;const cm=world.groups[gi].children.find(o=>o.userData.partId===cp.id)!;const cv=new THREE.Box3().setFromObject(cm).getCenter(new THREE.Vector3()).toArray();label('TIP CAMERA',cv,180,-90);label('SAMPLE RACK',[-1.05,1.32,-1.65],-96,60);label('ASSAY PLATE',[-.49,1.255,-1.66],108,67);}
- txt(detail?'Equipment detail':result.name,1140,143,19,dark,700);txt(detail?'Authored motion / no liquid solver':`Simulated time ${clock(state.minute)}  /  08:00–16:00`,1140,166,12,muted);
+ txt(detail?'Equipment detail':result.name,1140,143,19,dark,700);txt(detail?`${frame.job?.id??'No job'} / ${frame.job?.state??'idle'}`:`Simulated time ${clock(state.minute)}  /  08:00–16:00`,1140,166,12,muted);
  txt(String(state.processed).padStart(2,'0'),1138,238,65,dark,600);txt('/ 24',1230,235,25,muted);txt('SAMPLE JOBS COMPLETED',1140,260,11,muted,700);
  rule(1140,280,254);resource('BATTERY',`${Math.round(state.batteryWh)} Wh`,state.batteryWh/1000,308,state.batteryWh<100?orange:teal);
  resource('CLEAN WATER',`${state.waterL.toFixed(1)} L`,state.waterL/16,385,state.waterL<1?orange:teal);
@@ -48,10 +58,21 @@ function render(t:number,mode='film'){
  rule(1140,552,254);miniChart(578);
  box(28,728,660,44,'#f7f4ec',4);txt(scenario==='combined'?'No delivery · 20% solar · 350 Wh starting battery':scenario==='resilience'?'Spare kits + tips · 4.5 L extra water · 40 W deferred load':'District depot → motorbike → lab · local repair on site',44,756,16,dark,600);
  rule(32,810,1375);txt('40 m² LAB',34,839,12,dark,700);txt('24 SAMPLE JOBS',219,839,12,dark,700);txt('6 SCENARIOS',444,839,12,dark,700);txt('21 SCENE INSTANCES',631,839,12,dark,700);
- txt('Native OI geometry + animation  /  added deterministic resource ledger',34,872,13,muted);txt('Conceptual geometry. Synthetic loads. No assay or physics validation.',881,872,11,muted);
+ txt(`Event ${frame.event_id.slice(-24)} / ${frame.job?.state??'idle'} / ${frame.job?.reason??'modeled'}`,34,872,13,muted);txt('Conceptual geometry. Synthetic loads. No assay or physics validation.',881,872,11,muted);
  const progress=Math.min(t/24,1);box(0,893,1440,7,'#c8d1c5');box(0,893,1440*progress,7,teal);
  document.getElementById('status')!.textContent=`${t.toFixed(1)} s · ${phase}`;
- return {scenario,processed:state.processed,detail,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles};
+ return {scenario,event_id:frame.event_id,scene_sha256:sceneDigest,job:frame.job,poseTime,processed:state.processed,detail,drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles};
 }
-(window as any).frame=render;(window as any).ws=ws;(window as any).nativeGif=async()=>{const r=await renderGif(assets,ws.room,{scope:'room',assetIndex:0,region:{x:0,z:0,width:17,depth:12},motion:'animation',size:640,duration:3,fps:10,rangeStart:0,rangeEnd:3},new AbortController().signal,()=>{},ws);return{bytes:Array.from(new Uint8Array(await r.blob.arrayBuffer())),metadata:r.metadata};};
+(window as any).frame=render;(window as any).ws=ws;(window as any).recording=recording;
+// GIF uses precisely the same event sampling and renderer as scrubbing and PNG capture.
+(window as any).nativeGif=async()=>{
+ const gif=GIFEncoder(),small=document.createElement('canvas');small.width=640;small.height=400;
+ const context=small.getContext('2d')!,frames=[];
+ for(let i=0;i<120;i++){
+  frames.push(render(i/5));context.drawImage(canvas,0,0,640,400);
+  const pixels=context.getImageData(0,0,640,400).data,palette=quantize(pixels,256);
+  gif.writeFrame(applyPalette(pixels,palette),640,400,{palette,delay:200});
+ }
+ gif.finish();return {bytes:Array.from(gif.bytes()),metadata:{schema:'field-lab-event-gif/v1',scene_sha256:sceneDigest,frames,mechanics:'kinematic-only'}};
+};
 (window as any).ready=true;render(2,'hero');let playing=false,last=performance.now(),time=0;document.getElementById('play')!.onclick=()=>{playing=!playing;last=performance.now();};document.getElementById('time')!.oninput=(e:any)=>{time=Number(e.target.value);playing=false;render(time);};function tick(now:number){if(playing){time=(time+(now-last)/1000)%24;render(time);(document.getElementById('time') as HTMLInputElement).value=String(time);}last=now;requestAnimationFrame(tick);}requestAnimationFrame(tick);

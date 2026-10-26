@@ -74,6 +74,7 @@ try {
   }
   if (render) {
     run('verify', process.execPath, [join(here, 'verify.mjs'), output]);
+    run('record-events', process.execPath, ['--import', 'tsx', join(repoRoot, 'scripts/field-lab-recording.ts'), output]);
     run('capture', process.execPath, [join(here, 'capture.mjs'), output, 'film']);
   }
 } catch (error) {
