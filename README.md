@@ -125,6 +125,9 @@ recognition and robot control remain consuming-application responsibilities.
 The [inspection agent integration](docs/vision-agent.md) connects those observations
 to existing simulated robot commands. Its MCP tools record the visual decision, durable
 command, runtime job result and follow-up image; a runnable demo exercises the full loop.
+The [persistent demo launcher](docs/persistent-vision-demo.md) keeps the camera, vision
+service and robot runtime available for an external MCP agent, with saved state across
+restarts and commands to show or hide the inspection marker.
 
 ## Persistent runtime hosting
 

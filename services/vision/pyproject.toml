@@ -12,6 +12,7 @@ dependencies = ["opencv-python-headless==5.0.0.93", "numpy==2.2.6", "Pillow==11.
 [project.scripts]
 oi-vision = "oi_vision.__main__:main"
 oi-vision-agent = "oi_vision.agent_cli:main"
+oi-vision-demo = "oi_vision.demo_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["oi_vision*"]
