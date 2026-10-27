@@ -1,0 +1,40 @@
+[Unit]
+Description=Open Industries agent-controlled sample farm
+After=network.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=oi-farm
+Group=oi-farm
+WorkingDirectory=/opt/oi-farm/app
+Environment=PATH=/opt/oi-station/node/bin:/usr/bin:/bin
+Environment=MUJOCO_GL=egl
+Environment=EGL_PLATFORM=surfaceless
+Environment=LIBGL_ALWAYS_SOFTWARE=1
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=OMP_NUM_THREADS=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/opt/oi-farm/venv/bin/python -m oi_vision.farm_cli serve --source /opt/oi-farm/source --state-dir /var/lib/oi-farm/state --port 8794
+Restart=on-failure
+RestartSec=10
+KillMode=mixed
+TimeoutStopSec=30
+UMask=0077
+StateDirectory=oi-farm
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/oi-farm
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target

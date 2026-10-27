@@ -132,6 +132,9 @@ The [AWS inspection deployment](docs/aws-inspection-station.md) provides a pinne
 EC2/systemd installation, SSH stdio agent access, complete-state backup/restore and
 reproducible MCP evidence capture. The [AWS evidence](docs/evidence/aws-inspection-live/README.md)
 records the observed synthetic inspection loop, service restart and host reboot.
+The [sample-farm adapter](docs/farm-agent-control.md) exposes the original ASTRA dog
+and SO-101 arm through MCP: agent-selected moves and harvests, OpenCV pickup evidence,
+pause/resume, persistent jobs and a read-only 3D viewer.
 
 ## Persistent runtime hosting
 
