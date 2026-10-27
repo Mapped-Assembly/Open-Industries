@@ -2,10 +2,12 @@
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Open Industries · Farm demo</title>
 <style>body{margin:0;background:#101e19;color:#e2f5e7;font:15px system-ui}header{padding:20px 24px;border-bottom:1px solid #345044}h1{font-size:25px;margin:0}p{margin:8px 0;color:#b5cdbf}#view{height:65vh;min-height:350px}#status{white-space:pre-wrap;margin-top:12px;min-height:44px}canvas{display:block}button{padding:11px 18px;margin:8px 8px 0 0;border:1px solid #638875;border-radius:8px;background:#233d30;color:white;font:inherit;cursor:pointer}button.primary{background:#b6f08c;color:#173019;font-weight:700}button:disabled{opacity:.4;cursor:default}main{display:grid;grid-template-columns:minmax(0,1fr) 370px}aside{padding:16px;max-height:75vh;overflow:auto;border-left:1px solid #345044}h2{font-size:18px}h3{margin:8px 0}article{background:#20352b;padding:12px;border-radius:10px;margin-bottom:12px}.images{display:flex;gap:8px}.images figure{margin:0;width:50%}.images img{width:100%;border-radius:6px}figcaption,small{font-size:12px;color:#b5cdbf}#error{color:#ffd391}progress{width:100%;accent-color:#b6f08c}footer{padding:14px 24px;color:#b5cdbf}@media(max-width:850px){main{display:block}aside{max-height:none;border:0}#view{height:50vh}}</style>
+<style>#view{position:relative}.view-tools{position:absolute;top:12px;right:12px;z-index:2}.view-tools button{margin:0 0 0 6px;background:#173025e8}.view-tools button[aria-pressed="true"]{background:#b6f08c;color:#173019}#minimap{position:absolute;top:12px;left:12px;width:220px;height:164px;border:1px solid #638875;border-radius:10px;background:#101e19ed;pointer-events:none}#pov-label{position:absolute;bottom:12px;right:12px;padding:5px 9px;background:#101e19dd;border-radius:5px;pointer-events:none;font-size:12px}@media(max-width:600px){#minimap{width:154px;height:115px}.view-tools button{font-size:12px;padding:8px}}</style>
+<style>@media(max-width:600px){.view-tools{display:flex;flex-direction:column;gap:6px}}</style>
 <header><h1>Open Industries / Farm demo</h1><p>ASTRA + SO-101 · Automated controller · OpenCV image verification</p>
 <button id="new" data-action="new_run">New run</button><button id="start" class="primary" data-action="start">Start harvest</button><button id="pause" data-action="pause">Pause</button><button id="resume" data-action="resume">Resume</button>
 <div id="status">Loading actual farm meshes…</div><progress id="progress" max="72" value="0"></progress><div id="error" role="alert"></div></header>
-<main><div id="view"></div><aside><h2>Pickup evidence</h2><p>Rendered simulation images · fixed OpenCV color ROI</p><div id="evidence">Start a run to collect before/after images.</div><h2>Saved runs</h2><div id="history">Loading…</div></aside></main>
+<main><div id="view"><canvas id="minimap" width="440" height="328" aria-label="Live overhead farm map with robot position and heading"></canvas><div class="view-tools"><button id="overview" aria-pressed="true">Overview</button><button id="pov" aria-pressed="false">Quadruped POV</button></div><div id="pov-label">Quadruped POV · simulated mounted camera</div></div><aside><h2>Pickup evidence</h2><p>Rendered simulation images · fixed OpenCV color ROI</p><div id="evidence">Start a run to collect before/after images.</div><h2>Saved runs</h2><div id="history">Loading…</div></aside></main>
 <footer>Deterministic automation, no model invoked by these buttons. Simulated kinematics; scripted produce attachment/release. Drag to orbit · scroll to zoom. Runs continue when this page closes.</footer>
 <script type="importmap">{"imports":{"three":"/vendor/three.module.min.js"}}</script>
 <script type="module">
@@ -38,6 +40,24 @@ const scene=new T.Scene();scene.background=new T.Color('#14251d');scene.add(new 
 const light=new T.DirectionalLight(0xfff2d9,2);light.position.set(3,1,7);scene.add(light);
 const camera=new T.PerspectiveCamera(45,1,.01,100);camera.up.set(0,0,1);camera.position.set(4,5,4);
 const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,0,.2);orbit.enableDamping=true;
+const povCamera=new T.PerspectiveCamera(80,1,.015,100);povCamera.up.set(0,0,1);
+let viewMode='overview',robotReady=false;
+const base=new T.Vector3(),rotation=new T.Quaternion(),forward=new T.Vector3(),eye=new T.Vector3();
+for(const mode of ['overview','pov'])document.querySelector('#'+mode).onclick=()=>{viewMode=mode;orbit.enabled=mode==='overview';for(const id of ['overview','pov'])document.querySelector('#'+id).setAttribute('aria-pressed',String(mode===id));};
+const map=document.querySelector('#minimap'),mapContext=map.getContext('2d');
+function robotViews(s){
+ if(!s.robot_quaternion)return;robotReady=true;base.fromArray(s.robot_position);
+ const [w,x,y,z]=s.robot_quaternion;rotation.set(x,y,z,w);forward.set(0,1,0).applyQuaternion(rotation);
+ eye.set(0,.24,.5).applyQuaternion(rotation).add(base);povCamera.position.copy(eye);
+ povCamera.up.set(0,0,1).applyQuaternion(rotation);povCamera.lookAt(eye.clone().add(forward).addScaledVector(povCamera.up,-.22));
+ const c=mapContext;c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,220,164);
+ const point=(x,y)=>[110+x*44,125-y*53];
+ c.fillStyle='#e2f5e7';c.font='bold 12px system-ui';c.fillText('LIVE MAP',12,19);c.font='10px system-ui';c.fillStyle='#b5cdbf';c.fillText('+Y ↑',179,19);
+ const route=[[1.8,1.3],[1,.96],[0,.96],[-1,.96],[1.8,1.3]];c.strokeStyle='#809e8d';c.setLineDash([3,4]);c.beginPath();route.forEach(([x,y],i)=>{const p=point(x,y);i?c.lineTo(...p):c.moveTo(...p);});c.stroke();c.setLineDash([]);
+ for(const bed of [0,1,2]){const [bx,by]=point(bed-1,.35);c.fillStyle=s.deposited.includes(bed)?'#60914e':'#385743';c.fillRect(bx-18,by-21,36,40);c.strokeStyle=s.next_bed===bed?'#f5d976':'#638875';c.strokeRect(bx-18,by-21,36,40);c.fillStyle='#e2f5e7';c.textAlign='center';c.fillText(['Tomato','Lettuce','Carrot'][bed],bx,by+33);}
+ const home=point(1.8,1.3);c.strokeStyle='#b5cdbf';c.strokeRect(home[0]-5,home[1]-5,10,10);c.textAlign='right';c.fillText('Home',home[0]+5,home[1]-10);
+ const [rx,ry]=point(base.x,base.y);c.save();c.translate(rx,ry);c.rotate(Math.atan2(-forward.y,forward.x));c.fillStyle='#b6f08c';c.beginPath();c.moveTo(9,0);c.lineTo(-6,-5);c.lineTo(-3,0);c.lineTo(-6,5);c.closePath();c.fill();c.restore();c.textAlign='left';c.fillStyle='#b5cdbf';c.fillText('▲ Robot   ··· Route',12,154);
+}
 new ResizeObserver(()=>{renderer.setSize(view.clientWidth,view.clientHeight);camera.aspect=view.clientWidth/view.clientHeight;camera.updateProjectionMatrix();}).observe(view);
 const description=await json('/api/scene'), meshes=new Map(),nodes=new Map();
 for(const [id,url] of Object.entries(description.meshes)){
@@ -47,10 +67,12 @@ for(const [id,url] of Object.entries(description.meshes)){
 for(const g of description.geometries){const material=new T.MeshStandardMaterial({color:new T.Color(...g.rgba.slice(0,3)),roughness:.8});
  const node=new T.Mesh(g.kind==='mesh'?meshes.get(g.mesh):primitive(g.kind,g.size),material);node.position.fromArray(g.position);node.quaternion.fromArray(g.quaternion);scene.add(node);nodes.set(g.id,node);}
 async function update(){try{const state=await json('/api/state');for(const [id,...pose] of state.transforms){const n=nodes.get(id);n.position.fromArray(pose);n.quaternion.fromArray(pose,3);}
- latest=state;controls();document.querySelector('#progress').value=state.elapsed;
+ latest=state;robotViews(state);controls();document.querySelector('#progress').value=state.elapsed;
  status.textContent=`${state.paused?'PAUSED · ':''}${state.phase} · ${state.elapsed.toFixed(1)} / 72 s · Box ${state.deposited.length}/3\nRun ${state.run_id.slice(0,8)} · ${state.controller} · ${state.active_job?'Executing '+state.next_action:(state.next_action||'mission complete')}`;
  if(state.controller_error)document.querySelector('#error').textContent=state.controller_error;await evidence(state);
 }catch{latest=null;controls();status.textContent='Disconnected — reconnecting; server owns progress.';}setTimeout(update,150);}update();
-renderer.setAnimationLoop(()=>{orbit.update();renderer.render(scene,camera);});
+renderer.setAnimationLoop(()=>{orbit.update();const w=view.clientWidth,h=view.clientHeight;renderer.setScissorTest(false);renderer.setViewport(0,0,w,h);povCamera.aspect=w/h;povCamera.updateProjectionMatrix();renderer.render(scene,viewMode==='pov'&&robotReady?povCamera:camera);
+ if(viewMode==='overview'&&robotReady){const width=Math.min(320,w*.45),height=width*.62;renderer.setScissorTest(true);renderer.setScissor(w-width-12,12,width,height);renderer.setViewport(w-width-12,12,width,height);renderer.clearDepth();povCamera.aspect=width/height;povCamera.updateProjectionMatrix();renderer.render(scene,povCamera);renderer.setScissorTest(false);}
+});
 }catch(error){status.textContent=`Viewer unavailable: ${error.message}`;}
 </script></html>

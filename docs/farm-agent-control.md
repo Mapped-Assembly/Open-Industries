@@ -9,6 +9,11 @@ deposits, and returns home. **Pause** and **Resume** persist across service rest
 closing the browser does not stop the run. Before/after images appear beside the
 live 3D view. Allow about 80 seconds for the complete route and captures.
 
+The live minimap shows the robot's position/heading, crop beds, active bed and
+home route. **Quadruped POV** switches the main view to a simulated forward-facing
+camera mounted on the robot; **Overview** restores orbit controls and keeps a live
+POV inset. Both views follow the authoritative robot position and orientation.
+
 The buttons invoke **automated control, not an LLM**. The separately recorded
 model-issued MCP run remains preserved. New run archives the prior run identity
 and state in SQLite while retaining all jobs, command receipts and image bytes.

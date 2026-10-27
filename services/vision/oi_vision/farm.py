@@ -243,6 +243,7 @@ class FarmRuntime:
                 "next_action": ACTIONS[boundary] if boundary < len(ACTIONS) else None,
                 "next_bed": BEDS[boundary//2] if boundary < 6 else None,
                 "deposited": list(pose.deposited), "robot_position": self.data.qpos[:3].tolist(),
+                "robot_quaternion": self.data.qpos[3:7].tolist(),
                 "joint_positions": self.data.qpos[self.mission.qids].tolist(),
                 "simulated": True, "looping": False, "control": "agent-selected kinematic segments; scripted grasp/release"}
 
