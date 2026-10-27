@@ -1,0 +1,20 @@
+{
+  "scope": "local implementation verification; not an AWS deployment or model run",
+  "checked_on_utc": "2026-10-27",
+  "runtime_evidence_commit": "b61fa7485e0dc16745eaa6454dd410dacde9ecba",
+  "versions": {"python": "3.12.3", "node": "22.23.4", "opencv": "5.0.0", "opencv_python_headless_distribution": "5.0.0.93", "cfn_lint": "1.58.0"},
+  "checks": [
+    {"command": "OI_VISION_MCP_TESTS=1 python -m unittest discover -s services/vision/tests -v", "status": "passed", "tests": 31, "duration_seconds": 286.295},
+    {"command": "npm run test:mcp", "status": "passed"},
+    {"command": "cfn-lint deploy/inspection/station.cfn.json", "status": "passed"},
+    {"command": "bash -n deploy/inspection/install.sh deploy/inspection/mcp.sh deploy/inspection/record.sh", "status": "passed"},
+    {"check": "systemd-analyze verify --man=no on copied unit files with only executable path substituted for the available local Python", "status": "passed", "boundary": "syntax only; no service installed or started"},
+    {"check": "fresh Python 3.12 environment: hash-locked requirements, --no-build-isolation --no-deps application build/install, pip check", "status": "passed"},
+    {"check": "separate local launcher through exported MCP; review/action/idempotency/disconnect/restart/full backup and restore", "status": "passed", "artifacts": ["exercise.json", "tool-trace.json", "verified-restart.json", "verified-restore.json", "before.jpg", "after.jpg"]}
+  ],
+  "aws": {"status": "not deployed", "credential_check": "aws sts get-caller-identity --region us-east-1", "observed_error": "Unable to locate credentials", "instance_id": null, "observed_region": null},
+  "systemd_live_recovery": "not verified; local sudo requires an unavailable password and no authorized EC2 target was available",
+  "host_reboot": "not performed; test suite confirms an unchanged boot ID cannot pass reboot verification",
+  "model_driven_agent_run": "not performed; deterministic MCP verification only",
+  "remaining_inputs": ["authorized AWS profile or role and target account", "SSH key pair and operator public IPv4 /32", "SSH access to resulting EC2 host", "existing MCP agent/model configuration only if a separate model-driven demonstration is desired"]
+}

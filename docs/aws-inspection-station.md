@@ -10,6 +10,8 @@ were unavailable (`sts get-caller-identity`: unable to locate credentials). Ther
 no observed EC2 instance, cloud reboot, or model-driven run claimed by this PR.
 The verifier requires IMDSv2 identity when `--aws` is selected; local execution does
 not populate AWS fields. The remaining cloud steps below must produce their own evidence.
+The [retained local evidence](evidence/aws-inspection-local/README.md) contains actual
+MCP traces, before/after images, launcher restart and complete-state restore results.
 
 ## Architecture and ownership
 
@@ -355,8 +357,10 @@ Installation refuses a running service and holds the exclusive maintenance lock.
 The real app path and state path stay unchanged. It rebuilds locked dependencies and
 records `/opt/oi-station/installed.txt`. Check health and existing inspection records
 before accepting an upgrade. Roll back by stopping, checking out the backup's commit,
-reinstalling its dependencies, stopping again, and restoring the **complete** matching
-backup. Never use old code against newer state without its supported compatibility check.
+and running `sudo bash /opt/oi-station/app/deploy/inspection/install.sh OLD_FULL_SHA --no-start`.
+Then restore the **complete** matching backup using the procedure above, which starts
+the service only after restoration. Never launch old code against newer state as part
+of rollback. The installer supports `--no-start` for disaster recovery for the same reason.
 
 ## Teardown and billing cleanup
 

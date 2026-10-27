@@ -1,7 +1,10 @@
 #!/bin/bash
 # Run as root on Ubuntu 24.04 amd64. Never move the launcher-bound app path.
 set -euo pipefail
-[[ $EUID == 0 && $# == 1 && $1 =~ ^[0-9a-f]{40}$ ]] || exit 64
+[[ $EUID == 0 && $# -ge 1 && $# -le 2 && $1 =~ ^[0-9a-f]{40}$ ]] || exit 64
+[[ $# == 1 || $2 == --no-start ]] || exit 64
+start=true
+if [[ $# == 2 ]]; then start=false; fi
 release=$1
 app=/opt/oi-station/app
 [[ $(uname -m) == x86_64 && $(realpath "$app") == "$app" ]]
@@ -44,4 +47,4 @@ install -m 0440 "$temporary/sudoers" /etc/sudoers.d/oi-station-mcp
 { printf 'ApplicationCommit=%s\n' "$release"; node --version; python3.12 --version; /opt/oi-station/venv/bin/python -m pip freeze; } > /opt/oi-station/installed.txt
 systemctl daemon-reload
 systemctl enable oi-station.service oi-station-health.timer
-systemctl start oi-station.service oi-station-health.timer
+if $start; then systemctl start oi-station.service oi-station-health.timer; fi

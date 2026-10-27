@@ -1,0 +1,124 @@
+{
+  "kind": "restart",
+  "verified_at": "2026-10-27T02:02:47.804204+00:00",
+  "metadata": {
+    "recorded_at": "2026-10-27T02:02:32.143347+00:00",
+    "application_commit": "b61fa7485e0dc16745eaa6454dd410dacde9ecba",
+    "checkout_dirty": false,
+    "python": "3.12.3",
+    "node": "v22.23.4",
+    "opencv": "5.0.0",
+    "boot_id": "42b2ee7c-b905-477b-a3c1-9bc9e8f55146",
+    "aws": null,
+    "execution": "deterministic MCP verification; no model invoked",
+    "camera": "synthetic runtime-rendered pixels",
+    "movement": "simulated; no physical actuation"
+  },
+  "health": {
+    "status": "ready",
+    "evidence_kind": "simulation",
+    "binding_id": "demo-inspection",
+    "match_id": "63b7cd52-f669-44fc-a7fc-4f4d19dc8eae",
+    "robot_id": "24a61294-135f-4e21-bc36-304296d062c9",
+    "runtime_pid": 224457,
+    "game_url": "http://127.0.0.1:42403",
+    "vision_url": "http://127.0.0.1:33421",
+    "camera_url": "http://127.0.0.1:45525/snapshot.png",
+    "state_dir": "/tmp/opencode/aws-station-evidence-private/station",
+    "mcp_config": "/tmp/opencode/aws-station-evidence-private/station/mcp.json",
+    "opencv_version": "5.0.0",
+    "services_healthy": true
+  },
+  "same_identity_and_credentials": true,
+  "same_checkpoints_and_images": true,
+  "one_runtime_job": true,
+  "trace": [
+    {
+      "at": "2026-10-27T02:02:34.456313+00:00",
+      "event": "MCP_CONNECTED"
+    },
+    {
+      "at": "2026-10-27T02:02:38.259376+00:00",
+      "tool": "astra.agent_read_inspection",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a7f5e09c-f4e8-41a2-bd51-dc897d3b428e"
+      },
+      "result": {
+        "run_id": "a7f5e09c-f4e8-41a2-bd51-dc897d3b428e",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:02:41.044437+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a7f5e09c-f4e8-41a2-bd51-dc897d3b428e"
+      },
+      "result": {
+        "run_id": "a7f5e09c-f4e8-41a2-bd51-dc897d3b428e",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:02:43.602016+00:00",
+      "tool": "astra.agent_read_inspection",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "f0ce713f-6c9c-4b4c-a7c4-165312d1f3d3"
+      },
+      "result": {
+        "run_id": "f0ce713f-6c9c-4b4c-a7c4-165312d1f3d3",
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+        "revision": 6,
+        "job_id": "63e4f933-958d-4ac3-8a23-3dfda999b66f"
+      }
+    },
+    {
+      "at": "2026-10-27T02:02:46.397835+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "f0ce713f-6c9c-4b4c-a7c4-165312d1f3d3"
+      },
+      "result": {
+        "run_id": "f0ce713f-6c9c-4b4c-a7c4-165312d1f3d3",
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+        "revision": 6,
+        "job_id": "63e4f933-958d-4ac3-8a23-3dfda999b66f"
+      }
+    },
+    {
+      "at": "2026-10-27T02:02:47.776691+00:00",
+      "tool": "astra.game_read_match",
+      "arguments": {
+        "version": 5,
+        "match_id": "63b7cd52-f669-44fc-a7fc-4f4d19dc8eae"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:02:47.796526+00:00",
+      "tool": "astra.vision_read_frame",
+      "arguments": {
+        "frame_id": "293033c9-cead-4783-8583-0e9eeee2cf4a"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:02:47.804178+00:00",
+      "tool": "astra.vision_read_frame",
+      "arguments": {
+        "frame_id": "492c1568-2da3-4cb0-8fce-1cd017cf67eb"
+      },
+      "result": {}
+    }
+  ]
+}
