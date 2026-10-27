@@ -1,0 +1,401 @@
+{
+  "schema": "oi-station-evidence/1",
+  "metadata": {
+    "recorded_at": "2026-10-27T02:53:12.019030+00:00",
+    "application_commit": "63ed09bb2500260fbb3936ac8557fd5334eed08a",
+    "checkout_dirty": false,
+    "python": "3.12.3",
+    "node": "v22.23.4",
+    "opencv": "5.0.0",
+    "boot_id": "60e2c92c-8c20-45b2-8f7c-76dd7829df48",
+    "aws": {
+      "instanceId": "i-0fc59dacd62a60f0a",
+      "instanceType": "t3.small",
+      "region": "us-east-1",
+      "availabilityZone": "us-east-1a",
+      "imageId": "ami-0d6dd9e8265d48906",
+      "architecture": "x86_64"
+    },
+    "execution": "deterministic MCP verification; no model invoked",
+    "camera": "synthetic runtime-rendered pixels",
+    "movement": "simulated; no physical actuation"
+  },
+  "identity": {
+    "binding": {
+      "binding_id": "demo-inspection",
+      "camera_id": "demo-camera",
+      "profile_id": "marker",
+      "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+      "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+      "target_id": "0959bbb2-3291-4bc9-9552-c46db8ba0838"
+    },
+    "ports": {
+      "game": 35533,
+      "camera": 44937,
+      "vision": 45017
+    },
+    "root": "/opt/oi-station/app",
+    "identity_sha256": "94674922f04a390f153aa7c3b8bae2d1ee27e4e9f97fe313c3738636e1b28c37"
+  },
+  "initial_health": {
+    "status": "ready",
+    "evidence_kind": "simulation",
+    "binding_id": "demo-inspection",
+    "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+    "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+    "runtime_pid": 3840,
+    "game_url": "http://127.0.0.1:35533",
+    "vision_url": "http://127.0.0.1:45017",
+    "camera_url": "http://127.0.0.1:44937/snapshot.png",
+    "state_dir": "/var/lib/oi-station/state",
+    "mcp_config": "/var/lib/oi-station/state/mcp.json",
+    "opencv_version": "5.0.0",
+    "services_healthy": true
+  },
+  "disconnected_health": {
+    "status": "ready",
+    "evidence_kind": "simulation",
+    "binding_id": "demo-inspection",
+    "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+    "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+    "runtime_pid": 3840,
+    "game_url": "http://127.0.0.1:35533",
+    "vision_url": "http://127.0.0.1:45017",
+    "camera_url": "http://127.0.0.1:44937/snapshot.png",
+    "state_dir": "/var/lib/oi-station/state",
+    "mcp_config": "/var/lib/oi-station/state/mcp.json",
+    "opencv_version": "5.0.0",
+    "services_healthy": true
+  },
+  "review": {
+    "attempt": 1,
+    "binding_id": "demo-inspection",
+    "camera_id": "demo-camera",
+    "configuration_sha256": "8236009990032a000766650210b675d0ff45aededd505785af64e8fe3b31366c",
+    "created_at_ms": 1793069606722,
+    "events": [
+      {
+        "at_ms": 1793069607853,
+        "reason": "RECAPTURE_REQUIRED",
+        "stage": "observing"
+      },
+      {
+        "at_ms": 1793069614692,
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED"
+      }
+    ],
+    "machine_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+    "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+    "policy_version": "oi-inspection/1",
+    "reason": "TARGET_NOT_OBSERVED",
+    "rejected_observations": [
+      {
+        "acquired_at_ms": 1793069607757,
+        "analyzed_at_ms": 1793069607779,
+        "camera_id": "demo-camera",
+        "detection_count": 0,
+        "detections": [],
+        "detector_version": "oi-opencv-regions/1",
+        "evidence_kind": "simulation",
+        "frame_id": "b9a0631a-a795-49a8-b0aa-cbf62c1cb625",
+        "frame_sha256": "db28d7bb8541dc47e506c80d00083c1f4fdf459044b042b1b9db3eb4f4d3f0e5",
+        "interpretation": "Pixel measurements; labels are configured, not semantic recognition or calibrated confidence.",
+        "machine_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+        "metrics": {
+          "laplacian_variance": 186.297805,
+          "mask_fraction": 0,
+          "mean_luma": 33.953799
+        },
+        "observation_id": "aa01668e-01ee-42c9-a69b-a867e85aa4b2",
+        "opencv_version": "5.0.0",
+        "profile": {
+          "label": "inspection-marker",
+          "lower_hsv": [
+            20,
+            100,
+            100
+          ],
+          "min_area_px": 20,
+          "profile_id": "marker",
+          "type": "color_regions",
+          "upper_hsv": [
+            40,
+            255,
+            255
+          ]
+        },
+        "profile_sha256": "e428af44f04a253a67dc6d534cb406e54d701ba2b00df822eb35e2a6f3f72d6f",
+        "source_age_known": false,
+        "source_modified_at_ms": null,
+        "truncated": false,
+        "version": 1
+      },
+      {
+        "acquired_at_ms": 1793069614647,
+        "analyzed_at_ms": 1793069614668,
+        "camera_id": "demo-camera",
+        "detection_count": 0,
+        "detections": [],
+        "detector_version": "oi-opencv-regions/1",
+        "evidence_kind": "simulation",
+        "frame_id": "6fde5221-f28f-4ab5-892f-dddd9975ac4a",
+        "frame_sha256": "db28d7bb8541dc47e506c80d00083c1f4fdf459044b042b1b9db3eb4f4d3f0e5",
+        "interpretation": "Pixel measurements; labels are configured, not semantic recognition or calibrated confidence.",
+        "machine_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+        "metrics": {
+          "laplacian_variance": 186.297805,
+          "mask_fraction": 0,
+          "mean_luma": 33.953799
+        },
+        "observation_id": "67f97155-cf1f-4d56-a98a-ce023ad38315",
+        "opencv_version": "5.0.0",
+        "profile": {
+          "label": "inspection-marker",
+          "lower_hsv": [
+            20,
+            100,
+            100
+          ],
+          "min_area_px": 20,
+          "profile_id": "marker",
+          "type": "color_regions",
+          "upper_hsv": [
+            40,
+            255,
+            255
+          ]
+        },
+        "profile_sha256": "e428af44f04a253a67dc6d534cb406e54d701ba2b00df822eb35e2a6f3f72d6f",
+        "source_age_known": false,
+        "source_modified_at_ms": null,
+        "truncated": false,
+        "version": 1
+      }
+    ],
+    "revision": 3,
+    "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+    "stage": "needs_review",
+    "target_id": "0959bbb2-3291-4bc9-9552-c46db8ba0838",
+    "updated_at_ms": 1793069614692,
+    "version": 1
+  },
+  "inspection": {
+    "after_position": {
+      "x": 14,
+      "y": 19
+    },
+    "attempt": 0,
+    "before": {
+      "acquired_at_ms": 1793069632797,
+      "analyzed_at_ms": 1793069632821,
+      "camera_id": "demo-camera",
+      "detection_count": 1,
+      "detections": [
+        {
+          "area_px": 144,
+          "bbox_px": [
+            70,
+            46,
+            13,
+            13
+          ],
+          "centroid_px": [
+            76,
+            52
+          ],
+          "label": "inspection-marker"
+        }
+      ],
+      "detector_version": "oi-opencv-regions/1",
+      "evidence_kind": "simulation",
+      "frame_id": "36761b37-4478-4ea4-a8ae-2a30d8142a55",
+      "frame_sha256": "e9873d57beacabc74ee20b04185ff67617ed5dd22ffb2c7bf90b2884dfe93d8e",
+      "interpretation": "Pixel measurements; labels are configured, not semantic recognition or calibrated confidence.",
+      "machine_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+      "metrics": {
+        "laplacian_variance": 233.422805,
+        "mask_fraction": 0.001965,
+        "mean_luma": 34.2603
+      },
+      "observation_id": "bd538af5-5b43-423c-a63d-d4654e6cba68",
+      "opencv_version": "5.0.0",
+      "profile": {
+        "label": "inspection-marker",
+        "lower_hsv": [
+          20,
+          100,
+          100
+        ],
+        "min_area_px": 20,
+        "profile_id": "marker",
+        "type": "color_regions",
+        "upper_hsv": [
+          40,
+          255,
+          255
+        ]
+      },
+      "profile_sha256": "e428af44f04a253a67dc6d534cb406e54d701ba2b00df822eb35e2a6f3f72d6f",
+      "source_age_known": false,
+      "source_modified_at_ms": null,
+      "truncated": false,
+      "version": 1
+    },
+    "before_position": {
+      "x": 13,
+      "y": 27
+    },
+    "binding_id": "demo-inspection",
+    "camera_id": "demo-camera",
+    "command": {
+      "action": "survey_robot",
+      "command_id": "0f6e71c7-9cff-52b1-866f-d603dcd57cd8",
+      "deposit_id": "0959bbb2-3291-4bc9-9552-c46db8ba0838",
+      "expected_revision": 2,
+      "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+      "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+      "sensor": "camera-depth",
+      "version": 5
+    },
+    "configuration_sha256": "8236009990032a000766650210b675d0ff45aededd505785af64e8fe3b31366c",
+    "created_at_ms": 1793069631806,
+    "decision_observation_id": "bd538af5-5b43-423c-a63d-d4654e6cba68",
+    "events": [
+      {
+        "at_ms": 1793069632850,
+        "reason": "TARGET_OBSERVED",
+        "stage": "ready"
+      },
+      {
+        "at_ms": 1793069638279,
+        "reason": "COMMAND_PREPARED",
+        "stage": "dispatching"
+      },
+      {
+        "at_ms": 1793069639475,
+        "reason": "COMMAND_ACCEPTED",
+        "stage": "running"
+      },
+      {
+        "at_ms": 1793069660497,
+        "reason": "RUNTIME_JOB_COMPLETED",
+        "stage": "verifying"
+      },
+      {
+        "at_ms": 1793069668006,
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED"
+      }
+    ],
+    "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb",
+    "machine_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+    "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+    "policy_version": "oi-inspection/1",
+    "prepared_at_ms": 1793069638279,
+    "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+    "receipt_revision": 3,
+    "revision": 6,
+    "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+    "runtime_job": {
+      "action": "survey_robot",
+      "charged_mj": 0,
+      "energy_mj": 220000,
+      "id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb",
+      "phase": "completed",
+      "reason": null,
+      "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+      "route": [],
+      "started_at_ms": 1793069638806,
+      "state": "completed",
+      "target_id": "0959bbb2-3291-4bc9-9552-c46db8ba0838",
+      "work_ms": 4250
+    },
+    "runtime_revision": 5,
+    "stage": "completed",
+    "target_id": "0959bbb2-3291-4bc9-9552-c46db8ba0838",
+    "updated_at_ms": 1793069668006,
+    "version": 1,
+    "after": {
+      "acquired_at_ms": 1793069666937,
+      "analyzed_at_ms": 1793069666954,
+      "camera_id": "demo-camera",
+      "detection_count": 1,
+      "detections": [
+        {
+          "area_px": 144,
+          "bbox_px": [
+            70,
+            46,
+            13,
+            13
+          ],
+          "centroid_px": [
+            76,
+            52
+          ],
+          "label": "inspection-marker"
+        }
+      ],
+      "detector_version": "oi-opencv-regions/1",
+      "evidence_kind": "simulation",
+      "frame_id": "7e6d2c11-1a1d-4751-88af-a2416a89abd3",
+      "frame_sha256": "5fb980a40d3bfeb3abad826d26c9931119e0bbb52c653fce8e07e60f6c6cfba4",
+      "interpretation": "Pixel measurements; labels are configured, not semantic recognition or calibrated confidence.",
+      "machine_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+      "metrics": {
+        "laplacian_variance": 233.422805,
+        "mask_fraction": 0.001965,
+        "mean_luma": 34.2603
+      },
+      "observation_id": "356595df-9d29-4c89-93f7-4d1913dda80e",
+      "opencv_version": "5.0.0",
+      "profile": {
+        "label": "inspection-marker",
+        "lower_hsv": [
+          20,
+          100,
+          100
+        ],
+        "min_area_px": 20,
+        "profile_id": "marker",
+        "type": "color_regions",
+        "upper_hsv": [
+          40,
+          255,
+          255
+        ]
+      },
+      "profile_sha256": "e428af44f04a253a67dc6d534cb406e54d701ba2b00df822eb35e2a6f3f72d6f",
+      "source_age_known": false,
+      "source_modified_at_ms": null,
+      "truncated": false,
+      "version": 1
+    },
+    "verification": {
+      "runtime_job_completed": true,
+      "image_changed": true,
+      "robot_moved": true,
+      "physical_motion_verified": false
+    }
+  },
+  "images": {
+    "before": {
+      "file": "before.jpg",
+      "preview_sha256": "d41001948cf607bd3bda18039532ed3a5280b10a6f5890ada7cb44c18d1b4d37",
+      "source_png_sha256": "e9873d57beacabc74ee20b04185ff67617ed5dd22ffb2c7bf90b2884dfe93d8e"
+    },
+    "after": {
+      "file": "after.jpg",
+      "preview_sha256": "5d28c0a1140a4ca7577b99e5191de70a4f9542ffd6e2f6fd4043600705417801",
+      "source_png_sha256": "5fb980a40d3bfeb3abad826d26c9931119e0bbb52c653fce8e07e60f6c6cfba4"
+    }
+  },
+  "checks": {
+    "review_without_command": true,
+    "authorized_survey_completed": true,
+    "same_uuid_idempotent": true,
+    "agent_disconnect_continuity": true
+  },
+  "persistence": "Run verify after service restart and host reboot; not yet verified."
+}

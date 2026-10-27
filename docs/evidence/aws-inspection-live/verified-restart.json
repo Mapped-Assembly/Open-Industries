@@ -1,0 +1,131 @@
+{
+  "kind": "restart",
+  "verified_at": "2026-10-27T02:55:16.592647+00:00",
+  "metadata": {
+    "recorded_at": "2026-10-27T02:54:46.214339+00:00",
+    "application_commit": "63ed09bb2500260fbb3936ac8557fd5334eed08a",
+    "checkout_dirty": false,
+    "python": "3.12.3",
+    "node": "v22.23.4",
+    "opencv": "5.0.0",
+    "boot_id": "60e2c92c-8c20-45b2-8f7c-76dd7829df48",
+    "aws": {
+      "instanceId": "i-0fc59dacd62a60f0a",
+      "instanceType": "t3.small",
+      "region": "us-east-1",
+      "availabilityZone": "us-east-1a",
+      "imageId": "ami-0d6dd9e8265d48906",
+      "architecture": "x86_64"
+    },
+    "execution": "deterministic MCP verification; no model invoked",
+    "camera": "synthetic runtime-rendered pixels",
+    "movement": "simulated; no physical actuation"
+  },
+  "health": {
+    "status": "ready",
+    "evidence_kind": "simulation",
+    "binding_id": "demo-inspection",
+    "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+    "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+    "runtime_pid": 4178,
+    "game_url": "http://127.0.0.1:35533",
+    "vision_url": "http://127.0.0.1:45017",
+    "camera_url": "http://127.0.0.1:44937/snapshot.png",
+    "state_dir": "/var/lib/oi-station/state",
+    "mcp_config": "/var/lib/oi-station/state/mcp.json",
+    "opencv_version": "5.0.0",
+    "services_healthy": true
+  },
+  "same_identity_and_credentials": true,
+  "same_checkpoints_and_images": true,
+  "one_runtime_job": true,
+  "trace": [
+    {
+      "at": "2026-10-27T02:54:50.000713+00:00",
+      "event": "MCP_CONNECTED"
+    },
+    {
+      "at": "2026-10-27T02:54:55.976067+00:00",
+      "tool": "astra.agent_read_inspection",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f"
+      },
+      "result": {
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:55:02.621473+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f"
+      },
+      "result": {
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:55:08.013734+00:00",
+      "tool": "astra.agent_read_inspection",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+        "revision": 6,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:55:13.381476+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+        "revision": 6,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:55:16.550877+00:00",
+      "tool": "astra.game_read_match",
+      "arguments": {
+        "version": 5,
+        "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:55:16.577184+00:00",
+      "tool": "astra.vision_read_frame",
+      "arguments": {
+        "frame_id": "36761b37-4478-4ea4-a8ae-2a30d8142a55"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:55:16.592616+00:00",
+      "tool": "astra.vision_read_frame",
+      "arguments": {
+        "frame_id": "7e6d2c11-1a1d-4751-88af-a2416a89abd3"
+      },
+      "result": {}
+    }
+  ]
+}

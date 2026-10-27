@@ -5,11 +5,12 @@ inspection station**, not the work-cell runtime. No GPU, public HTTP API, model
 account, DNS, TLS proxy, or Kubernetes is required. An external agent uses SSH stdio
 to the same MCP entry point tested locally.
 
-**Deployment status:** implementation and local verification only. AWS credentials
-were unavailable (`sts get-caller-identity`: unable to locate credentials). There is
-no observed EC2 instance, cloud reboot, or model-driven run claimed by this PR.
-The verifier requires IMDSv2 identity when `--aws` is selected; local execution does
-not populate AWS fields. The remaining cloud steps below must produce their own evidence.
+**Deployment status:** deployed through the official AWS MCP server on 2026-10-27 UTC,
+instance `i-0fc59dacd62a60f0a` in `us-east-1`. The deterministic inspection loop,
+service restart and actual host reboot passed. See the [AWS evidence](evidence/aws-inspection-live/README.md).
+No model-driven run is claimed. AWS access used browser OAuth through
+`https://aws-mcp.us-east-1.api.aws/mcp`; local CLI credentials were not required.
+The CLI provisioning recipe below is an alternative using the same CloudFormation template.
 The [retained local evidence](evidence/aws-inspection-local/README.md) contains actual
 MCP traces, before/after images, launcher restart and complete-state restore results.
 
@@ -45,7 +46,7 @@ flowchart LR
 | Item | Selected configuration |
 | --- | --- |
 | Region | `us-east-1` (N. Virginia) |
-| Compute | Linux On-Demand `t3.small`, 2 vCPU / 2 GiB, CPU-only, Standard CPU credits |
+| Compute | Linux On-Demand `t3.small`, 2 vCPU / 2 GiB, CPU-only, Unlimited CPU credits (see surcharge below) |
 | OS | Canonical Ubuntu Server 24.04 amd64; resolve once, save and deploy the exact AMI ID |
 | Storage | 30 GiB encrypted gp3 root EBS, including private state outside the checkout; `DeleteOnTermination=false` |
 | Application | Full 40-character commit from **Mapped-Assembly/Open-Industries** |
@@ -63,8 +64,10 @@ flowchart LR
 The AMI and application dependencies are pinned. Ubuntu security packages are installed
 from the current Ubuntu repository, not a byte-identical OS snapshot; retain the AMI ID
 and `dpkg-query -W` privately if exact OS patch reproduction is required. No Free Tier
-eligibility is assumed. Standard CPU credits cap cost but may throttle sustained work;
-measure runtime heartbeat and inspection latency on the selected host before submission.
+eligibility is assumed for other accounts. The initial Standard-credit deployment
+throttled with an empty CPU-credit balance. The observed station uses Unlimited;
+the template's `CpuCredits` parameter defaults to this measured configuration.
+Standard remains selectable but has not passed this deployment's acceptance workload.
 
 ## Operating cost (checked 2026-10-27 UTC)
 
@@ -76,7 +79,21 @@ reported effective date 2026-10-01:
 | Linux shared On-Demand t3.small, SKU `QA3NBPZEQKZ2K9AR` | $0.0208/hour | $15.18 |
 | gp3 storage, SKU `JG3KUJMBRGHV3N8G` | $0.08/GB-month × 30 GB | $2.40 |
 | One public IPv4 | $0.005/hour | $3.65 |
-| **Total** | **No Free Tier discount** | **about $21.24/month** |
+| **Base total** | **Before credits and surplus CPU** | **about $21.24/month** |
+
+Linux T3 Unlimited surplus CPU costs **$0.05/vCPU-hour** above the earned baseline,
+subject to AWS's credit accounting. A short post-reboot idle sample measured about
+25–32% aggregate CPU versus the 20% baseline, suggesting roughly **$25–30/month**
+including base resources if sustained. Inspections and startup used more CPU. This is
+not a long-duration billing measurement. At sustained 100% CPU, the compute-credit
+surcharge can reach $58.40/730-hour month, for about **$79.64/month total** before
+other exclusions. Monitor `CPUCreditBalance`, `CPUSurplusCreditBalance`, and
+`CPUSurplusCreditsCharged`; the original $21.24 estimate alone is insufficient.
+
+AWS `GetAccountPlanState` confirmed the deployment account has an **active Free plan
+and $100 remaining credits**, with plan expiration **2027-04-16** at the time checked.
+Eligible usage consumes those credits; the figures above are gross usage estimates,
+not an immediate cash bill. Other resources and workloads also draw from the balance.
 
 Sources: [T3 specifications](https://aws.amazon.com/ec2/instance-types/t3/),
 [EBS pricing](https://aws.amazon.com/ebs/pricing/),
@@ -396,9 +413,10 @@ credential leakage and false reboot claims, and exercise complete offline backup
 Existing CI remains enabled on Python 3.11/3.12 and Node 22, including the new deployment
 paths. Static unit checks are not a substitute for running systemd on EC2.
 
-Remaining inputs for live completion: an authorized AWS profile/role, permitted target
-account and region, an SSH key pair plus operator `/32`, and reachable SSH access to
-the resulting host. No model credential is needed for deterministic verification.
-An actual model-driven demonstration additionally needs the user's existing configured
-MCP-capable agent host. Keep AWS/systemd-recovery/reboot/model results marked unverified
-until their observed evidence is captured.
+AWS authorization and host access were established and live deterministic evidence
+was captured. On the deployment workstation, `ssh oi-inspection` uses a dedicated
+private key outside Git and an EC2-console-verified host key. Its current public IP is
+`100.52.194.24`; update the alias after stop/start if that changes. SSH ingress is
+restricted to that workstation's observed public `/32`.
+An actual model-driven demonstration still needs the user's existing configured
+MCP-capable agent host. The recorded workflow uses real MCP tools but no LLM.

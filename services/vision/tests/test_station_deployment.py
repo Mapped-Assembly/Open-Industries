@@ -34,7 +34,8 @@ class DeploymentChecks(unittest.TestCase):
         self.assertEqual(ingress[0]["CidrIp"], {"Ref": "AdminCidr"})
         station = resources["Station"]["Properties"]
         self.assertEqual(station["MetadataOptions"]["HttpTokens"], "required")
-        self.assertEqual(station["CreditSpecification"]["CPUCredits"], "standard")
+        self.assertEqual(station["CreditSpecification"]["CPUCredits"], {"Ref": "CpuCredits"})
+        self.assertEqual(template["Parameters"]["CpuCredits"]["AllowedValues"], ["standard", "unlimited"])
         for disk in station["BlockDeviceMappings"]:
             self.assertTrue(disk["Ebs"]["Encrypted"])
             self.assertFalse(disk["Ebs"]["DeleteOnTermination"])

@@ -1,0 +1,213 @@
+{
+  "execution": "deterministic MCP; no LLM",
+  "events": [
+    {
+      "at": "2026-10-27T02:53:16.902781+00:00",
+      "event": "MCP_CONNECTED"
+    },
+    {
+      "at": "2026-10-27T02:53:20.034814+00:00",
+      "tool": "astra.game_read_match",
+      "arguments": {
+        "version": 5,
+        "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:53:27.897366+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f"
+      },
+      "result": {
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+        "stage": "observing",
+        "reason": "RECAPTURE_REQUIRED",
+        "revision": 2
+      }
+    },
+    {
+      "at": "2026-10-27T02:53:34.735066+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f"
+      },
+      "result": {
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:53:35.687042+00:00",
+      "tool": "astra.game_read_match",
+      "arguments": {
+        "version": 5,
+        "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:53:41.086149+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f"
+      },
+      "result": {
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:53:46.551536+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f"
+      },
+      "result": {
+        "run_id": "a44b837d-0105-4146-b6e0-c7726190f46f",
+        "stage": "needs_review",
+        "reason": "TARGET_NOT_OBSERVED",
+        "revision": 3
+      }
+    },
+    {
+      "at": "2026-10-27T02:53:52.913392+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "ready",
+        "reason": "TARGET_OBSERVED",
+        "revision": 2
+      }
+    },
+    {
+      "at": "2026-10-27T02:53:59.533557+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "running",
+        "reason": "COMMAND_ACCEPTED",
+        "revision": 4,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:53:59.649145+00:00",
+      "event": "MCP_DISCONNECTED"
+    },
+    {
+      "at": "2026-10-27T02:54:09.102689+00:00",
+      "event": "MCP_CONNECTED"
+    },
+    {
+      "at": "2026-10-27T02:54:15.064032+00:00",
+      "tool": "astra.agent_read_inspection",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "running",
+        "reason": "COMMAND_ACCEPTED",
+        "revision": 4,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:54:20.543959+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "verifying",
+        "reason": "RUNTIME_JOB_COMPLETED",
+        "revision": 5,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:54:28.060672+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+        "revision": 6,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:54:33.281611+00:00",
+      "tool": "astra.agent_inspect_robot",
+      "arguments": {
+        "binding_id": "demo-inspection",
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712"
+      },
+      "result": {
+        "run_id": "996c6948-e3f8-487b-b296-29cb7e2f9712",
+        "stage": "completed",
+        "reason": "RUNTIME_AND_FOLLOWUP_OBSERVATION_RECORDED",
+        "revision": 6,
+        "job_id": "6116cc12-18b4-412e-9fa0-d28bb6fa4dfb"
+      }
+    },
+    {
+      "at": "2026-10-27T02:54:36.415714+00:00",
+      "tool": "astra.game_read_match",
+      "arguments": {
+        "version": 5,
+        "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1"
+      },
+      "result": {}
+    },
+    {
+      "at": "2026-10-27T02:54:36.439423+00:00",
+      "tool": "astra.vision_read_frame",
+      "arguments": {
+        "frame_id": "36761b37-4478-4ea4-a8ae-2a30d8142a55"
+      },
+      "result": {
+        "preview_sha256": "d41001948cf607bd3bda18039532ed3a5280b10a6f5890ada7cb44c18d1b4d37"
+      }
+    },
+    {
+      "at": "2026-10-27T02:54:36.453657+00:00",
+      "tool": "astra.vision_read_frame",
+      "arguments": {
+        "frame_id": "7e6d2c11-1a1d-4751-88af-a2416a89abd3"
+      },
+      "result": {
+        "preview_sha256": "5d28c0a1140a4ca7577b99e5191de70a4f9542ffd6e2f6fd4043600705417801"
+      }
+    },
+    {
+      "at": "2026-10-27T02:54:36.578067+00:00",
+      "event": "MCP_DISCONNECTED"
+    }
+  ]
+}

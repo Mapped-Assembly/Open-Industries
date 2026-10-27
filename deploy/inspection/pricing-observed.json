@@ -9,6 +9,12 @@
   "estimate_730_hours": {"compute": 15.184, "ebs": 2.4, "ipv4": 3.65, "total": 21.234},
   "exclusions": ["tax", "data transfer", "off-host backups and snapshots", "model provider usage"],
   "free_tier_assumed": false,
-  "cpu_credits": "standard: no unlimited surplus credit charges; exhausted credits throttle CPU",
-  "deployment_status": "not deployed: authorized AWS credentials and target access unavailable"
+  "cpu_credits": "unlimited: observed workload exceeded Standard baseline; Linux surplus CPU costs $0.05/vCPU-hour",
+  "surplus_cpu_vcpu_hour": 0.05,
+  "base_estimate_excludes_surplus_cpu": true,
+  "short_sample_idle_monthly_estimate_usd": "25-30; not a long-duration billing measurement",
+  "maximum_730h_total_at_full_cpu_usd": 79.634,
+  "account_credits_observed_usd": 100,
+  "account_plan": "ACTIVE FREE; expires 2027-04-16",
+  "deployment_status": "deployed in us-east-1; deterministic workflow, restart and reboot verified"
 }

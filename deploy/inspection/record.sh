@@ -4,6 +4,8 @@ set -euo pipefail
 [[ $EUID == 0 && $# == 2 ]] || exit 64
 export PATH=/opt/oi-station/node/bin:/usr/bin:/bin
 python=/opt/oi-station/venv/bin/python
+# Join the boot/start job before opening a wrapper that requires an active unit.
+systemctl start oi-station.service
 case "$1" in
   before-reboot)
     "$python" -m oi_vision.station_evidence exercise --aws --output "$2" --mcp-wrapper /usr/local/bin/oi-station-mcp

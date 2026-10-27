@@ -130,8 +130,8 @@ service and robot runtime available for an external MCP agent, with saved state 
 restarts and commands to show or hide the inspection marker.
 The [AWS inspection deployment](docs/aws-inspection-station.md) provides a pinned
 EC2/systemd installation, SSH stdio agent access, complete-state backup/restore and
-reproducible MCP evidence capture. Cloud deployment and host reboot remain unverified
-until an authorized target host runs the acceptance procedure.
+reproducible MCP evidence capture. The [AWS evidence](docs/evidence/aws-inspection-live/README.md)
+records the observed synthetic inspection loop, service restart and host reboot.
 
 ## Persistent runtime hosting
 

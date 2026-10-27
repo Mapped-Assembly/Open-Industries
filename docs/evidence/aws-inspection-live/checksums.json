@@ -1,0 +1,10 @@
+{
+  "exercise.json": "5e926ea4bb013f1139be2431869b6bd184c793cd0433ca9f96d452cfbbe46209",
+  "tool-trace.json": "4ed989c78ecad4e06f2191821f46ba4dabcb7ee863454747b2f9e86c0ad5303f",
+  "before.jpg": "d41001948cf607bd3bda18039532ed3a5280b10a6f5890ada7cb44c18d1b4d37",
+  "after.jpg": "5d28c0a1140a4ca7577b99e5191de70a4f9542ffd6e2f6fd4043600705417801",
+  "verified-restart.json": "d1136b10f444fc101ca6ed0e38d85710039b2d9dbc4888629560e915b9320d96",
+  "verified-reboot.json": "d925e00bb57157a8e3061a0f9217dec0d69a708dd6713f56e0821229e93f42f2",
+  "verified-crash-recovery.json": "3de55c973b130c84ba4fe11ba4382a01204c0497a54639015ae7f0cc3d7c7fa1",
+  "verified-restore.json": "a87894eff6fb1ee4ce69f711744125a27077380aaaa668aae2c8ee6bc82ddbb5"
+}

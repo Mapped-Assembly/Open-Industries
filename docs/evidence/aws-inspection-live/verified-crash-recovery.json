@@ -1,0 +1,22 @@
+{
+  "at": "2026-10-27T02:58:26.765864+00:00",
+  "old_launcher_pid": 528,
+  "old_runtime_pid": 841,
+  "new_runtime_pid": 1468,
+  "old_processes_gone": true,
+  "health": {
+    "status": "ready",
+    "evidence_kind": "simulation",
+    "binding_id": "demo-inspection",
+    "match_id": "db547548-5940-4f47-aaeb-9d40274cabf1",
+    "robot_id": "39c7393a-9295-4356-a414-42a2aaee6c79",
+    "runtime_pid": 1468,
+    "game_url": "http://127.0.0.1:35533",
+    "vision_url": "http://127.0.0.1:45017",
+    "camera_url": "http://127.0.0.1:44937/snapshot.png",
+    "state_dir": "/var/lib/oi-station/state",
+    "mcp_config": "/var/lib/oi-station/state/mcp.json",
+    "opencv_version": "5.0.0",
+    "services_healthy": true
+  }
+}
