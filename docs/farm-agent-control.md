@@ -1,5 +1,10 @@
 # Agent control of the sample farm
 
+**Live status:** deployed on the existing AWS host. The OpenCode agent directly
+completed all three harvests and returned the robot home through the new MCP tools.
+[Observed model-issued run, images and restart verification](evidence/farm-agent-aws/README.md).
+The `farm` MCP connection is configured in this project's OpenCode configuration.
+
 The original ASTRA quadruped + mounted SO-101 farm is now available through the
 Open Industries MCP host. The adapter imports the original MuJoCo model builder,
 joint-limited harvest choreography and browser mesh exporter from
@@ -155,6 +160,23 @@ For a coherent backup, disconnect agent clients, take an exclusive
 Restore while stopped to the same absolute paths with matching source/application
 commits; quarantine the current directory first, and restore ownership to `oi-farm`.
 Do not edit command receipts or replace only part of the database to restart a job.
+
+After exporting evidence, an operator can explicitly start a **new** simulated farm
+while retaining the completed one. Disconnect clients first, then on the host:
+
+```bash
+sudo bash <<'SH'
+set -euo pipefail
+exec 9>/run/lock/oi-farm-maintenance.lock
+flock --exclusive --nonblock 9
+systemctl stop oi-farm
+mv /var/lib/oi-farm/state /var/lib/oi-farm/completed-$(date -u +%Y%m%dT%H%M%SZ)
+systemctl start oi-farm
+SH
+```
+
+This creates a new station identity and service token, not an idempotent retry of
+the old mission. Reconnect MCP afterward. Never use it to conceal an uncertain job.
 
 Upgrades: stop, back up, fetch/checkout the reviewed full OI commit at the same
 `/opt/oi-farm/app` path, then run its installer. Keep the pinned farm-source commit.

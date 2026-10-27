@@ -1,0 +1,416 @@
+{
+  "recorded_at_ms": 1793072606064,
+  "actor": {
+    "host": "OpenCode",
+    "model": "openai/gpt-6-astra",
+    "execution": "Direct model-issued farm MCP calls in the implementation session; not the deterministic farm_evidence controller"
+  },
+  "application_commit": "22a9cf13524bf4759c1bfe0603b0828aa8e1709e",
+  "source_commit": "523d1f5a54b5b279d6d2ae9fcb8b5315b15573aa",
+  "aws": {
+    "instanceId": "i-0fc59dacd62a60f0a",
+    "instanceType": "t3.small",
+    "region": "us-east-1",
+    "availabilityZone": "us-east-1a",
+    "imageId": "ami-0d6dd9e8265d48906",
+    "architecture": "x86_64"
+  },
+  "opencv": "5.0.0",
+  "mujoco": "3.17.0",
+  "camera": "actual rendered MuJoCo farm pixels; synthetic",
+  "movement": "kinematic simulation; scripted grasp attachment/release",
+  "final_station": {
+    "version": 1,
+    "station_id": "b2fb907e-b7c0-465b-8396-46b531060ade",
+    "source": "/opt/oi-farm/source",
+    "elapsed": 72.0,
+    "boundary": 7,
+    "revision": 16,
+    "active_job": null,
+    "paused": false,
+    "review_required": false
+  },
+  "commands": [
+    {
+      "request": {
+        "action": "move_to_next_bed",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef701",
+        "expected_revision": 0
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef701",
+        "accepted": true,
+        "revision": 1,
+        "action": "move_to_next_bed",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef701",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "pause",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef702",
+        "expected_revision": 1
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef702",
+        "accepted": true,
+        "revision": 2,
+        "action": "pause",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef701",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "resume",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef703",
+        "expected_revision": 2
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef703",
+        "accepted": true,
+        "revision": 3,
+        "action": "resume",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef701",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "harvest",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef704",
+        "expected_revision": 4,
+        "observation_id": "df0976f1-97fd-44bd-88ab-e84259efd0ae"
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef704",
+        "accepted": true,
+        "revision": 5,
+        "action": "harvest",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef704",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "move_to_next_bed",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef705",
+        "expected_revision": 6
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef705",
+        "accepted": true,
+        "revision": 7,
+        "action": "move_to_next_bed",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef705",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "harvest",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef706",
+        "expected_revision": 8,
+        "observation_id": "ce8ec588-c031-4464-a590-1063e59a85ed"
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef706",
+        "accepted": true,
+        "revision": 9,
+        "action": "harvest",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef706",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "move_to_next_bed",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef707",
+        "expected_revision": 10
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef707",
+        "accepted": true,
+        "revision": 11,
+        "action": "move_to_next_bed",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef707",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "harvest",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef708",
+        "expected_revision": 12,
+        "observation_id": "01c63dfe-f933-4b38-a559-29a27ad09483"
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef708",
+        "accepted": true,
+        "revision": 13,
+        "action": "harvest",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef708",
+        "simulated": true
+      }
+    },
+    {
+      "request": {
+        "action": "return_home",
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef709",
+        "expected_revision": 14
+      },
+      "receipt": {
+        "command_id": "0f45af09-c370-4740-8e0e-35caf41ef709",
+        "accepted": true,
+        "revision": 15,
+        "action": "return_home",
+        "active_job": "0f45af09-c370-4740-8e0e-35caf41ef709",
+        "simulated": true
+      }
+    }
+  ],
+  "jobs": [
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef701",
+      "action": "move_to_next_bed",
+      "bed": 2,
+      "stage": "completed",
+      "observation_id": null,
+      "target_elapsed": 6.0,
+      "accepted_at_ms": 1793072278263,
+      "simulated": true,
+      "finished_at_ms": 1793072316562
+    },
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef704",
+      "action": "harvest",
+      "bed": 2,
+      "stage": "completed",
+      "observation_id": "df0976f1-97fd-44bd-88ab-e84259efd0ae",
+      "target_elapsed": 18.0,
+      "accepted_at_ms": 1793072333289,
+      "simulated": true,
+      "finished_at_ms": 1793072345326,
+      "after_observation_id": "e27b0706-92fc-4c92-b385-f21f022f64d8",
+      "verification": {
+        "deposited": true,
+        "image_changed": true,
+        "pickup_color_reduced": true
+      }
+    },
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef705",
+      "action": "move_to_next_bed",
+      "bed": 1,
+      "stage": "completed",
+      "observation_id": null,
+      "target_elapsed": 24.0,
+      "accepted_at_ms": 1793072376634,
+      "simulated": true,
+      "finished_at_ms": 1793072382672
+    },
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef706",
+      "action": "harvest",
+      "bed": 1,
+      "stage": "completed",
+      "observation_id": "ce8ec588-c031-4464-a590-1063e59a85ed",
+      "target_elapsed": 36.0,
+      "accepted_at_ms": 1793072411448,
+      "simulated": true,
+      "finished_at_ms": 1793072423497,
+      "after_observation_id": "4b15015f-7d6a-49d2-b76a-bb2e744c8227",
+      "verification": {
+        "deposited": true,
+        "image_changed": true,
+        "pickup_color_reduced": true
+      }
+    },
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef707",
+      "action": "move_to_next_bed",
+      "bed": 0,
+      "stage": "completed",
+      "observation_id": null,
+      "target_elapsed": 42.0,
+      "accepted_at_ms": 1793072465648,
+      "simulated": true,
+      "finished_at_ms": 1793072471670
+    },
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef708",
+      "action": "harvest",
+      "bed": 0,
+      "stage": "completed",
+      "observation_id": "01c63dfe-f933-4b38-a559-29a27ad09483",
+      "target_elapsed": 54.0,
+      "accepted_at_ms": 1793072513126,
+      "simulated": true,
+      "finished_at_ms": 1793072525194,
+      "after_observation_id": "e9bae652-aea9-4288-9496-d932f01521ef",
+      "verification": {
+        "deposited": true,
+        "image_changed": true,
+        "pickup_color_reduced": true
+      }
+    },
+    {
+      "command_id": "0f45af09-c370-4740-8e0e-35caf41ef709",
+      "action": "return_home",
+      "bed": null,
+      "stage": "completed",
+      "observation_id": null,
+      "target_elapsed": 72.0,
+      "accepted_at_ms": 1793072547098,
+      "simulated": true,
+      "finished_at_ms": 1793072565173
+    }
+  ],
+  "observations": [
+    {
+      "observation_id": "df0976f1-97fd-44bd-88ab-e84259efd0ae",
+      "bed": 2,
+      "crop_label": "Carrots",
+      "captured_at_ms": 1793072326250,
+      "revision": 4,
+      "elapsed": 6.0,
+      "sha256": "2e64154b69e0a1c496ebcdf36d0b13ec8c1b279af1af3e347d37ff875bf8fb21",
+      "evidence_kind": "simulation",
+      "analysis": {
+        "target_pixels": 126,
+        "target_visible": true,
+        "roi": [
+          144,
+          104,
+          32,
+          32
+        ],
+        "opencv": "5.0.0",
+        "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"
+      },
+      "file": "bed-2-before.png"
+    },
+    {
+      "observation_id": "e27b0706-92fc-4c92-b385-f21f022f64d8",
+      "bed": 2,
+      "crop_label": "Carrots",
+      "captured_at_ms": 1793072346343,
+      "revision": 6,
+      "elapsed": 18.0,
+      "sha256": "ed34f8abc2d99535d4ed40f1d8eb3d557e198ea70f6284832029e9271c09c5f8",
+      "evidence_kind": "simulation",
+      "analysis": {
+        "target_pixels": 0,
+        "target_visible": false,
+        "roi": [
+          144,
+          104,
+          32,
+          32
+        ],
+        "opencv": "5.0.0",
+        "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"
+      },
+      "file": "bed-2-after.png"
+    },
+    {
+      "observation_id": "ce8ec588-c031-4464-a590-1063e59a85ed",
+      "bed": 1,
+      "crop_label": "Lettuce",
+      "captured_at_ms": 1793072389228,
+      "revision": 8,
+      "elapsed": 24.0,
+      "sha256": "bfb958b1b14acfac7295ff6e4cd02ca9ebbf66860ab906d439a5b3b35e20cc9c",
+      "evidence_kind": "simulation",
+      "analysis": {
+        "target_pixels": 618,
+        "target_visible": true,
+        "roi": [
+          144,
+          104,
+          32,
+          32
+        ],
+        "opencv": "5.0.0",
+        "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"
+      },
+      "file": "bed-1-before.png"
+    },
+    {
+      "observation_id": "4b15015f-7d6a-49d2-b76a-bb2e744c8227",
+      "bed": 1,
+      "crop_label": "Lettuce",
+      "captured_at_ms": 1793072424355,
+      "revision": 10,
+      "elapsed": 36.0,
+      "sha256": "c315c3f8fae9b26e42ed7e4f78a66b7d2aa6cf4b680c9471e1115d6b102c1b5d",
+      "evidence_kind": "simulation",
+      "analysis": {
+        "target_pixels": 0,
+        "target_visible": false,
+        "roi": [
+          144,
+          104,
+          32,
+          32
+        ],
+        "opencv": "5.0.0",
+        "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"
+      },
+      "file": "bed-1-after.png"
+    },
+    {
+      "observation_id": "01c63dfe-f933-4b38-a559-29a27ad09483",
+      "bed": 0,
+      "crop_label": "Tomatoes",
+      "captured_at_ms": 1793072501771,
+      "revision": 12,
+      "elapsed": 42.0,
+      "sha256": "a54cfaea5ef45ad1fdfa9fd872d7febaacb638b44c3deb887ef56f3515eb7b7f",
+      "evidence_kind": "simulation",
+      "analysis": {
+        "target_pixels": 436,
+        "target_visible": true,
+        "roi": [
+          144,
+          104,
+          32,
+          32
+        ],
+        "opencv": "5.0.0",
+        "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"
+      },
+      "file": "bed-0-before.png"
+    },
+    {
+      "observation_id": "e9bae652-aea9-4288-9496-d932f01521ef",
+      "bed": 0,
+      "crop_label": "Tomatoes",
+      "captured_at_ms": 1793072525760,
+      "revision": 14,
+      "elapsed": 54.0,
+      "sha256": "7c925706eb78a3cfc2eb3c7f88eaa33a4351ca0b56ca3afa99e233f596a1967a",
+      "evidence_kind": "simulation",
+      "analysis": {
+        "target_pixels": 0,
+        "target_visible": false,
+        "roi": [
+          144,
+          104,
+          32,
+          32
+        ],
+        "opencv": "5.0.0",
+        "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"
+      },
+      "file": "bed-0-after.png"
+    }
+  ],
+  "checks": {
+    "all_three_harvests_verified": true,
+    "returned_home": true,
+    "pause_resume": true,
+    "same_command_retry_observed": true
+  }
+}

@@ -17,6 +17,19 @@
       "aws": {
         "type": "remote",
         "url": "https://aws-mcp.us-east-1.api.aws/mcp"
+      },
+      "farm": {
+        "type": "local",
+        "command": [
+          "ssh",
+          "-T",
+          "-o",
+          "BatchMode=yes",
+          "oi-inspection",
+          "sudo",
+          "-n",
+          "/usr/local/bin/oi-farm-mcp"
+        ]
       }
     }
   }
