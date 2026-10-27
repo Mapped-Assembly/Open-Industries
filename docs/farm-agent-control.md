@@ -13,6 +13,11 @@ The live minimap shows the robot's position/heading, crop beds, active bed and
 home route. **Quadruped POV** switches the main view to a simulated forward-facing
 camera mounted on the robot; **Overview** restores orbit controls and keeps a live
 POV inset. Both views follow the authoritative robot position and orientation.
+Live POV boxes are computed by server-side OpenCV HSV segmentation and contours
+from the browser's actual rendered camera pixels (256×160, about 1.4 updates/sec).
+Labels identify red/orange/green color candidates, not recognized crop species.
+The capability-protected `/api/pov-analysis` endpoint accepts fixed-size RGBA pixels;
+these transient views do not authorize harvesting or replace saved pickup evidence.
 
 The buttons invoke **automated control, not an LLM**. The separately recorded
 model-issued MCP run remains preserved. New run archives the prior run identity

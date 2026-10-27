@@ -15,12 +15,23 @@ from uuid import uuid4
 
 import numpy as np
 
-from oi_vision.farm import FarmError, FarmRuntime, analyze_pixels
+from oi_vision.farm import FarmError, FarmRuntime, analyze_pixels, analyze_pov
 from oi_vision.farm_cli import handler_for
 
 
 class FarmPixelTests(unittest.TestCase):
     """Color evidence must come from the pickup pixels, not a crop label."""
+
+    def test_live_pov_contours_follow_pixels(self) -> None:
+        """Live boxes come from image contours and disappear when color disappears."""
+        pixels = np.zeros((160, 256, 4), dtype=np.uint8)
+        self.assertEqual(analyze_pov(pixels.tobytes())["boxes"], [])
+        pixels[40:60, 70:100, :3] = (255, 0, 0)
+        result = analyze_pov(pixels.tobytes())
+        self.assertEqual(result["boxes"][0]["label"], "red")
+        self.assertEqual(result["boxes"][0]["box"], [70, 40, 30, 20])
+        with self.assertRaisesRegex(FarmError, "INVALID_REQUEST"):
+            analyze_pov(b"bad")
 
     def test_absent_target_and_target_outside_roi_do_not_pass(self) -> None:
         """Unrelated orange pixels outside the calibrated region cannot authorize harvest."""

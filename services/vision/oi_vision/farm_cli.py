@@ -17,7 +17,7 @@ import threading
 from typing import Any
 
 from .demo_host import read_json, write_json
-from .farm import FarmError, FarmRuntime, SOURCE_COMMIT, require
+from .farm import FarmError, FarmRuntime, SOURCE_COMMIT, require, analyze_pov
 
 
 def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTPRequestHandler]:
@@ -44,7 +44,7 @@ def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTP
 
         def do_POST(self) -> None:
             """Dispatch only known agent operations after bearer authorization."""
-            browser = self.path == "/api/control"
+            browser = self.path in ("/api/control", "/api/pov-analysis")
             host = self.headers.get("Host", "")
             browser_authorized = (bool(re.fullmatch(r"(127\.0\.0\.1|localhost):[0-9]+", host))
                 and self.headers.get("Origin") == "http://" + host
@@ -56,9 +56,13 @@ def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTP
             self.connection.settimeout(10)
             try:
                 length = int(self.headers.get("Content-Length", "0"))
-                require(0 < length <= 4096, "INVALID_REQUEST")
+                require(0 < length <= (220000 if self.path == "/api/pov-analysis" else 4096), "INVALID_REQUEST")
                 request = json.loads(self.rfile.read(length))
                 require(isinstance(request, dict), "INVALID_REQUEST")
+                if self.path == "/api/pov-analysis":
+                    require(set(request) == {"rgba"} and isinstance(request["rgba"], str), "INVALID_REQUEST")
+                    self.reply(200, analyze_pov(base64.b64decode(request["rgba"], validate=True)))
+                    return
                 with runtime.lock, runtime.db:
                     if browser:
                         result = {"receipt": runtime.demo_command(request)}

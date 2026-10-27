@@ -4,6 +4,7 @@
 <style>body{margin:0;background:#101e19;color:#e2f5e7;font:15px system-ui}header{padding:20px 24px;border-bottom:1px solid #345044}h1{font-size:25px;margin:0}p{margin:8px 0;color:#b5cdbf}#view{height:65vh;min-height:350px}#status{white-space:pre-wrap;margin-top:12px;min-height:44px}canvas{display:block}button{padding:11px 18px;margin:8px 8px 0 0;border:1px solid #638875;border-radius:8px;background:#233d30;color:white;font:inherit;cursor:pointer}button.primary{background:#b6f08c;color:#173019;font-weight:700}button:disabled{opacity:.4;cursor:default}main{display:grid;grid-template-columns:minmax(0,1fr) 370px}aside{padding:16px;max-height:75vh;overflow:auto;border-left:1px solid #345044}h2{font-size:18px}h3{margin:8px 0}article{background:#20352b;padding:12px;border-radius:10px;margin-bottom:12px}.images{display:flex;gap:8px}.images figure{margin:0;width:50%}.images img{width:100%;border-radius:6px}figcaption,small{font-size:12px;color:#b5cdbf}#error{color:#ffd391}progress{width:100%;accent-color:#b6f08c}footer{padding:14px 24px;color:#b5cdbf}@media(max-width:850px){main{display:block}aside{max-height:none;border:0}#view{height:50vh}}</style>
 <style>#view{position:relative}.view-tools{position:absolute;top:12px;right:12px;z-index:2}.view-tools button{margin:0 0 0 6px;background:#173025e8}.view-tools button[aria-pressed="true"]{background:#b6f08c;color:#173019}#minimap{position:absolute;top:12px;left:12px;width:220px;height:164px;border:1px solid #638875;border-radius:10px;background:#101e19ed;pointer-events:none}#pov-label{position:absolute;bottom:12px;right:12px;padding:5px 9px;background:#101e19dd;border-radius:5px;pointer-events:none;font-size:12px}@media(max-width:600px){#minimap{width:154px;height:115px}.view-tools button{font-size:12px;padding:8px}}</style>
 <style>.evidence-image{position:relative}.evidence-image img{display:block}.roi-box{position:absolute;border:2px solid #b6f08c;box-sizing:border-box;pointer-events:none;box-shadow:0 0 0 1px #102019}.roi-box.absent{border-color:#ffd391}.roi-legend{font-size:12px;color:#b6f08c;margin:6px 0}@media(max-width:600px){.view-tools{display:flex;flex-direction:column;gap:6px}}</style>
+<style>#live-boxes{position:absolute;pointer-events:none;overflow:hidden}.live-box{position:absolute;border:2px solid #b6f08c;box-sizing:border-box}.live-box span{position:absolute;top:0;left:0;background:#102019df;color:#b6f08c;font:10px system-ui;white-space:nowrap;padding:1px 3px}#pov-label{z-index:1}</style>
 <header><h1>Open Industries / Farm demo</h1><p>ASTRA + SO-101 · Automated controller · OpenCV image verification</p>
 <button id="new" data-action="new_run">New run</button><button id="start" class="primary" data-action="start">Start harvest</button><button id="pause" data-action="pause">Pause</button><button id="resume" data-action="resume">Resume</button>
 <div id="status">Loading actual farm meshes…</div><progress id="progress" max="72" value="0"></progress><div id="error" role="alert"></div></header>
@@ -42,8 +43,23 @@ const camera=new T.PerspectiveCamera(45,1,.01,100);camera.up.set(0,0,1);camera.p
 const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,0,.2);orbit.enableDamping=true;
 const povCamera=new T.PerspectiveCamera(80,1,.015,100);povCamera.up.set(0,0,1);
 let viewMode='overview',robotReady=false;
+const liveBoxes=document.createElement('div');liveBoxes.id='live-boxes';view.append(liveBoxes);
+const sample=document.createElement('canvas');sample.width=256;sample.height=160;const sampleContext=sample.getContext('2d',{willReadFrequently:true});
+let analysisBusy=false,lastAnalysis=0,boxesAt=0;
+function liveAnalysis(rect){
+ Object.assign(liveBoxes.style,{left:rect.x+'px',top:rect.y+'px',width:rect.w+'px',height:rect.h+'px'});
+ const now=performance.now();if(now-boxesAt>2000)liveBoxes.replaceChildren();
+ if(!latest||!robotReady||analysisBusy||now-lastAnalysis<700)return;
+ analysisBusy=true;lastAnalysis=now;const mode=viewMode;
+ const ratio=renderer.getPixelRatio();sampleContext.drawImage(renderer.domElement,rect.x*ratio,rect.y*ratio,rect.w*ratio,rect.h*ratio,0,0,256,160);
+ const pixels=sampleContext.getImageData(0,0,256,160).data;let binary='';for(let i=0;i<pixels.length;i+=8192)binary+=String.fromCharCode(...pixels.subarray(i,i+8192));
+ fetch('/api/pov-analysis',{method:'POST',headers:{'Content-Type':'application/json','X-Farm-Demo':'__DEMO_TOKEN__'},body:JSON.stringify({rgba:btoa(binary)}),signal:AbortSignal.timeout(3000)})
+ .then(async response=>{if(!response.ok)throw Error('Vision unavailable');return response.json();})
+ .then(result=>{if(viewMode!==mode)return;liveBoxes.replaceChildren();for(const detection of result.boxes){const box=document.createElement('div'),label=document.createElement('span');box.className='live-box';const [x,y,w,h]=detection.box;Object.assign(box.style,{left:100*x/result.width+'%',top:100*y/result.height+'%',width:100*w/result.width+'%',height:100*h/result.height+'%'});label.textContent=detection.label+' candidate';box.append(label);liveBoxes.append(box);}boxesAt=performance.now();document.querySelector('#pov-label').textContent='Live OpenCV · color candidates · simulated POV';})
+ .catch(()=>{liveBoxes.replaceChildren();document.querySelector('#pov-label').textContent='Simulated POV · live OpenCV reconnecting…';}).finally(()=>{analysisBusy=false;});
+}
 const base=new T.Vector3(),rotation=new T.Quaternion(),forward=new T.Vector3(),eye=new T.Vector3();
-for(const mode of ['overview','pov'])document.querySelector('#'+mode).onclick=()=>{viewMode=mode;orbit.enabled=mode==='overview';for(const id of ['overview','pov'])document.querySelector('#'+id).setAttribute('aria-pressed',String(mode===id));};
+for(const mode of ['overview','pov'])document.querySelector('#'+mode).onclick=()=>{viewMode=mode;liveBoxes.replaceChildren();orbit.enabled=mode==='overview';for(const id of ['overview','pov'])document.querySelector('#'+id).setAttribute('aria-pressed',String(mode===id));};
 const map=document.querySelector('#minimap'),mapContext=map.getContext('2d');
 function robotViews(s){
  if(!s.robot_quaternion)return;robotReady=true;base.fromArray(s.robot_position);
@@ -72,7 +88,8 @@ async function update(){try{const state=await json('/api/state');for(const [id,.
  if(state.controller_error)document.querySelector('#error').textContent=state.controller_error;await evidence(state);
 }catch{latest=null;controls();status.textContent='Disconnected — reconnecting; server owns progress.';}setTimeout(update,150);}update();
 renderer.setAnimationLoop(()=>{orbit.update();const w=view.clientWidth,h=view.clientHeight;renderer.setScissorTest(false);renderer.setViewport(0,0,w,h);povCamera.aspect=w/h;povCamera.updateProjectionMatrix();renderer.render(scene,viewMode==='pov'&&robotReady?povCamera:camera);
- if(viewMode==='overview'&&robotReady){const width=Math.min(320,w*.45),height=width*.62;renderer.setScissorTest(true);renderer.setScissor(w-width-12,12,width,height);renderer.setViewport(w-width-12,12,width,height);renderer.clearDepth();povCamera.aspect=width/height;povCamera.updateProjectionMatrix();renderer.render(scene,povCamera);renderer.setScissorTest(false);}
+ if(viewMode==='overview'&&robotReady){const width=Math.min(320,w*.45),height=width*.62;renderer.setScissorTest(true);renderer.setScissor(w-width-12,12,width,height);renderer.setViewport(w-width-12,12,width,height);renderer.clearDepth();povCamera.aspect=width/height;povCamera.updateProjectionMatrix();renderer.render(scene,povCamera);renderer.setScissorTest(false);liveAnalysis({x:w-width-12,y:h-height-12,w:width,h:height});}
+ else if(robotReady)liveAnalysis({x:0,y:0,w,h});
 });
 }catch(error){status.textContent=`Viewer unavailable: ${error.message}`;}
 </script></html>

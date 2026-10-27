@@ -60,6 +60,30 @@ def analyze_pixels(rgb: np.ndarray, bed: int) -> dict[str, Any]:
             "interpretation": "color candidate at fixed simulated pickup location; not crop recognition"}
 
 
+def analyze_pov(rgba: bytes) -> dict[str, Any]:
+    """Find bounded color contours in browser-rendered POV pixels; no semantic claims."""
+    require(len(rgba) == 256*160*4, "INVALID_REQUEST")
+    pixels = np.frombuffer(rgba, dtype=np.uint8).reshape(160, 256, 4)
+    hsv = cv2.cvtColor(pixels[:, :, :3], cv2.COLOR_RGB2HSV)
+    boxes = []
+    for label, low, high in (("red", (0, 120, 110), (9, 255, 255)),
+                             ("orange", (10, 120, 110), (25, 255, 255)),
+                             ("green", (30, 90, 80), (90, 255, 255))):
+        mask = cv2.inRange(hsv, np.array(low), np.array(high))
+        if label == "red":
+            mask |= cv2.inRange(hsv, np.array((170, 120, 110)), np.array((179, 255, 255)))
+        mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area < 12:
+                continue
+            x, y, width, height = cv2.boundingRect(contour)
+            boxes.append({"label": label, "box": [x, y, width, height], "area": area})
+    return {"width": 256, "height": 160, "boxes": sorted(boxes, key=lambda box: box["area"], reverse=True)[:24],
+            "method": "OpenCV HSV color contours", "opencv": cv2.__version__}
+
+
 class FarmRuntime:
     """Own the farm clock, model, durable commands and camera; agents never set poses/time."""
 
