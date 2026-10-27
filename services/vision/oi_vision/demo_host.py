@@ -35,11 +35,14 @@ def read_json(path: Path) -> Json:
 
 
 def write_private(path: Path, text: str) -> None:
-    """Atomically replace a private file, syncing both its bytes and directory entry."""
+    """Atomically write private state, retaining directory ownership for root-run operators."""
     descriptor, temporary = tempfile.mkstemp(prefix=".write-", dir=path.parent)
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
             os.fchmod(stream.fileno(), 0o600)
+            if os.geteuid() == 0:
+                owner = path.parent.stat()
+                os.fchown(stream.fileno(), owner.st_uid, owner.st_gid)
             stream.write(text)
             stream.flush()
             os.fsync(stream.fileno())
