@@ -26,7 +26,7 @@ curl --fail --silent --show-error --location https://nodejs.org/dist/v22.23.4/no
 echo "1805bcd35e6815559bd2eb97db438d3fdb0eb3a5e6a977b7c1badca76337e9ce  $temporary/node.tar.xz" | sha256sum --check
 install -d -m 0755 /opt/oi-station/node
 tar -xJf "$temporary/node.tar.xz" -C /opt/oi-station/node --strip-components=1
-export PATH=/opt/oi-station/node/bin:/usr/bin:/bin
+export PATH=/opt/oi-station/node/bin:/usr/sbin:/usr/bin:/sbin:/bin
 cd "$app"
 npm ci --ignore-scripts
 node scripts/prepare-vendor.mjs
