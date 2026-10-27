@@ -39,6 +39,10 @@ data; the before/after OpenCV observations are separate records derived from pix
 The reference policy is deterministic and needs no model account. An external
 model-backed agent can invoke its MCP tools and show the evidence to the user.
 
+For a station that remains available across agent connections and host restarts,
+use the [persistent demo launcher](persistent-vision-demo.md). It writes a local
+MCP connection configuration and provides operator controls to show or hide the marker.
+
 ## Run the complete local demonstration
 
 From the repository root, using Python 3.11 or 3.12 and Node 22.18+:
