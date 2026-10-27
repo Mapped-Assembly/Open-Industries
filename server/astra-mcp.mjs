@@ -8,6 +8,7 @@ import { simulationTools } from './mcp-simulation-contract.mjs';
 import { visionTools } from './mcp-vision-contract.mjs';
 import { callVisionTool } from './mcp-vision.mjs';
 import { agentTools, callAgentTool } from './mcp-agent.mjs';
+import { farmTools, callFarmTool } from './mcp-farm.mjs';
 import { scrubPortableData as scrub } from '../src/lib/portable-data.mjs';
 
 let sceneRuntime;
@@ -43,6 +44,7 @@ const tools = [
   ...simulationTools,
   ...visionTools,
   ...agentTools,
+  ...farmTools,
   { name: 'astra.read_animation_feedback', description: 'Read the latest scrubbed Mergence authored-animation review for Form iteration.', inputSchema: { type: 'object', properties: {} } },
   { name: 'astra.read_form_project', description: 'Read a local compiled Form project manifest from the Mergence checkout.', inputSchema: { type: 'object', properties: { path: { type: 'string', description: 'Checkout-relative path, usually demo/form-project.json.' } } } },
   { name: 'astra.save_form_project', description: 'Save a Form MCP project_ir back into an existing compiled project manifest.', inputSchema: { type: 'object', properties: { path: { type: 'string' }, project_ir: { type: 'object' } }, required: ['path', 'project_ir'] } },
@@ -51,6 +53,7 @@ const tools = [
 ];
 
 async function callTool(name, args = {}) {
+  if(farmTools.some(tool=>tool.name===name))return callFarmTool(name,args);
   if(agentTools.some(tool=>tool.name===name))return callAgentTool(root,name,args);
   if(visionTools.some(tool=>tool.name===name))return callVisionTool(name,args);
   if(simulationTools.some(tool=>tool.name===name))return (await simulationModule()).callSimulationTool(name,args);
@@ -99,7 +102,7 @@ async function handle(request) {
   if (request.method === 'tools/call') {
     try {
       const result = await callTool(request.params?.name, request.params?.arguments);
-      if (request.params?.name === 'astra.vision_read_frame') {
+      if (['astra.vision_read_frame','astra.farm_read_frame'].includes(request.params?.name)) {
         const { preview, ...record } = result;
         const { data, ...metadata } = preview;
         const formatted = textResult({ ...record, preview: metadata });
@@ -109,6 +112,10 @@ async function handle(request) {
       return response(request.id, textResult(result));
     }
     catch (error) {
+      if(farmTools.some(tool=>tool.name===request.params?.name)) {
+        const code=error?.name==='FarmToolError'?error.code:'FARM_UNAVAILABLE';
+        return response(request.id,{...textResult({error:{code,message:code}}),isError:true});
+      }
       if(agentTools.some(tool=>tool.name===request.params?.name)) {
         const code=error?.name==='AgentToolError'?error.code:'UNAVAILABLE';
         return response(request.id,{...textResult({error:{code,message:code}}),isError:true});

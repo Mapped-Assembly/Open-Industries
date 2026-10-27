@@ -1,0 +1,50 @@
+[Unit]
+Description=Open Industries synthetic inspection station (game + camera + OpenCV)
+After=network.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=oi-station
+Group=oi-station
+WorkingDirectory=/opt/oi-station/app
+Environment=PATH=/opt/oi-station/node/bin:/usr/bin:/bin
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=OMP_NUM_THREADS=1
+Environment=NODE_ENV=production
+ExecStart=/opt/oi-station/venv/bin/python -m oi_vision.demo_cli serve --root /opt/oi-station/app --state-dir /var/lib/oi-station/state
+ExecStartPost=/opt/oi-station/venv/bin/python -m oi_vision.station_evidence health --state-dir /var/lib/oi-station/state --wait 60
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=90
+TimeoutStopSec=30
+# SIGTERM reaches the launcher first for ordered checkpointing. SIGKILL reaches
+# every remaining cgroup member after the timeout, including new-session workers.
+KillMode=mixed
+KillSignal=SIGTERM
+SendSIGKILL=yes
+OOMPolicy=stop
+UMask=0077
+StateDirectory=oi-station
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/oi-station
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LogNamespace=oi-station
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=60
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

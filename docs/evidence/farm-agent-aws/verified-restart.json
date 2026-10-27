@@ -1,0 +1,40 @@
+{
+  "at_ms": 1793072649533,
+  "same_state_and_jobs": true,
+  "farm": {
+    "station_id": "b2fb907e-b7c0-465b-8396-46b531060ade",
+    "revision": 16,
+    "source_commit": "523d1f5a54b5b279d6d2ae9fcb8b5315b15573aa",
+    "elapsed": 72,
+    "duration": 72,
+    "boundary": 7,
+    "phase": "complete",
+    "paused": false,
+    "active_job": null,
+    "review_required": false,
+    "next_action": null,
+    "next_bed": null,
+    "deposited": [
+      2,
+      1,
+      0
+    ],
+    "robot_position": [
+      1.7999999999999998,
+      1.3,
+      -0.026
+    ],
+    "joint_positions": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "simulated": true,
+    "looping": false,
+    "control": "agent-selected kinematic segments; scripted grasp/release"
+  },
+  "job_count": 7,
+  "transport": "SSH stdio MCP"
+}

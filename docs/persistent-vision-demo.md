@@ -10,6 +10,9 @@ This is the simulated city-dump inspection adapter from [the inspection integrat
 The camera draws the authorized runtime state and a configurable yellow marker.
 Physical equipment, native Open Industries chat, a live model run and AWS deployment
 remain separate integrations.
+For the deployment implementation and cloud acceptance procedure, see
+[AWS inspection station](aws-inspection-station.md); it preserves this launcher's
+fixed repository-root binding and supervises the complete process tree.
 
 ## Start the station
 

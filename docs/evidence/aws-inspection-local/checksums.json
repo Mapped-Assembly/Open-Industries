@@ -1,0 +1,8 @@
+{
+  "exercise.json": "c65816a8370835cefb198955ceeacfa1f67e9fcb230ec11f37d08067b7133056",
+  "tool-trace.json": "68128f199e966189ac1789246219195d86b4be0e2dde06c4a8abc83ec1f677ed",
+  "before.jpg": "d41001948cf607bd3bda18039532ed3a5280b10a6f5890ada7cb44c18d1b4d37",
+  "after.jpg": "5d28c0a1140a4ca7577b99e5191de70a4f9542ffd6e2f6fd4043600705417801",
+  "verified-restart.json": "eeb9430a76bcbd22f3108962aaa4db9de8f9c164ef04a3d05a1c6efee4eff7cc",
+  "verified-restore.json": "95f5934a69c4782d96e16b75df88a6741efa0e95c3fdc6103b523dd710ac684b"
+}

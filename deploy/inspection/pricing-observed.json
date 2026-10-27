@@ -1,0 +1,20 @@
+{
+  "checked_on": "2026-10-27",
+  "region": "us-east-1",
+  "currency": "USD",
+  "ec2_price_list_source": "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/us-east-1/index.csv",
+  "ec2": {"sku": "QA3NBPZEQKZ2K9AR", "effective_date": "2026-10-01", "instance_type": "t3.small", "os": "Linux", "tenancy": "Shared", "term": "OnDemand", "hourly": 0.0208},
+  "ebs": {"sku": "JG3KUJMBRGHV3N8G", "effective_date": "2026-10-01", "type": "gp3", "gb_month": 0.08, "provisioned_gb": 30},
+  "ipv4": {"source": "https://aws.amazon.com/vpc/pricing/", "hourly": 0.005, "count": 1},
+  "estimate_730_hours": {"compute": 15.184, "ebs": 2.4, "ipv4": 3.65, "total": 21.234},
+  "exclusions": ["tax", "data transfer", "off-host backups and snapshots", "model provider usage"],
+  "free_tier_assumed": false,
+  "cpu_credits": "unlimited: observed workload exceeded Standard baseline; Linux surplus CPU costs $0.05/vCPU-hour",
+  "surplus_cpu_vcpu_hour": 0.05,
+  "base_estimate_excludes_surplus_cpu": true,
+  "short_sample_idle_monthly_estimate_usd": "25-30; not a long-duration billing measurement",
+  "maximum_730h_total_at_full_cpu_usd": 79.634,
+  "account_credits_observed_usd": 100,
+  "account_plan": "ACTIVE FREE; expires 2027-04-16",
+  "deployment_status": "deployed in us-east-1; deterministic workflow, restart and reboot verified"
+}

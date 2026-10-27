@@ -16,3 +16,6 @@ oi-vision-demo = "oi_vision.demo_cli:main"
 
 [tool.setuptools.packages.find]
 include = ["oi_vision*"]
+
+[tool.setuptools.package-data]
+oi_vision = ["farm_viewer.html"]

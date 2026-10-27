@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "open-industries-aws": {
+      "command": "ssh",
+      "args": ["-T", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "oi-inspection", "sudo", "-n", "/usr/local/bin/oi-station-mcp"]
+    }
+  }
+}

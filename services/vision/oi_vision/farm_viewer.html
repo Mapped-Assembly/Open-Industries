@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent-controlled sample farm</title>
+<style>body{margin:0;background:#14251d;color:#e2f5e7;font:16px system-ui}header{padding:16px}h1{font-size:22px;margin:0}p{margin:6px 0}#view{height:75vh}#status{white-space:pre-wrap}canvas{display:block}</style>
+<header><h1>Agent-controlled sample farm</h1><p>ASTRA + SO-101 · simulated kinematics · OpenCV pickup evidence</p>
+<p>Read-only viewer. The agent chooses each move and harvest; opening this page never starts a mission.</p><div id="status">Loading actual farm meshes…</div></header><div id="view"></div>
+<script type="importmap">{"imports":{"three":"/vendor/three.module.min.js"}}</script>
+<script type="module">
+import * as T from 'three';
+import {OrbitControls} from '/vendor/OrbitControls.js';
+const view=document.querySelector('#view'), status=document.querySelector('#status');
+async function json(url){const r=await fetch(url);if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json();}
+function primitive(kind,[x,y,z]){switch(kind){
+case 'box':return new T.BoxGeometry(2*x,2*y,2*z);case 'plane':return new T.PlaneGeometry(2*(x||8),2*(y||8));
+case 'sphere':return new T.SphereGeometry(x,16,12);case 'ellipsoid':return new T.SphereGeometry(1,16,12).scale(x,y,z);
+case 'capsule':return new T.CapsuleGeometry(x,2*y,4,12).rotateX(Math.PI/2);
+case 'cylinder':return new T.CylinderGeometry(x,x,2*y,16).rotateX(Math.PI/2);default:throw Error(kind);}}
+try{
+const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));view.append(renderer.domElement);
+const scene=new T.Scene();scene.background=new T.Color('#14251d');scene.add(new T.HemisphereLight(0xe8f6ff,0x586b3a,1.4));
+const light=new T.DirectionalLight(0xfff2d9,2);light.position.set(3,1,7);scene.add(light);
+const camera=new T.PerspectiveCamera(45,1,.01,100);camera.up.set(0,0,1);camera.position.set(4,5,4);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,.2);controls.enableDamping=true;
+new ResizeObserver(()=>{renderer.setSize(view.clientWidth,view.clientHeight);camera.aspect=view.clientWidth/view.clientHeight;camera.updateProjectionMatrix();}).observe(view);
+const description=await json('/api/scene'), meshes=new Map(),nodes=new Map();
+for(const [id,url] of Object.entries(description.meshes)){
+ const response=await fetch(url);if(!response.ok)throw Error('Mesh unavailable');const b=await response.arrayBuffer(),h=new DataView(b),v=h.getUint32(0,true),f=h.getUint32(4,true);
+ const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(new Float32Array(b,8,v*3),3));g.setIndex(new T.BufferAttribute(new Uint32Array(b,8+v*12,f*3),1));g.computeVertexNormals();meshes.set(Number(id),g);
+}
+for(const g of description.geometries){const material=new T.MeshStandardMaterial({color:new T.Color(...g.rgba.slice(0,3)),roughness:.8});
+ const node=new T.Mesh(g.kind==='mesh'?meshes.get(g.mesh):primitive(g.kind,g.size),material);node.position.fromArray(g.position);node.quaternion.fromArray(g.quaternion);scene.add(node);nodes.set(g.id,node);}
+async function update(){try{const state=await json('/api/state');for(const [id,...pose] of state.transforms){const n=nodes.get(id);n.position.fromArray(pose);n.quaternion.fromArray(pose,3);}
+ status.textContent=`${state.paused?'PAUSED · ':''}${state.phase} · ${state.elapsed.toFixed(1)} / 72 s · Box ${state.deposited.length}/3\n${state.active_job?'Executing '+state.active_job:'Waiting for agent: '+(state.next_action||'mission complete')}`;
+}catch{status.textContent='Disconnected — reconnecting; server owns progress.';}setTimeout(update,150);}update();
+renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
+}catch(error){status.textContent=`Viewer unavailable: ${error.message}`;}
+</script></html>
