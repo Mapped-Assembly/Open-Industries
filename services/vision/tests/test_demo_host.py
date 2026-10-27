@@ -21,6 +21,8 @@ from uuid import uuid4
 
 from oi_vision.contracts import Json
 from oi_vision.demo_host import DemoError, PersistentDemo, read_json
+from oi_vision.station_backup import backup, restore
+from oi_vision.station_evidence import exercise, verify
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -256,6 +258,33 @@ class PersistentDemoTests(unittest.TestCase):
         self.assertNotEqual(self.cli("status").returncode, 0)
         restarted, resumed = self.start()
         self.assertEqual(resumed["match_id"], ready["match_id"])
+        self.stop(restarted, resumed)
+
+    def test_deployment_evidence_and_complete_offline_restore(self) -> None:
+        """The shipped verifier uses exported MCP, then proves a complete three-store restore."""
+        process, ready = self.start()
+        output = Path(self.temporary.name) / "public-evidence"
+        archive = Path(self.temporary.name) / "private-backup"
+        result = exercise(self.directory, output)
+        self.assertTrue(all(result["checks"].values()))
+        self.assertIsNone(result["metadata"]["aws"])
+        self.assertNotEqual((output / "before.jpg").read_bytes(), (output / "after.jpg").read_bytes())
+        with self.assertRaisesRegex(DemoError, "DEMO_ALREADY_RUNNING"):
+            backup(self.directory, archive)
+        self.stop(process, ready)
+        backup(self.directory, archive)
+        for name in ("runtime.sqlite", "observations.sqlite", "inspections.sqlite", "host.json", "connection.json"):
+            self.assertTrue((archive / "state" / name).is_file())
+        with self.assertRaisesRegex(DemoError, "RESTORE_DESTINATION_EXISTS"):
+            restore(archive, self.directory)
+        self.directory.rename(Path(self.temporary.name) / "quarantine")
+        restore(archive, self.directory)
+        restarted, resumed = self.start()
+        persisted = verify(self.directory, output, "restore")
+        self.assertTrue(persisted["same_identity_and_credentials"])
+        self.assertTrue(persisted["same_checkpoints_and_images"])
+        with self.assertRaisesRegex(DemoError, "HOST_NOT_REBOOTED"):
+            verify(self.directory, output, "reboot")
         self.stop(restarted, resumed)
 
     def test_occupied_saved_port_does_not_replace_fixture(self) -> None:

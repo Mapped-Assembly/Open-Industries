@@ -128,6 +128,10 @@ command, runtime job result and follow-up image; a runnable demo exercises the f
 The [persistent demo launcher](docs/persistent-vision-demo.md) keeps the camera, vision
 service and robot runtime available for an external MCP agent, with saved state across
 restarts and commands to show or hide the inspection marker.
+The [AWS inspection deployment](docs/aws-inspection-station.md) provides a pinned
+EC2/systemd installation, SSH stdio agent access, complete-state backup/restore and
+reproducible MCP evidence capture. Cloud deployment and host reboot remain unverified
+until an authorized target host runs the acceptance procedure.
 
 ## Persistent runtime hosting
 

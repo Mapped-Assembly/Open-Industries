@@ -1,0 +1,16 @@
+[Unit]
+Description=Probe actual inspection services, scheduler and synthetic camera
+After=oi-station.service
+
+[Service]
+Type=oneshot
+User=oi-station
+Group=oi-station
+Environment=PATH=/opt/oi-station/node/bin:/usr/bin:/bin
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/oi-station/venv/bin/python -m oi_vision.station_evidence health --state-dir /var/lib/oi-station/state
+TimeoutStartSec=20
+LogNamespace=oi-station
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true

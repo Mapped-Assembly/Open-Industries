@@ -25,15 +25,17 @@ class ToolClient(Protocol):
 class McpClient:
     """Execute the repository's real stdio host with inherited service credentials."""
 
-    def __init__(self, root: Path, timeout_seconds: float = 35, allow_agent_tools: bool = False) -> None:
-        """Start a private host; disable nested inspection-tool execution."""
+    def __init__(self, root: Path, timeout_seconds: float = 35, allow_agent_tools: bool = False,
+                 *, command: list[str] | None = None) -> None:
+        """Start a host or an operator-supplied stdio entry point; never a tool-supplied command."""
         self.timeout = timeout_seconds
         self.counter = 0
         self.messages: queue.Queue[bytes | None] = queue.Queue(maxsize=8)
         self.process = subprocess.Popen(
-            ["node", str(root / "server/astra-mcp.mjs")], cwd=root,
-            env={**os.environ, "ASTRA_ROOT": str(root),
-                 "OI_AGENT_ENABLED": os.environ.get("OI_AGENT_ENABLED", "false") if allow_agent_tools else "false"},
+            command or ["node", str(root / "server/astra-mcp.mjs")], cwd=root,
+            env=({key: value for key, value in os.environ.items() if not key.startswith(("OI_", "ASTRA_"))}
+                 if command else {**os.environ, "ASTRA_ROOT": str(root),
+                 "OI_AGENT_ENABLED": os.environ.get("OI_AGENT_ENABLED", "false") if allow_agent_tools else "false"}),
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         self.reader = threading.Thread(target=self._consume, daemon=True)
         self.reader.start()

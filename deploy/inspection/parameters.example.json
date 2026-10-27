@@ -1,0 +1,6 @@
+[
+  {"ParameterKey": "Release", "ParameterValue": "REPLACE_WITH_REVIEWED_FULL_COMMIT_SHA"},
+  {"ParameterKey": "ImageId", "ParameterValue": "REPLACE_WITH_PINNED_UBUNTU_2404_AMD64_AMI"},
+  {"ParameterKey": "KeyName", "ParameterValue": "oi-inspection-operator"},
+  {"ParameterKey": "AdminCidr", "ParameterValue": "203.0.113.10/32"}
+]

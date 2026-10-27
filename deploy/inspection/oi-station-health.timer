@@ -1,0 +1,10 @@
+[Unit]
+Description=Check inspection station readiness every thirty seconds
+
+[Timer]
+OnBootSec=90
+OnUnitActiveSec=30
+Unit=oi-station-health.service
+
+[Install]
+WantedBy=timers.target
