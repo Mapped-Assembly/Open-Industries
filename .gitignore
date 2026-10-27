@@ -3,6 +3,7 @@ dist/
 .venv/
 .venv-vision/
 .venv-release/
+.venv-farm/
 python-dist/
 .env
 .env.local
