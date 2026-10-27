@@ -23,6 +23,7 @@ from .farm import FarmError, FarmRuntime, SOURCE_COMMIT, require
 def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTPRequestHandler]:
     """Expose authenticated agent operations and a read-only loopback 3D viewer."""
     scene: Any = None
+    demo_token = secrets.token_hex(32)
 
     class Handler(BaseHTTPRequestHandler):
         """Keep credentials and raw exception messages out of HTTP logs/responses."""
@@ -43,8 +44,13 @@ def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTP
 
         def do_POST(self) -> None:
             """Dispatch only known agent operations after bearer authorization."""
-            if self.headers.get("Origin") or not hmac.compare_digest(
-                    self.headers.get("Authorization", ""), "Bearer " + token):
+            browser = self.path == "/api/control"
+            host = self.headers.get("Host", "")
+            browser_authorized = (bool(re.fullmatch(r"(127\.0\.0\.1|localhost):[0-9]+", host))
+                and self.headers.get("Origin") == "http://" + host
+                and hmac.compare_digest(self.headers.get("X-Farm-Demo", ""), demo_token))
+            if (browser and not browser_authorized) or (not browser and (self.headers.get("Origin") or not hmac.compare_digest(
+                    self.headers.get("Authorization", ""), "Bearer " + token))):
                 self.reply(401, {"error": {"code": "AUTH_REQUIRED"}})
                 return
             self.connection.settimeout(10)
@@ -54,7 +60,9 @@ def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTP
                 request = json.loads(self.rfile.read(length))
                 require(isinstance(request, dict), "INVALID_REQUEST")
                 with runtime.lock, runtime.db:
-                    if self.path == "/command":
+                    if browser:
+                        result = {"receipt": runtime.demo_command(request)}
+                    elif self.path == "/command":
                         result = {"receipt": runtime.command(request)}
                     elif self.path == "/capture":
                         require(set(request) == {"bed"}, "INVALID_REQUEST")
@@ -82,7 +90,8 @@ def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTP
         def do_GET(self) -> None:
             """Serve only scene data and explicit static assets; visiting never starts motion."""
             nonlocal scene
-            if self.headers.get("Sec-Fetch-Site") == "cross-site":
+            if self.headers.get("Sec-Fetch-Site") == "cross-site" or not re.fullmatch(
+                    r"(127\.0\.0\.1|localhost):[0-9]+", self.headers.get("Host", "")):
                 self.reply(403, {"error": {"code": "AUTH_REQUIRED"}})
                 return
             try:
@@ -90,7 +99,12 @@ def handler_for(runtime: FarmRuntime, token: str, source: Path) -> type[BaseHTTP
                 if path == "/health":
                     self.reply(200 if not runtime.failure else 503, {"healthy": not runtime.failure})
                 elif path == "/":
-                    self.reply(200, (Path(__file__).parent / "farm_viewer.html").read_bytes(), "text/html; charset=utf-8")
+                    page = (Path(__file__).parent / "farm_viewer.html").read_text().replace("__DEMO_TOKEN__", demo_token)
+                    self.reply(200, page.encode(), "text/html; charset=utf-8")
+                elif path == "/api/evidence":
+                    self.reply(200, runtime.evidence())
+                elif path.startswith("/api/frame/"):
+                    self.reply(200, runtime.frame(path.removeprefix("/api/frame/"))[1], "image/png")
                 elif path in ("/vendor/three.module.min.js", "/vendor/OrbitControls.js"):
                     self.reply(200, (source / "simulation" / path.lstrip("/")).read_bytes(), "text/javascript")
                 elif path in ("/api/scene", "/api/state") or re.fullmatch(r"/assets/mesh/\d+\.bin", path):

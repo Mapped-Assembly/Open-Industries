@@ -1,14 +1,31 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Agent-controlled sample farm</title>
-<style>body{margin:0;background:#14251d;color:#e2f5e7;font:16px system-ui}header{padding:16px}h1{font-size:22px;margin:0}p{margin:6px 0}#view{height:75vh}#status{white-space:pre-wrap}canvas{display:block}</style>
-<header><h1>Agent-controlled sample farm</h1><p>ASTRA + SO-101 · simulated kinematics · OpenCV pickup evidence</p>
-<p>Read-only viewer. The agent chooses each move and harvest; opening this page never starts a mission.</p><div id="status">Loading actual farm meshes…</div></header><div id="view"></div>
+<title>Open Industries · Farm demo</title>
+<style>body{margin:0;background:#101e19;color:#e2f5e7;font:15px system-ui}header{padding:20px 24px;border-bottom:1px solid #345044}h1{font-size:25px;margin:0}p{margin:8px 0;color:#b5cdbf}#view{height:65vh;min-height:350px}#status{white-space:pre-wrap;margin-top:12px;min-height:44px}canvas{display:block}button{padding:11px 18px;margin:8px 8px 0 0;border:1px solid #638875;border-radius:8px;background:#233d30;color:white;font:inherit;cursor:pointer}button.primary{background:#b6f08c;color:#173019;font-weight:700}button:disabled{opacity:.4;cursor:default}main{display:grid;grid-template-columns:minmax(0,1fr) 370px}aside{padding:16px;max-height:75vh;overflow:auto;border-left:1px solid #345044}h2{font-size:18px}h3{margin:8px 0}article{background:#20352b;padding:12px;border-radius:10px;margin-bottom:12px}.images{display:flex;gap:8px}.images figure{margin:0;width:50%}.images img{width:100%;border-radius:6px}figcaption,small{font-size:12px;color:#b5cdbf}#error{color:#ffd391}progress{width:100%;accent-color:#b6f08c}footer{padding:14px 24px;color:#b5cdbf}@media(max-width:850px){main{display:block}aside{max-height:none;border:0}#view{height:50vh}}</style>
+<header><h1>Open Industries / Farm demo</h1><p>ASTRA + SO-101 · Automated controller · OpenCV image verification</p>
+<button id="new" data-action="new_run">New run</button><button id="start" class="primary" data-action="start">Start harvest</button><button id="pause" data-action="pause">Pause</button><button id="resume" data-action="resume">Resume</button>
+<div id="status">Loading actual farm meshes…</div><progress id="progress" max="72" value="0"></progress><div id="error" role="alert"></div></header>
+<main><div id="view"></div><aside><h2>Pickup evidence</h2><p>Rendered simulation images · fixed OpenCV color ROI</p><div id="evidence">Start a run to collect before/after images.</div><h2>Saved runs</h2><div id="history">Loading…</div></aside></main>
+<footer>Deterministic automation, no model invoked by these buttons. Simulated kinematics; scripted produce attachment/release. Drag to orbit · scroll to zoom. Runs continue when this page closes.</footer>
 <script type="importmap">{"imports":{"three":"/vendor/three.module.min.js"}}</script>
 <script type="module">
 import * as T from 'three';
 import {OrbitControls} from '/vendor/OrbitControls.js';
 const view=document.querySelector('#view'), status=document.querySelector('#status');
+let latest=null,busy=false,evidenceKey='';
+const buttons=[...document.querySelectorAll('button[data-action]')];
+function controls(){const s=latest;for(const b of buttons)b.disabled=busy||!s;
+if(!s||busy)return;
+document.querySelector('#new').disabled=!!s.active_job||s.controller==='running';
+document.querySelector('#start').disabled=!!s.active_job||s.boundary===7||s.review_required||['running','paused'].includes(s.controller);
+document.querySelector('#pause').disabled=s.controller!=='running';document.querySelector('#resume').disabled=s.controller!=='paused';}
+for(const button of buttons)button.onclick=async()=>{busy=true;controls();const request={command_id:crypto.randomUUID(),expected_revision:latest.revision,action:button.dataset.action};
+try{const response=await fetch('/api/control',{method:'POST',headers:{'Content-Type':'application/json','X-Farm-Demo':'__DEMO_TOKEN__'},body:JSON.stringify(request)});const result=await response.json();if(!response.ok)throw Error(result.error?.code||'Control unavailable');document.querySelector('#error').textContent='';latest=null;}
+catch(error){document.querySelector('#error').textContent=error.message+' — refresh state before retrying.';}finally{busy=false;controls();}};
+async function evidence(s){const key=s.run_id+':'+s.revision;if(key===evidenceKey)return;const data=await json('/api/evidence');const panel=document.querySelector('#evidence');panel.replaceChildren();
+for(const bed of [2,1,0]){const job=data.jobs.find(j=>j.action==='harvest'&&j.bed===bed);const card=document.createElement('article');const title=document.createElement('h3');title.textContent=['Tomatoes','Lettuce','Carrots'][bed]+' · '+(job?.stage||'waiting');card.append(title);const images=document.createElement('div');images.className='images';
+for(const [label,key] of [['Before','observation_id'],['After','after_observation_id']]){const frame=data.frames.find(f=>f.observation_id===job?.[key]);if(!frame)continue;const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');img.src='/api/frame/'+frame.observation_id;img.alt=label+' '+frame.crop_label+' simulated pickup';caption.textContent=label+' · '+frame.analysis.target_pixels+' target pixels';figure.append(img,caption);images.append(figure);}card.append(images);panel.append(card);}
+document.querySelector('#history').textContent=data.history.length?data.history.map(r=>r.run_id.slice(0,8)+' · '+(r.boundary===7?'complete':r.boundary+'/7 segments')).join(' | '):'Previous runs will be preserved here.';evidenceKey=key;}
 async function json(url){const r=await fetch(url);if(!r.ok)throw Error(`HTTP ${r.status}`);return r.json();}
 function primitive(kind,[x,y,z]){switch(kind){
 case 'box':return new T.BoxGeometry(2*x,2*y,2*z);case 'plane':return new T.PlaneGeometry(2*(x||8),2*(y||8));
@@ -30,8 +47,10 @@ for(const [id,url] of Object.entries(description.meshes)){
 for(const g of description.geometries){const material=new T.MeshStandardMaterial({color:new T.Color(...g.rgba.slice(0,3)),roughness:.8});
  const node=new T.Mesh(g.kind==='mesh'?meshes.get(g.mesh):primitive(g.kind,g.size),material);node.position.fromArray(g.position);node.quaternion.fromArray(g.quaternion);scene.add(node);nodes.set(g.id,node);}
 async function update(){try{const state=await json('/api/state');for(const [id,...pose] of state.transforms){const n=nodes.get(id);n.position.fromArray(pose);n.quaternion.fromArray(pose,3);}
- status.textContent=`${state.paused?'PAUSED · ':''}${state.phase} · ${state.elapsed.toFixed(1)} / 72 s · Box ${state.deposited.length}/3\n${state.active_job?'Executing '+state.active_job:'Waiting for agent: '+(state.next_action||'mission complete')}`;
-}catch{status.textContent='Disconnected — reconnecting; server owns progress.';}setTimeout(update,150);}update();
+ latest=state;controls();document.querySelector('#progress').value=state.elapsed;
+ status.textContent=`${state.paused?'PAUSED · ':''}${state.phase} · ${state.elapsed.toFixed(1)} / 72 s · Box ${state.deposited.length}/3\nRun ${state.run_id.slice(0,8)} · ${state.controller} · ${state.active_job?'Executing '+state.next_action:(state.next_action||'mission complete')}`;
+ if(state.controller_error)document.querySelector('#error').textContent=state.controller_error;await evidence(state);
+}catch{latest=null;controls();status.textContent='Disconnected — reconnecting; server owns progress.';}setTimeout(update,150);}update();
 renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
 }catch(error){status.textContent=`Viewer unavailable: ${error.message}`;}
 </script></html>

@@ -1,5 +1,27 @@
 # Agent control of the sample farm
 
+## One-screen demo
+
+Open the AWS tunnel at **http://127.0.0.1:8795**. Click **New run**, then
+**Start harvest**. The deterministic server-owned controller moves through all
+three beds, captures fresh OpenCV evidence before each harvest, verifies the
+deposits, and returns home. **Pause** and **Resume** persist across service restarts;
+closing the browser does not stop the run. Before/after images appear beside the
+live 3D view. Allow about 80 seconds for the complete route and captures.
+
+The buttons invoke **automated control, not an LLM**. The separately recorded
+model-issued MCP run remains preserved. New run archives the prior run identity
+and state in SQLite while retaining all jobs, command receipts and image bytes.
+An active run must finish before New run is available. Revision checks reject stale
+controls, and request UUIDs make repeated identical submissions idempotent.
+
+Browser controls use a separate random capability, exact loopback Host/Origin
+checks and a custom header. The service bearer token is never embedded in HTML.
+The original bearer-authenticated MCP operations remain available. Evidence and
+run history persist in the same private state directory. The existing station-wide
+limits (256 images / 1,000 MCP receipts) still apply; reaching a limit stops automation
+for review and never deletes old evidence.
+
 **Live status:** deployed on the existing AWS host. The OpenCode agent directly
 completed all three harvests and returned the robot home through the new MCP tools.
 [Observed model-issued run, images and restart verification](evidence/farm-agent-aws/README.md).
@@ -31,9 +53,8 @@ coordinates, URLs, file paths or a caller-specified simulation time.
 The bounded route is **bed 2 (carrots), bed 1 (lettuce), bed 0 (tomatoes), home**.
 Each move and each harvest needs a separate agent command. The agent may pause or
 resume an active job. Starting a viewer or disconnecting MCP neither starts nor
-cancels robot work. No reset command is exposed; completed crop deposits remain
-completed. To rerun a demonstration, the operator explicitly selects a new state
-directory while keeping the previous run for evidence.
+cancels robot work. The demo's New run control retains the previous run and its
+evidence; no reset command is exposed through MCP.
 
 Example agent instructions:
 
@@ -81,8 +102,9 @@ MUJOCO_GL=egl EGL_PLATFORM=surfaceless LIBGL_ALWAYS_SOFTWARE=1 OPENBLAS_NUM_THRE
 ```
 
 Open `http://127.0.0.1:8794` to view the original farm geometry and current robot pose.
-The viewer is read-only. Mutation/capture endpoints require a private bearer token
-and reject browser-origin requests. The HTTP service binds only `127.0.0.1`.
+The viewer includes capability-protected demo controls. MCP mutation/capture
+endpoints require a private bearer token and reject browser-origin requests.
+The HTTP service binds only `127.0.0.1`.
 
 Add a local stdio server to your existing agent configuration:
 

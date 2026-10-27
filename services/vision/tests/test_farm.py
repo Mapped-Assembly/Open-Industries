@@ -143,6 +143,56 @@ class FarmControlTests(unittest.TestCase):
                 self.assertIsNone(self.runtime.status()["active_job"])
                 with urlopen(Request(url, data=body, headers={"Authorization": "Bearer test-token"}), timeout=5) as response:
                     self.assertTrue(json.load(response)["receipt"]["accepted"])
+                base = f"http://127.0.0.1:{server.server_port}"
+                with urlopen(base, timeout=5) as response:
+                    page = response.read().decode()
+                import re
+                capability = re.search(r"'X-Farm-Demo':'([a-f0-9]+)'", page)[1]
+                self.assertNotIn("test-token", page)
+                control = json.dumps(self.request("new_run")).encode()
+                for headers in ({}, {"Origin": base, "X-Farm-Demo": "wrong"},
+                                {"Origin": "https://example.com", "X-Farm-Demo": capability}):
+                    with self.assertRaises(HTTPError) as error:
+                        urlopen(Request(base+"/api/control", data=control, headers=headers), timeout=5)
+                    self.assertEqual(error.exception.code, 401)
+                self.complete()
+                control = json.dumps(self.request("new_run")).encode()
+                with urlopen(Request(base+"/api/control", data=control,
+                                    headers={"Origin": base, "X-Farm-Demo": capability}), timeout=5) as response:
+                    self.assertEqual(json.load(response)["receipt"]["action"], "new_run")
             finally:
                 server.shutdown()
                 thread.join(timeout=5)
+
+    def test_demo_controller_restart_and_preserved_runs(self) -> None:
+        """A browser-started route survives pause/restart and a reset retains original evidence."""
+        self.runtime.demo_command(self.request("start"))
+        self.time += .25
+        self.runtime.tick()
+        self.runtime.demo_command(self.request("pause"))
+        elapsed = self.runtime.status()["elapsed"]
+        self.runtime.close()
+        self.runtime = FarmRuntime(self.source, self.directory, lambda: self.time)
+        self.time += 10
+        self.runtime.tick()
+        self.assertEqual(elapsed, self.runtime.status()["elapsed"])
+        self.runtime.demo_command(self.request("resume"))
+        for _ in range(400):
+            self.time += .25
+            self.runtime.tick()
+        self.assertEqual(self.runtime.status()["controller"], "completed")
+        evidence = self.runtime.evidence()
+        self.assertEqual(len(evidence["frames"]), 6)
+        self.assertEqual(len(evidence["jobs"]), 7)
+        old_run = self.runtime.status()["run_id"]
+        reset = self.request("new_run")
+        receipt = self.runtime.demo_command(reset)
+        self.assertEqual(receipt, self.runtime.demo_command(reset))
+        self.assertNotEqual(old_run, receipt["run_id"])
+        self.assertEqual(self.runtime.status()["deposited"], [])
+        self.assertEqual(self.runtime.evidence()["jobs"], [])
+        self.assertEqual(self.runtime.evidence()["history"][0]["run_id"], old_run)
+        for frame in evidence["frames"]:
+            self.assertEqual(self.runtime.frame(frame["observation_id"])[0], frame)
+        with self.assertRaisesRegex(FarmError, "REVISION_CONFLICT"):
+            self.runtime.demo_command({**reset, "command_id": str(uuid4())})

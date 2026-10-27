@@ -95,6 +95,8 @@ class FarmRuntime:
                 CREATE TABLE IF NOT EXISTS commands(id TEXT PRIMARY KEY, request TEXT NOT NULL, receipt TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS jobs(id TEXT PRIMARY KEY, body TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS frames(id TEXT PRIMARY KEY, body TEXT NOT NULL, png BLOB NOT NULL);
+                CREATE TABLE IF NOT EXISTS runs(id TEXT PRIMARY KEY, body TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS demo_commands(id TEXT PRIMARY KEY, request TEXT NOT NULL, receipt TEXT NOT NULL);
             """)
             row = self.db.execute("SELECT body FROM state WHERE id=1").fetchone()
             self.state = json.loads(row[0]) if row else {
@@ -103,6 +105,9 @@ class FarmRuntime:
                 "review_required": False}
             require(self.state.get("version") == 1, "UNSUPPORTED_FARM_STATE")
             require(self.state["source"] == str(source.resolve()), "SOURCE_BINDING_CHANGED")
+            self.state.setdefault("run_id", self.state["station_id"])
+            self.state.setdefault("controller", "manual")
+            self.state.setdefault("controller_error", None)
             self.mission.update(self.data, self.state["elapsed"])
             with self.db:
                 self.save()
@@ -134,6 +139,8 @@ class FarmRuntime:
         with self.lock, self.db:
             now = self.clock()
             delta, self.last = min(max(now-self.last, 0), .25), now
+            if self.state["controller"] == "running" and not self.state["active_job"]:
+                self.advance_controller()
             if not self.state["active_job"] or self.state["paused"]:
                 return
             job = self.job(self.state["active_job"])
@@ -158,6 +165,68 @@ class FarmRuntime:
                 self.db.execute("UPDATE jobs SET body=? WHERE id=?", (json.dumps(job), job["command_id"]))
             self.save()
 
+    def advance_controller(self) -> None:
+        """Select the next bounded command using the same vision gates as MCP callers."""
+        if self.state["review_required"] or self.state["boundary"] == 7:
+            self.state["controller"] = "needs_review" if self.state["review_required"] else "completed"
+            self.save()
+            return
+        try:
+            boundary = self.state["boundary"]
+            request = {"command_id": str(uuid4()), "expected_revision": self.state["revision"],
+                       "action": ACTIONS[boundary]}
+            if request["action"] == "harvest":
+                request["observation_id"] = self.capture(BEDS[boundary//2])["observation_id"]
+            self.command(request)
+        except FarmError as exc:
+            self.state["controller"] = "needs_review"
+            self.state["controller_error"] = str(exc)
+            self.state["review_required"] = True
+        self.save()
+
+    def demo_command(self, request: dict[str, Any]) -> dict[str, Any]:
+        """Idempotent browser controls; archive runs without removing any evidence."""
+        require(set(request) == {"command_id", "expected_revision", "action"}, "INVALID_REQUEST")
+        ident = canonical_uuid(request["command_id"])
+        serialized = json.dumps(request, sort_keys=True)
+        with self.lock, self.db:
+            previous = self.db.execute("SELECT request,receipt FROM demo_commands WHERE id=?", (ident,)).fetchone()
+            if previous:
+                require(previous[0] == serialized, "COMMAND_ID_REUSED")
+                return json.loads(previous[1])
+            require(type(request["expected_revision"]) is int and request["expected_revision"] == self.state["revision"], "REVISION_CONFLICT")
+            action = request["action"]
+            require(action in ("new_run", "start", "pause", "resume"), "INVALID_REQUEST")
+            if action == "new_run":
+                require(not self.state["active_job"] and self.state["controller"] != "running", "ROBOT_BUSY")
+                self.db.execute("INSERT INTO runs VALUES(?,?)", (self.state["run_id"], json.dumps(self.state)))
+                self.state.update(run_id=str(uuid4()), elapsed=0., boundary=0, paused=False,
+                                  review_required=False, controller="manual", controller_error=None)
+                self.mission.update(self.data, 0.)
+            elif action == "start":
+                require(not self.state["review_required"] and self.state["boundary"] < 7, "ACTION_NOT_AVAILABLE")
+                require(not self.state["active_job"], "ROBOT_BUSY")
+                self.state["controller"] = "running"
+            else:
+                require(self.state["controller"] == ("running" if action == "pause" else "paused"), "ACTION_NOT_AVAILABLE")
+                self.state["controller"] = "paused" if action == "pause" else "running"
+                self.state["paused"] = action == "pause"
+            self.state["revision"] += 1
+            self.last = self.clock()
+            result = {"run_id": self.state["run_id"], "revision": self.state["revision"], "action": action}
+            self.db.execute("INSERT INTO demo_commands VALUES(?,?,?)", (ident, serialized, json.dumps(result)))
+            self.save()
+            return result
+
+    def evidence(self) -> dict[str, Any]:
+        """Expose current evidence and retained run summaries for the demo screen."""
+        with self.lock:
+            jobs = [json.loads(row[0]) for row in self.db.execute("SELECT body FROM jobs ORDER BY rowid")]
+            jobs = [job for job in jobs if job.get("run_id", self.state["station_id"]) == self.state["run_id"]]
+            frames = [self.frame(job[key])[0] for job in jobs for key in ("observation_id", "after_observation_id") if job.get(key)]
+            history = [json.loads(row[0]) for row in self.db.execute("SELECT body FROM runs ORDER BY rowid DESC")]
+            return {"jobs": jobs, "frames": frames, "history": [{"run_id": run["run_id"], "boundary": run["boundary"]} for run in history]}
+
     def status(self) -> dict[str, Any]:
         """Expose current authoritative state and the next bounded action."""
         with self.lock:
@@ -166,6 +235,8 @@ class FarmRuntime:
             boundary = self.state["boundary"]
             return {"station_id": self.state["station_id"], "revision": self.state["revision"],
                 "source_commit": SOURCE_COMMIT,
+                "run_id": self.state["run_id"], "controller": self.state["controller"],
+                "controller_error": self.state["controller_error"],
                 "elapsed": self.state["elapsed"], "duration": 72, "boundary": boundary,
                 "phase": pose.phase, "paused": self.state["paused"], "active_job": self.state["active_job"],
                 "review_required": self.state["review_required"],
@@ -204,6 +275,7 @@ class FarmRuntime:
             require(ok, "CAMERA_UNAVAILABLE")
             png = encoded.tobytes()
             record = {"observation_id": str(uuid4()), "bed": bed, "crop_label": self.crops[bed],
+                "run_id": self.state["run_id"],
                 "captured_at_ms": int(time.time()*1000), "revision": self.state["revision"],
                 "elapsed": self.state["elapsed"], "sha256": hashlib.sha256(png).hexdigest(),
                 "evidence_kind": "simulation", "analysis": analyze_pixels(pixels, bed)}
@@ -246,6 +318,7 @@ class FarmRuntime:
                     require(before["analysis"]["target_visible"], "TARGET_NOT_OBSERVED")
                     require(self.db.execute("SELECT count(*) FROM frames").fetchone()[0] < 255, "STORAGE_LIMIT")
                 job = {"command_id": command_id, "action": action, "bed": bed, "stage": "running",
+                    "run_id": self.state["run_id"],
                     "observation_id": observation, "target_elapsed": BOUNDARIES[boundary+1],
                     "accepted_at_ms": int(time.time()*1000), "simulated": True}
                 self.db.execute("INSERT INTO jobs VALUES(?,?)", (command_id, json.dumps(job)))
