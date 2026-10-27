@@ -37,7 +37,7 @@ const renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math
 const scene=new T.Scene();scene.background=new T.Color('#14251d');scene.add(new T.HemisphereLight(0xe8f6ff,0x586b3a,1.4));
 const light=new T.DirectionalLight(0xfff2d9,2);light.position.set(3,1,7);scene.add(light);
 const camera=new T.PerspectiveCamera(45,1,.01,100);camera.up.set(0,0,1);camera.position.set(4,5,4);
-const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,0,.2);controls.enableDamping=true;
+const orbit=new OrbitControls(camera,renderer.domElement);orbit.target.set(0,0,.2);orbit.enableDamping=true;
 new ResizeObserver(()=>{renderer.setSize(view.clientWidth,view.clientHeight);camera.aspect=view.clientWidth/view.clientHeight;camera.updateProjectionMatrix();}).observe(view);
 const description=await json('/api/scene'), meshes=new Map(),nodes=new Map();
 for(const [id,url] of Object.entries(description.meshes)){
@@ -51,6 +51,6 @@ async function update(){try{const state=await json('/api/state');for(const [id,.
  status.textContent=`${state.paused?'PAUSED · ':''}${state.phase} · ${state.elapsed.toFixed(1)} / 72 s · Box ${state.deposited.length}/3\nRun ${state.run_id.slice(0,8)} · ${state.controller} · ${state.active_job?'Executing '+state.next_action:(state.next_action||'mission complete')}`;
  if(state.controller_error)document.querySelector('#error').textContent=state.controller_error;await evidence(state);
 }catch{latest=null;controls();status.textContent='Disconnected — reconnecting; server owns progress.';}setTimeout(update,150);}update();
-renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
+renderer.setAnimationLoop(()=>{orbit.update();renderer.render(scene,camera);});
 }catch(error){status.textContent=`Viewer unavailable: ${error.message}`;}
 </script></html>
