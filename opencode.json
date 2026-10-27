@@ -12,6 +12,12 @@
       "command": ["node", "server/astra-mcp.mjs"],
       "cwd": ".",
       "enabled": true
+    },
+    "servers": {
+      "aws": {
+        "type": "remote",
+        "url": "https://aws-mcp.us-east-1.api.aws/mcp"
+      }
     }
   }
 }
