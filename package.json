@@ -54,6 +54,7 @@
     "test:scene-links": "node --import tsx scripts/scene-links-test.ts",
     "test:scene-links-browser": "node --import tsx scripts/scene-links-browser-test.ts",
     "test:local-scenes": "node --import tsx scripts/local-scenes-test.ts",
+    "test:opencad-robot": "node --import tsx scripts/opencad-robot-handoff-test.ts",
     "test:mcp-scenes": "node --import tsx scripts/mcp-scenes-test.ts",
     "test:mcp-scenes-browser": "node --import tsx scripts/mcp-scenes-test.ts --browser",
     "test:scene-history": "node --import tsx scripts/scene-history-test.ts",
