@@ -1,0 +1,39 @@
+name: OpenCAD Robot Asset Compatibility
+
+on:
+  pull_request:
+    paths:
+      - "src/lib/scene.ts"
+      - "src/lib/cloud-storage.ts"
+      - "src/lib/workspace.ts"
+      - "src/lib/scene-repository.ts"
+      - "scripts/opencad-robot-handoff-test.ts"
+      - "package.json"
+      - ".github/workflows/opencad-robot-handoff.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/lib/scene.ts"
+      - "src/lib/cloud-storage.ts"
+      - "src/lib/workspace.ts"
+      - "src/lib/scene-repository.ts"
+      - "scripts/opencad-robot-handoff-test.ts"
+      - ".github/workflows/opencad-robot-handoff.yml"
+  workflow_dispatch:
+
+jobs:
+  opencad-robot-asset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build typed OI workbench
+        run: npm run build
+      - name: Real local OI asset and MCP scene round-trip
+        run: npm run test:opencad-robot
