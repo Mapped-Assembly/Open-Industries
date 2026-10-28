@@ -104,7 +104,7 @@ export function readManifest(value: unknown): SceneManifest {
   for (const asset of m.assets) {
     if (!validString(asset.id) || assetIds.has(asset.id) || !validString(asset.name) || !validVector(asset.dimensions) || asset.dimensions.some(n => n < 0)
         || !asset.source || !['form','step','generated'].includes(asset.source.kind) || !validString(asset.source.filename) || !validString(asset.source.digest)
-        || (asset.source.kind === 'generated' && asset.source.generator !== 'form-industries')
+        || (asset.source.kind === 'generated' && !['form-industries', 'opencad-robot'].includes(asset.source.generator))
         || (asset.projectRevision !== undefined && !validString(asset.projectRevision))) throw new Error('Invalid or duplicate scene asset reference.');
     assetIds.add(asset.id);
   }
@@ -149,6 +149,7 @@ export function missingAsset(ref: AssetReference, cloudVersionId?: string): Asse
 /** IDs alone cannot prove that a source is the revision used by this scene. */
 export function assertSourceMatches(ref: AssetReference, asset: Asset): void {
   if (asset.id !== ref.id || asset.source.kind !== ref.source.kind || asset.source.digest !== ref.source.digest
+      || (asset.source.kind === 'generated' && ref.source.kind === 'generated' && asset.source.generator !== ref.source.generator)
       || asset.source.version !== ref.source.version || asset.source.projectId !== ref.source.projectId
       || (ref.source.projectId !== undefined && asset.formProject?.projectId !== undefined && asset.formProject.projectId !== ref.source.projectId)
       || (ref.projectRevision !== undefined && asset.formProject?.revision !== ref.projectRevision)) {
