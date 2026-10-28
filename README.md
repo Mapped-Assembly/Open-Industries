@@ -60,6 +60,18 @@ An **asset** is reusable imported equipment geometry. An **instance** is one pla
 
 See the [workspace guide](docs/workspace.md) for the full editing workflow and the [Form handoff contract](docs/form-handoff.md) for supported project formats.
 
+### Import robot geometry from OpenCAD
+
+OpenIndustries accepts `opencad-robot` as an explicitly identified generated
+asset source. OpenCAD exports an `oi.asset.json` bundle with right-handed Y-up
+meter geometry, preserved URDF link/visual IDs and separate provenance hashes.
+Use the existing local asset-import CLI and scene tools to place it in a room.
+Imported robot geometry is **a neutral, unvalidated pose**, not verified
+kinematics or physics.
+
+See [OpenCAD robot asset handoff](docs/opencad-robot-handoff.md) for the local
+import command and scene example.
+
 ## Saving your work
 
 | Option | Where it lives | Best for |
