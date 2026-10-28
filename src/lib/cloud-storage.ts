@@ -23,7 +23,7 @@ export function parseCloudBundle(text: string): LibraryEntry {
   if (bundle?.schemaVersion !== 1 || asset?.schemaVersion !== 1 || asset.units !== 'm' || asset.upAxis !== 'Y'
       || typeof asset.id !== 'string' || typeof asset.name !== 'string' || !['form', 'step', 'generated'].includes(asset.source?.kind)
       || typeof asset.source.filename !== 'string' || typeof asset.source.digest !== 'string'
-      || (asset.source.kind === 'generated' && asset.source.generator !== 'form-industries')
+      || (asset.source.kind === 'generated' && !['form-industries', 'opencad-robot'].includes(asset.source.generator))
       || !Array.isArray(asset.parts) || !Array.isArray(asset.warnings) || !asset.warnings.every(w => typeof w === 'string')
       || !Array.isArray(asset.originOffset) || asset.originOffset.length !== 3 || !asset.originOffset.every(Number.isFinite)) {
     throw new Error('Unsupported or incomplete cloud asset bundle.');
