@@ -28,7 +28,7 @@ export type FormProject = {
 export type AssetSource =
   | { kind: 'form'; filename: string; digest: string; projectId?: string; version?: string }
   | { kind: 'step'; filename: string; digest: string; projectId?: never; version?: never }
-  | { kind: 'generated'; filename: string; digest: string; generator: 'form-industries'; projectId?: never; version?: never };
+  | { kind: 'generated'; filename: string; digest: string; generator: 'form-industries' | 'opencad-robot'; projectId?: never; version?: never };
 
 export type Asset = {
   schemaVersion: 1;
