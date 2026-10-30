@@ -12,7 +12,8 @@
     "server/domains/**/*.ts",
     "server/simulation-service.ts",
     "server/field-lab-service.ts",
-    "scripts/field-lab-durable-test.ts"
+    "scripts/field-lab-durable-test.ts",
+    "scripts/field-lab-recording.ts"
   ],
   "exclude": []
 }

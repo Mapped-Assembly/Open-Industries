@@ -14,9 +14,9 @@ The fixed baseline is 08:00–16:00 in 15-minute steps. The runner rejects other
 
 In Open-Industries, choose **Import OI project** and select `benchmarks/field-lab/fixtures/field-lab.oi.json`. It includes all geometry, 21 instances, a 24-second timeline and eight animation tracks. No account or cloud database is required. Choose **Animate → Play animation** to view the kinematic workflow. Import `benchmarks/field-lab/fixtures/field-lab-pipette.step` separately for CAD review, or `benchmarks/field-lab/fixtures/field-lab-pipette.form.json` for the equipment/BOM handoff.
 
-The render command produces `field-lab-benchmark.mp4` when ffmpeg is available and a native `field-lab-native.gif`. The presentation shows the normal day, a pipette/camera close-up, combined disruption, and a resilience package. The six-result panel is populated from the actual benchmark JSON.
+The render command produces `field-lab-benchmark.mp4` when ffmpeg is available and an event-driven `field-lab-native.gif`. The presentation shows the normal day, a pipette/camera close-up, combined disruption, and a resilience package. The six-result panel is populated from the actual benchmark JSON.
 
-The main film directly calls the unmodified OI `createWorld`, `applyWorldPoses` and `evaluateWorkspace` functions. It adds a camera, lights, shadows and captions. The imported portable scene retains OI's own default workbench appearance. The film freezes the workflow when the resource model blocks job admission; it is not a physical motion controller. Camera hardware is shown; no perception is running.
+The main film directly calls the unmodified OI `createWorld`, `applyWorldPoses` and `evaluateWorkspace` functions. It adds a camera, lights, shadows and captions. The imported portable scene retains OI's own default workbench appearance. The film uses recorded SQLite job progress for the pipette; paused or failed work retains its last pose. Other authored animation tracks remain static because they have no job binding. Each screenshot includes the source scene hash and event ID; it is not a physical motion controller. Camera hardware is shown; no perception is running.
 
 ## Scenario and result
 
@@ -133,3 +133,22 @@ See [the lab runtime contract](../../docs/architecture/field-lab-runtime.md) for
 15-minute booking convention, controls, units, backup boundaries, local service and limits.
 The original scene animation is still illustrative: declared hashed instance/job bindings do
 not establish live scene synchronization (#12) or scientific/physical validity (#11).
+
+## Recorded job playback (issue #12, first implementation)
+
+`node --import tsx scripts/field-lab-recording.ts` creates
+`deliverables/field-lab/field-lab-recording.json` from three real SQLite lab days.
+The render runner invokes this automatically. The recorder reads authorized compact
+post-state history every modeled minute, retaining event IDs before server history
+compacts. It never synthesizes job completion or uses browser wall time as work.
+Scrubbing, PNG capture and GIF export use the same last-recorded-state lookup.
+The full portable recording is exported alongside film frames. Playback is stepped
+at one-minute checkpoints, not continuous equipment telemetry. Resource bars show
+available stock (excluding held reservations); the six-case chart is the frozen
+whole-day reference, while the main counter is completed recorded jobs.
+
+The plain `.oi.json` fixture remains an explicitly authored kinematic asset. Job
+progress is carried in the separate versioned recording, not embedded in the generic
+scene format. This PR does not yet connect the main workbench to the live lab service
+or add scene picking. See `docs/architecture/field-lab-playback.md` for remaining
+OpenCAD work and evidence limits.

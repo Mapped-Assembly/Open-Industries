@@ -1,3 +1,4 @@
+import { projectLabScene, type LabSceneSnapshot } from '../../src/lib/field-lab-playback.js';
 import { randomUUID } from 'node:crypto';
 import type { JsonObject, SimulationCommand, SimulationInstance } from './contracts.js';
 import type { CommandAdapter } from './command-contracts.js';
@@ -262,16 +263,28 @@ export class FieldLabDatabase extends SqliteAuthority {
   }
   /** Historical snapshots use current ACL and explicit modeled provenance. */
   historyPage(token: string, input: unknown): unknown {
+    return this.readHistory(token, input, false);
+  }
+  /** Compact authorized scene history; shares the same recorded events and ACL as full history. */
+  sceneHistoryPage(token: string, input: unknown): unknown {
+    return this.readHistory(token, input, true);
+  }
+  /** Project compact frames before bounded JSON serialization, retaining fixed-head cursors. */
+  private readHistory(token: string, input: unknown, sceneOnly: boolean): unknown {
+    const scene = (snapshot: JsonObject, id: string): JsonObject =>
+      asJson(projectLabScene(snapshot as unknown as LabSceneSnapshot, id));
     return this.transaction(() => {
       const policy: EventProjection = {
-        version: 'field-lab-history-v1',
+        version: sceneOnly ? 'field-lab-scene-history-v1' : 'field-lab-history-v1',
         authorize: (s, p) =>
           (s as unknown as SimulationInstance).members.some((m) => m.principal_id === p),
         validateState: (s) => {
           this.registry.validateInstance(s);
         },
-        snapshot: (s, p) => this.registry.project(s, p),
-        event: (e, p) => ({
+        snapshot: (s, p) => sceneOnly
+          ? scene(this.registry.project(s, p), `checkpoint:${s.revision}`)
+          : this.registry.project(s, p),
+        event: (e, p) => sceneOnly ? scene(this.registry.project(e.state, p), e.id) : ({
           id: e.id,
           instance_id: e.instance_id,
           simulation_time_ms: e.simulation_time_ms,
