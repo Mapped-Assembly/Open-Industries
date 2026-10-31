@@ -20,7 +20,7 @@ Changed or unknown pins/digests fail with an exact-runtime/complete-backup remed
 schema does not import or convert game, work-cell or historical in-memory saves.
 
 These are declared runtime-to-scene references. The renderer does not control the clock,
-award outputs or dispatch physical equipment. Interactive scene synchronization remains #12;
+award outputs or dispatch physical equipment. The [event-driven scene viewer](field-lab-scene.md) consumes these bindings and recorded job progress;
 scientific evidence/calibration is #11. Completion records simulated/modeled provenance and
 `assay_validity: not-validated`. It is not a measurement, certification or cold-chain guarantee.
 

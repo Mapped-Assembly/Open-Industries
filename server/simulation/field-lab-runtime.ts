@@ -262,21 +262,35 @@ export class FieldLabDatabase extends SqliteAuthority {
   }
   /** Historical snapshots use current ACL and explicit modeled provenance. */
   historyPage(token: string, input: unknown): unknown {
+    return this.readHistory(token, input, false);
+  }
+  /** Bounded scene-only projection; shares event IDs and authorization with full history. */
+  sceneHistoryPage(token: string, input: unknown): unknown {
+    return this.readHistory(token, input, true);
+  }
+  /** Read one authorized fixed-head history, without exposing raw state or credentials. */
+  private readHistory(token: string, input: unknown, sceneOnly: boolean): unknown {
     return this.transaction(() => {
+      const project = (state: Readonly<JsonObject>, principal: string): JsonObject => {
+        const full = this.registry.project(state, principal);
+        if (!sceneOnly) return full;
+        return Object.fromEntries(['instance_id', 'revision', 'simulation_time_ms', 'origin_ms',
+          'recipe', 'bindings', 'jobs'].map(key => [key, full[key]!])) as JsonObject;
+      };
       const policy: EventProjection = {
-        version: 'field-lab-history-v1',
+        version: sceneOnly ? 'field-lab-scene-history-v1' : 'field-lab-history-v1',
         authorize: (s, p) =>
           (s as unknown as SimulationInstance).members.some((m) => m.principal_id === p),
         validateState: (s) => {
           this.registry.validateInstance(s);
         },
-        snapshot: (s, p) => this.registry.project(s, p),
+        snapshot: (s, p) => project(s, p),
         event: (e, p) => ({
           id: e.id,
           instance_id: e.instance_id,
           simulation_time_ms: e.simulation_time_ms,
           action: e.payload.action!,
-          snapshot: this.registry.project(e.state, p),
+          snapshot: project(e.state, p),
         }),
       };
       return this.history.read(input, this.identity(token), policy);

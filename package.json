@@ -75,7 +75,10 @@
     "test:units": "node --import tsx scripts/game-manufacturing-test.ts --units",
     "test:combat": "node --import tsx scripts/game-manufacturing-test.ts --combat",
     "test:victory": "node --import tsx scripts/game-manufacturing-test.ts --victory",
-    "test:runtime-deployment": "tsc -p tsconfig.simulation.json && node --import tsx --test tests/simulation/deployment.test.ts"
+    "test:runtime-deployment": "tsc -p tsconfig.simulation.json && node --import tsx --test tests/simulation/deployment.test.ts",
+    "test:field-lab-scene": "node --import tsx scripts/field-lab-playback-test.ts",
+    "field-lab:viewer": "node --import tsx scripts/field-lab-viewer.ts",
+    "test:field-lab-scene-browser": "node --import tsx scripts/field-lab-browser-test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

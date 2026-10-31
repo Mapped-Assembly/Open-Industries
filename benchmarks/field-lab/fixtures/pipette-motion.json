@@ -1,0 +1,4767 @@
+{
+  "schema": "oi.opencad-motion/v1",
+  "occurrence_id": "pipette",
+  "source_scene_sha256": "66a9e38818587254cfd90617b5f6817b88f3e20b52756d946557b98bad206605",
+  "source_form_sha256": "aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f",
+  "opencad_revision": "9c0c6dc0b5794debdfb8c7507078bae3303dd8bd",
+  "exporter_sha256": "70fb3855f63a3b3a99e17b2f7b3c36425e1c2fb74eac3573a6485474b42d213c",
+  "frames": {
+    "source": "right-handed Z-up mm",
+    "target": "right-handed Y-up m",
+    "mapping": "[x,z,-y]/1000",
+    "rotation": "translation-only"
+  },
+  "duration_s": 24,
+  "joint_ids": [
+    "pipette/x",
+    "pipette/z"
+  ],
+  "interface_id": "pipette/tip-port",
+  "target_interfaces": [
+    "target/source-port",
+    "target/destination-port"
+  ],
+  "component_ids": {
+    "gantry": "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2",
+    "head": "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3",
+    "pipette": "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4",
+    "tip": "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5",
+    "camera": "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6",
+    "camera-lens": "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7"
+  },
+  "document": {
+    "version": 1,
+    "id": "field-lab-pipette-transfer-v1",
+    "name": "Pipette transfer",
+    "entities": {
+      "pipette": {
+        "id": "pipette",
+        "name": "Pipette",
+        "assembly": {
+          "id": "pipette-assembly",
+          "name": "Pipette",
+          "root_ids": [
+            "base",
+            "frame",
+            "gantry",
+            "head",
+            "pipette",
+            "tip",
+            "camera",
+            "camera-lens",
+            "rack",
+            "plate",
+            "sample-tubes",
+            "tube-rims",
+            "plate-wells",
+            "electronics"
+          ],
+          "components": {
+            "base": {
+              "id": "base",
+              "name": "base",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/0"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "frame": {
+              "id": "frame",
+              "name": "frame",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/1"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "gantry": {
+              "id": "gantry",
+              "name": "gantry",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  -270.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "head": {
+              "id": "head",
+              "name": "head",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  -270.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "pipette": {
+              "id": "pipette",
+              "name": "pipette",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  -270.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "tip": {
+              "id": "tip",
+              "name": "tip",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  -270.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "camera": {
+              "id": "camera",
+              "name": "camera",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  -270.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "camera-lens": {
+              "id": "camera-lens",
+              "name": "camera-lens",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  -270.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "rack": {
+              "id": "rack",
+              "name": "rack",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/8"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "plate": {
+              "id": "plate",
+              "name": "plate",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/9"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "sample-tubes": {
+              "id": "sample-tubes",
+              "name": "sample-tubes",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/10"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "tube-rims": {
+              "id": "tube-rims",
+              "name": "tube-rims",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/11"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "plate-wells": {
+              "id": "plate-wells",
+              "name": "plate-wells",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/12"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            },
+            "electronics": {
+              "id": "electronics",
+              "name": "electronics",
+              "child_ids": [],
+              "geometry_refs": [
+                "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/13"
+              ],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            }
+          },
+          "metadata": {}
+        },
+        "transform": {
+          "translation_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rotation_quaternion_xyzw": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "interfaces": {
+          "tip-port": {
+            "id": "tip-port",
+            "component_id": "tip",
+            "transform": {
+              "translation_mm": [
+                0.0,
+                -30.0,
+                292.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          }
+        },
+        "colliders": [
+          {
+            "id": "gantry-box",
+            "component_id": "gantry",
+            "size_mm": [
+              75.0,
+              630.0,
+              75.00000000000007
+            ],
+            "transform": {
+              "translation_mm": [
+                0.0,
+                -0.0,
+                690.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "head-box",
+            "component_id": "head",
+            "size_mm": [
+              120.0,
+              130.0,
+              150.00000000000003
+            ],
+            "transform": {
+              "translation_mm": [
+                0.0,
+                -30.0,
+                605.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "pipette-box",
+            "component_id": "pipette",
+            "size_mm": [
+              50.0,
+              50.0,
+              180.00000000000006
+            ],
+            "transform": {
+              "translation_mm": [
+                0.0,
+                -30.0,
+                442.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "tip-box",
+            "component_id": "tip",
+            "size_mm": [
+              28.0,
+              27.999999999999996,
+              60.0
+            ],
+            "transform": {
+              "translation_mm": [
+                0.0,
+                -30.0,
+                321.99999999999994
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "camera-box",
+            "component_id": "camera",
+            "size_mm": [
+              79.99999999999999,
+              55.0,
+              54.99999999999999
+            ],
+            "transform": {
+              "translation_mm": [
+                80.0,
+                -85.0,
+                500.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "camera-lens-box",
+            "component_id": "camera-lens",
+            "size_mm": [
+              34.0,
+              33.999999999999986,
+              24.999999999999968
+            ],
+            "transform": {
+              "translation_mm": [
+                80.0,
+                -84.99999999999999,
+                461.99999999999994
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "base-box",
+            "component_id": "base",
+            "size_mm": [
+              1120.0,
+              760.0,
+              110.0
+            ],
+            "transform": {
+              "translation_mm": [
+                0.0,
+                -0.0,
+                55.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "rack-box",
+            "component_id": "rack",
+            "size_mm": [
+              270.0,
+              420.00000000000006,
+              55.00000000000001
+            ],
+            "transform": {
+              "translation_mm": [
+                -270.0,
+                -39.99999999999999,
+                135.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "id": "plate-box",
+            "component_id": "plate",
+            "size_mm": [
+              320.0,
+              450.0,
+              31.999999999999986
+            ],
+            "transform": {
+              "translation_mm": [
+                290.00000000000006,
+                -40.00000000000001,
+                125.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          }
+        ]
+      },
+      "target": {
+        "id": "target",
+        "name": "Assay target reference",
+        "assembly": {
+          "id": "target",
+          "name": "Target",
+          "root_ids": [
+            "target"
+          ],
+          "components": {
+            "target": {
+              "id": "target",
+              "name": "Target",
+              "child_ids": [],
+              "geometry_refs": [],
+              "feature_refs": [],
+              "transform": {
+                "translation_mm": [
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "rotation_quaternion_xyzw": [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              },
+              "metadata": {}
+            }
+          },
+          "metadata": {}
+        },
+        "transform": {
+          "translation_mm": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "rotation_quaternion_xyzw": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        },
+        "interfaces": {
+          "source-port": {
+            "id": "source-port",
+            "component_id": "target",
+            "transform": {
+              "translation_mm": [
+                -270.0,
+                -30.0,
+                202.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          },
+          "destination-port": {
+            "id": "destination-port",
+            "component_id": "target",
+            "transform": {
+              "translation_mm": [
+                290.0,
+                -30.0,
+                202.0
+              ],
+              "rotation_quaternion_xyzw": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          }
+        },
+        "colliders": []
+      }
+    },
+    "interactions": [
+      {
+        "id": "lower-source",
+        "actor_id": "pipette",
+        "target_id": "target",
+        "interaction_type": "MOVE",
+        "actor_interface": null,
+        "duration_s": 4.0,
+        "actor_pose": null,
+        "component_poses": {
+          "gantry": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "head": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "pipette": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "tip": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera-lens": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        "destination_id": null
+      },
+      {
+        "id": "raise-source",
+        "actor_id": "pipette",
+        "target_id": "target",
+        "interaction_type": "MOVE",
+        "actor_interface": null,
+        "duration_s": 4.0,
+        "actor_pose": null,
+        "component_poses": {
+          "gantry": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "head": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "pipette": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "tip": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera-lens": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        "destination_id": null
+      },
+      {
+        "id": "transfer",
+        "actor_id": "pipette",
+        "target_id": "target",
+        "interaction_type": "MOVE",
+        "actor_interface": null,
+        "duration_s": 4.0,
+        "actor_pose": null,
+        "component_poses": {
+          "gantry": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "head": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "pipette": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "tip": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera-lens": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        "destination_id": null
+      },
+      {
+        "id": "lower-target",
+        "actor_id": "pipette",
+        "target_id": "target",
+        "interaction_type": "MOVE",
+        "actor_interface": null,
+        "duration_s": 4.0,
+        "actor_pose": null,
+        "component_poses": {
+          "gantry": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "head": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "pipette": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "tip": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera-lens": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              -90.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        "destination_id": null
+      },
+      {
+        "id": "raise-target",
+        "actor_id": "pipette",
+        "target_id": "target",
+        "interaction_type": "MOVE",
+        "actor_interface": null,
+        "duration_s": 4.0,
+        "actor_pose": null,
+        "component_poses": {
+          "gantry": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "head": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "pipette": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "tip": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera-lens": {
+            "translation_mm": [
+              290.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        "destination_id": null
+      },
+      {
+        "id": "return",
+        "actor_id": "pipette",
+        "target_id": "target",
+        "interaction_type": "MOVE",
+        "actor_interface": null,
+        "duration_s": 4.0,
+        "actor_pose": null,
+        "component_poses": {
+          "gantry": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "head": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "pipette": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "tip": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          },
+          "camera-lens": {
+            "translation_mm": [
+              -270.0,
+              0.0,
+              0.0
+            ],
+            "rotation_quaternion_xyzw": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          }
+        },
+        "destination_id": null
+      }
+    ],
+    "time_s": 0,
+    "ground_z_mm": null,
+    "collision_exclusions": [
+      [
+        "gantry-box",
+        "head-box"
+      ],
+      [
+        "head-box",
+        "pipette-box"
+      ],
+      [
+        "pipette-box",
+        "tip-box"
+      ],
+      [
+        "camera-box",
+        "camera-lens-box"
+      ],
+      [
+        "base-box",
+        "rack-box"
+      ],
+      [
+        "base-box",
+        "plate-box"
+      ]
+    ]
+  },
+  "samples": [
+    {
+      "time_s": 0.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 0.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 0.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 0.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 1.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 1.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 1.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 1.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 2.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.045,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 2.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 2.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 2.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 3.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 3.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 3.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 3.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 4.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.09,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 4.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.084375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 4.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.07875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 4.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.073125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 5.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.0675,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 5.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.061875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 5.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.05625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 5.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.050625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 6.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.045,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 6.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.039375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 6.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.03375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 6.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.028125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 7.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.0225,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 7.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.016875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 7.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.01125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 7.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          -0.005625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 8.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 8.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.235,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 8.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.2,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 8.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.165,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 9.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.13,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 9.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.095,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 9.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.06,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 9.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.025,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 10.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.01,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 10.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.045,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 10.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.08,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 10.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.115,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 11.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.15,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 11.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.185,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 11.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.22,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 11.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.255,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 12.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 12.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.005625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 12.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.01125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 12.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.016875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 13.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.0225,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 13.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.028125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 13.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.03375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 13.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.039375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 14.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.045,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 14.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.050625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 14.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.05625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 14.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.061875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 15.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.0675,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 15.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.073125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 15.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.07875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 15.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.084375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 16.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.09,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.09,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 16.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.084375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.084375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 16.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.07875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.07875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 16.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.073125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.073125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 17.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.0675,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.0675,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 17.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.061875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.061875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 17.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.05625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.05625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 17.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.050625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.050625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 18.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.045,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.045,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 18.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.039375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.039375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 18.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.03375,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.03375,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 18.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.028125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.028125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 19.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.0225,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.0225,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 19.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.016875,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.016875,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 19.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.01125,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.01125,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 19.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          -0.005625,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          -0.005625,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 20.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.29,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.29,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 20.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.255,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.255,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 20.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.22,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.22,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 20.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.185,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.185,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 21.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.15,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.15,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 21.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.115,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.115,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 21.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.08,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.08,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 21.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.045,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.045,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 22.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          0.01,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          0.01,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 22.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.025,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.025,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 22.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.06,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.06,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 22.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.095,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.095,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 23.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.13,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.13,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 23.25,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.165,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.165,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 23.5,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.2,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.2,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 23.75,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.235,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.235,
+          0.0,
+          -0.0
+        ]
+      }
+    },
+    {
+      "time_s": 24.0,
+      "offsets_m": {
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/2": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/3": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/5": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/6": [
+          -0.27,
+          0.0,
+          -0.0
+        ],
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/7": [
+          -0.27,
+          0.0,
+          -0.0
+        ]
+      }
+    }
+  ],
+  "checks": {
+    "motion": {
+      "status": "unchecked",
+      "safe_time_s": 24.0,
+      "time_s": 24.0,
+      "collider_ids": [],
+      "shape_ids": [],
+      "unchecked_components": [
+        "pipette/frame",
+        "pipette/sample-tubes",
+        "pipette/tube-rims",
+        "pipette/plate-wells",
+        "pipette/electronics"
+      ]
+    },
+    "blocked_path": {
+      "status": "collision",
+      "safe_time_s": 9.4642333984375,
+      "time_s": 9.46429443359375,
+      "collider_ids": [
+        "pipette-box",
+        "obstruction"
+      ],
+      "shape_ids": [
+        "form-aca161d634051007090f0026f8ae74b5494f42c41a25803f59d4b1e87cb90a3f/mesh/4",
+        "obstruction"
+      ],
+      "unchecked_components": [
+        "pipette/frame",
+        "pipette/sample-tubes",
+        "pipette/tube-rims",
+        "pipette/plate-wells",
+        "pipette/electronics"
+      ]
+    },
+    "travel": {
+      "status": "passed",
+      "x_mm": [
+        -270,
+        290
+      ],
+      "z_mm": [
+        -90,
+        0
+      ],
+      "negative_x_mm": 400
+    },
+    "alignment": {
+      "status": "passed",
+      "tolerance_mm": 1,
+      "rejected_offset_mm": 20
+    },
+    "roundtrip": "passed",
+    "sample_interval_s": 0.25,
+    "collision_tolerance_mm": 0.001,
+    "collision_time_tolerance_s": 0.0001,
+    "intended_contact": {
+      "pairs": [
+        [
+          "gantry-box",
+          "head-box"
+        ],
+        [
+          "head-box",
+          "pipette-box"
+        ],
+        [
+          "pipette-box",
+          "tip-box"
+        ],
+        [
+          "camera-box",
+          "camera-lens-box"
+        ],
+        [
+          "base-box",
+          "rack-box"
+        ],
+        [
+          "base-box",
+          "plate-box"
+        ]
+      ],
+      "reason": "Rigid head attachments, gantry/carriage interface, and rack/plate base mounts; these pairs are not collision-validated."
+    },
+    "unsupported": [
+      "Unchecked components listed by OpenCAD",
+      "mesh contact",
+      "liquid transfer",
+      "assay validity",
+      "cable/harness feasibility",
+      "hardware certification"
+    ],
+    "scope": "OpenCAD conservative interval checks over selected source-mesh box proxies; sampled travel/alignment checks. Not whole-machine or hardware certification."
+  }
+}

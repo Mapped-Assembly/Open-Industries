@@ -133,3 +133,10 @@ See [the lab runtime contract](../../docs/architecture/field-lab-runtime.md) for
 15-minute booking convention, controls, units, backup boundaries, local service and limits.
 The original scene animation is still illustrative: declared hashed instance/job bindings do
 not establish live scene synchronization (#12) or scientific/physical validity (#11).
+
+## Current event-driven scene (#12)
+
+Use `npm run field-lab:viewer` for the runtime-driven lab scene, pause/resume, selection
+inspection and portable recorded replay. The historical film above remains an authored
+kinematic baseline. See [event-driven scene and OpenCAD handoff](../../docs/architecture/field-lab-scene.md)
+for checked mechanics, source invalidation, recording limits and reproduction.

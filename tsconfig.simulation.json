@@ -2,7 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "allowJs": true
   },
   "include": [
@@ -12,7 +14,13 @@
     "server/domains/**/*.ts",
     "server/simulation-service.ts",
     "server/field-lab-service.ts",
-    "scripts/field-lab-durable-test.ts"
+    "scripts/field-lab-durable-test.ts",
+    "server/field-lab-recording.ts",
+    "scripts/field-lab-playback-test.ts",
+    "scripts/field-lab-viewer.ts",
+    "scripts/field-lab-browser-test.ts",
+    "benchmarks/field-lab/runtime-viewer.ts",
+    "src/gifenc.d.ts"
   ],
   "exclude": []
 }
