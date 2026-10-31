@@ -1,0 +1,75 @@
+import assert from 'node:assert/strict';
+import { mkdtempSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { FieldLabDatabase } from '../server/simulation/field-lab-runtime.js';
+import { recordLab } from '../server/field-lab-recording.js';
+import { labFramePoses, loadLabRecording, type LabRecording } from '../src/lib/field-lab-playback.js';
+
+const dir = mkdtempSync(join(tmpdir(), 'oi-lab-playback-'));
+let now = 1000, db = new FieldLabDatabase(join(dir, 'lab.sqlite'), { clock: () => now });
+try {
+  const login = { username: 'scene-operator', password: 'deterministic-test-password' };
+  let user = await db.authenticate(login, true);
+  const created = db.create(user.token, { command_id: 'scene-test', scenario: 'baseline', dispatch: 'automatic' }) as any;
+  const id = created.snapshot.instance_id;
+  const recording = (): LabRecording => recordLab(db,user.token,id,execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()+(execFileSync('git',['diff','HEAD'],{encoding:'utf8'}).trim()?'+dirty':''));
+  const current = async () => { const loaded=await loadLabRecording(recording());return labFramePoses(loaded,loaded.recording.cursor); };
+  const control = (action: string) => {
+    const snapshot = db.read(user.token,id) as any;
+    const command = { command_id: randomUUID(), instance_id:id, expected_revision:snapshot.revision, action, payload:{job_id:'sample-1'} };
+    const result=db.execute(user.token,command);
+    assert.deepEqual(db.execute(user.token,command),result,'exact retry must not duplicate an event');
+  };
+  now += 225000; db.tick();
+  const moving = await current(); assert.equal(moving.job!.progress_ms,225000);
+  assert.equal(moving.job!.state,'running');
+  control('pause');
+  const paused=await current(); now+=60000;db.tick();
+  assert.deepEqual((await current()).poses,paused.poses,'pause must hold actual component offsets');
+  const beforeRestart=recording(); db.close();db=new FieldLabDatabase(join(dir,'lab.sqlite'),{clock:()=>now});
+  user=await db.authenticate(login);
+  assert.deepEqual(recording(),beforeRestart,'restart must preserve journal IDs and interactions');
+  control('resume'); now+=225000;db.tick();
+  const resumed=await current();assert.equal(resumed.job!.progress_ms,450000);
+  assert.notDeepEqual(resumed.poses,paused.poses);
+  control('fail'); const failed=await current();now+=60000;db.tick();
+  assert.equal((await current()).job!.state,'failed');
+  assert.deepEqual((await current()).poses,failed.poses,'failed equipment retains last paid progress');
+  const archive=recording();
+  const loaded=await loadLabRecording(JSON.parse(JSON.stringify(archive)));
+  for(let i=0;i<archive.frames.length;i++) assert.deepEqual(labFramePoses(loaded,i),labFramePoses(await loadLabRecording(archive),i));
+  const pipette=loaded.workspace.items.find(i=>i.id==='pipette')!;
+  assert.equal(Object.keys(labFramePoses(loaded,archive.cursor).poses[loaded.workspace.items.indexOf(pipette)].parts).length,6);
+  assert(loaded.motion);assert.equal(loaded.motion.checks.motion.status,'unchecked');
+  const edited=structuredClone(archive), scene=JSON.parse(edited.scene_json);
+  scene.instances.find((i:any)=>i.id==='pipette').position[0]+=.1;
+  edited.scene_json=JSON.stringify(scene);
+  const stale=await loadLabRecording(edited);assert.equal(stale.motion,null);assert.match(stale.finding,/STALE/);
+  const formEdit=structuredClone(archive);formEdit.source_form_sha256='changed';assert.equal((await loadLabRecording(formEdit)).motion,null);
+  const missing=structuredClone(archive);missing.motion_json='';assert.equal((await loadLabRecording(missing)).motion,null);
+  const bad=structuredClone(archive);bad.frames[1].snapshot.jobs[0].progress_ms=-1;
+  await assert.rejects(loadLabRecording(bad),/progress/);
+  const duplicate=structuredClone(archive);duplicate.frames.push(duplicate.frames[1]);await assert.rejects(loadLabRecording(duplicate),/timeline/);
+  const blocked=structuredClone(archive);const blockedMotion=JSON.parse(blocked.motion_json);blockedMotion.checks.motion.status='collision';blocked.motion_json=JSON.stringify(blockedMotion);assert.equal((await loadLabRecording(blocked)).motion,null);
+  const corrupt=structuredClone(archive);const motion=JSON.parse(corrupt.motion_json);motion.samples[0].offsets_m={};corrupt.motion_json=JSON.stringify(motion);
+  await assert.rejects(loadLabRecording(corrupt),/handoff/);
+  // Real resource-shortage scenario, then history compaction: latest physical state is retained.
+  const short=db.create(user.token,{command_id:'shortage',scenario:'water_ration',dispatch:'automatic'}) as any;
+  for(let i=0;i<100;i++){now+=90000;db.tick();}
+  const shortage=await loadLabRecording(recordLab(db,user.token,short.snapshot.instance_id,execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()+(execFileSync('git',['diff','HEAD'],{encoding:'utf8'}).trim()?'+dirty':'')));
+  const state=labFramePoses(shortage,shortage.recording.cursor);
+  assert(state.frame.snapshot.jobs.some(j=>j.state==='waiting-for-resource'));
+  const poseBefore=state.poses; now+=90000;db.tick();
+  const held=await loadLabRecording(recordLab(db,user.token,short.snapshot.instance_id,execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim()+(execFileSync('git',['diff','HEAD'],{encoding:'utf8'}).trim()?'+dirty':'')));
+  assert.deepEqual(labFramePoses(held,held.recording.cursor).poses,poseBefore);
+  assert(held.recording.frames[0].snapshot.revision>1,'compacted checkpoint is explicit');
+  const other=await db.authenticate({username:'other-operator',password:'another-test-password'},true);
+  assert.throws(()=>recordLab(db,other.token,id,'test'),/NOT_AVAILABLE/);
+  mkdirSync('deliverables/field-lab',{recursive:true});
+  writeFileSync('deliverables/field-lab/runtime-recording.json',JSON.stringify(archive));
+  writeFileSync('deliverables/field-lab/runtime-shortage-recording.json',JSON.stringify(held.recording));
+  console.log('PASS event-bound poses, pause/resume/fault, duplicate receipt, restart, shortage, compaction, authorization, source invalidation and portable replay');
+} finally {db.close();rmSync(dir,{recursive:true,force:true});}

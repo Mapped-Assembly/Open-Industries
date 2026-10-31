@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "errors": [],
+  "checks": [
+    "import",
+    "paused pose",
+    "selection reason",
+    "export/reimport",
+    "captioned screenshot",
+    "reconnect projection",
+    "live SQLite bridge",
+    "no-viewer progression",
+    "live pause",
+    "cross-origin refusal"
+  ],
+  "scope": "Recorded fixtures and a fresh real local station; no physical equipment."
+}
