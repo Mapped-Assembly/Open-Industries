@@ -1,0 +1,629 @@
+{
+  "schema_version": 1,
+  "robot_id": "so101-follower-new-calibration",
+  "source_lock_sha256": "513c07599f6b28d0ab978354a1258539a8a6d79488d89302dc8433a0b5f37368",
+  "urdf_sha256": "3a65d2d35e68a8d2f0c2cc176d19b884506543c93ba72980145b80abe276022c",
+  "length_unit": "m",
+  "angle_unit": "rad",
+  "mass_unit": "kg",
+  "handedness": "right",
+  "up_axis": "Z",
+  "root_link": "base_link",
+  "joints": {
+    "gripper_frame_joint": {
+      "type": "fixed",
+      "parent": "gripper_link",
+      "child": "gripper_frame_link",
+      "origin_m": [
+        [
+          -0.9999999999964793,
+          0.0,
+          2.65358979335273e-06,
+          -0.0079
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          -0.000218121
+        ],
+        [
+          -2.65358979335273e-06,
+          0.0,
+          -0.9999999999964793,
+          -0.0981274
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "lower_rad": null,
+      "upper_rad": null,
+      "effort_Nm_model_only": null,
+      "velocity_rad_s_model_only": null
+    },
+    "gripper": {
+      "type": "revolute",
+      "parent": "gripper_link",
+      "child": "moving_jaw_so101_v1_link",
+      "origin_m": [
+        [
+          0.9999999999999987,
+          -5.242839999965148e-08,
+          1.9116473644030497e-13,
+          0.0202
+        ],
+        [
+          -1.415529999999998e-15,
+          -3.673205103346574e-06,
+          -0.9999999999932537,
+          0.0188
+        ],
+        [
+          5.2428399999999973e-08,
+          0.9999999999932524,
+          -3.673205103346569e-06,
+          -0.0234
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower_rad": -0.174533,
+      "upper_rad": 1.74533,
+      "effort_Nm_model_only": 10.0,
+      "velocity_rad_s_model_only": 10.0
+    },
+    "wrist_roll": {
+      "type": "revolute",
+      "parent": "wrist_link",
+      "child": "gripper_link",
+      "origin_m": [
+        [
+          -0.9988153870948911,
+          -0.04866027635002569,
+          2.832328968791006e-06,
+          5.55112e-17
+        ],
+        [
+          2.6504463166479907e-06,
+          3.8023295160241124e-06,
+          0.9999999999892587,
+          -0.0611
+        ],
+        [
+          -0.04866027636027247,
+          0.9988153870916694,
+          -3.6688537771909548e-06,
+          0.0181
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower_rad": -2.74385,
+      "upper_rad": 2.84121,
+      "effort_Nm_model_only": 10.0,
+      "velocity_rad_s_model_only": 10.0
+    },
+    "wrist_flex": {
+      "type": "revolute",
+      "parent": "lower_arm_link",
+      "child": "wrist_link",
+      "origin_m": [
+        [
+          -3.673205103346574e-06,
+          0.9999999999932537,
+          -4.024563185971374e-15,
+          -0.1349
+        ],
+        [
+          -0.9999999999932537,
+          -3.673205103346574e-06,
+          -8.673472169598178e-16,
+          0.0052
+        ],
+        [
+          -8.67362e-16,
+          4.02456e-15,
+          1.0,
+          3.62355e-17
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower_rad": -1.65806,
+      "upper_rad": 1.65806,
+      "effort_Nm_model_only": 10.0,
+      "velocity_rad_s_model_only": 10.0
+    },
+    "elbow_flex": {
+      "type": "revolute",
+      "parent": "upper_arm_link",
+      "child": "lower_arm_link",
+      "origin_m": [
+        [
+          -3.673205103346574e-06,
+          -0.9999999999932537,
+          -3.6361121148444205e-16,
+          -0.11257
+        ],
+        [
+          0.9999999999932537,
+          -3.673205103346574e-06,
+          8.742996643873405e-16,
+          -0.028
+        ],
+        [
+          -8.74301e-16,
+          -3.63608e-16,
+          1.0,
+          1.73763e-16
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower_rad": -1.69,
+      "upper_rad": 1.69,
+      "effort_Nm_model_only": 10.0,
+      "velocity_rad_s_model_only": 10.0
+    },
+    "shoulder_lift": {
+      "type": "revolute",
+      "parent": "shoulder_link",
+      "child": "upper_arm_link",
+      "origin_m": [
+        [
+          -3.673205103346574e-06,
+          0.9999999999865075,
+          3.6732051033217936e-06,
+          -0.0303992
+        ],
+        [
+          0.0,
+          -3.673205103346574e-06,
+          0.9999999999932537,
+          -0.0182778
+        ],
+        [
+          0.9999999999932537,
+          3.6732051033217936e-06,
+          1.3492435731251315e-11,
+          -0.0542
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower_rad": -1.74533,
+      "upper_rad": 1.74533,
+      "effort_Nm_model_only": 10.0,
+      "velocity_rad_s_model_only": 10.0
+    },
+    "shoulder_pan": {
+      "type": "revolute",
+      "parent": "base_link",
+      "child": "shoulder_link",
+      "origin_m": [
+        [
+          -0.9999999999964793,
+          -2.653589793343387e-06,
+          -7.0414969660857844e-12,
+          0.0388353
+        ],
+        [
+          -2.65358979335273e-06,
+          0.9999999999929585,
+          2.653589793343387e-06,
+          -8.97657e-09
+        ],
+        [
+          -4.18253e-17,
+          2.65358979335273e-06,
+          -0.9999999999964793,
+          0.0624
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "axis": [
+        0.0,
+        0.0,
+        1.0
+      ],
+      "lower_rad": -1.91986,
+      "upper_rad": 1.91986,
+      "effort_Nm_model_only": 10.0,
+      "velocity_rad_s_model_only": 10.0
+    }
+  },
+  "reference_link_transforms_m": {
+    "base_link": [
+      [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "shoulder_link": [
+      [
+        -0.9999999999964793,
+        -2.653589793343387e-06,
+        -7.0414969660857844e-12,
+        0.0388353
+      ],
+      [
+        -2.65358979335273e-06,
+        0.9999999999929585,
+        2.653589793343387e-06,
+        -8.97657e-09
+      ],
+      [
+        -4.18253e-17,
+        2.65358979335273e-06,
+        -0.9999999999964793,
+        0.0624
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "upper_arm_link": [
+      [
+        3.6731980618366753e-06,
+        -0.9999999999732395,
+        -6.326794896634347e-06,
+        0.06923454850205815
+      ],
+      [
+        2.6535995405050564e-06,
+        -6.326785149458065e-06,
+        0.999999999976465,
+        -0.01827787213400125
+      ],
+      [
+        -0.999999999989733,
+        -3.6732148505302576e-06,
+        2.6535763008990966e-06,
+        0.11659995149802566
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "lower_arm_link": [
+      [
+        -0.9999999999799857,
+        7.04143638450058e-12,
+        -6.326794897508647e-06,
+        0.09723413500940303
+      ],
+      [
+        -6.3267948975050575e-06,
+        -2.6535763012712638e-06,
+        0.999999999976465,
+        -0.01827799369971717
+      ],
+      [
+        -9.747196618251736e-12,
+        0.9999999999964791,
+        2.6535763012627045e-06,
+        0.2291700543468857
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "wrist_link": [
+      [
+        3.673198061836678e-06,
+        -0.9999999999732394,
+        -6.3267948934840846e-06,
+        0.23213413500673968
+      ],
+      [
+        2.653599540001305e-06,
+        -6.3267851463078036e-06,
+        0.999999999976465,
+        -0.018277154013682226
+      ],
+      [
+        -0.9999999999897329,
+        -3.6732148505302487e-06,
+        2.6535763003953576e-06,
+        0.2343700543481823
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "gripper_link": [
+      [
+        -6.011429472594973e-06,
+        -1.0300368439284612e-05,
+        -0.9999999999288823,
+        0.29323402049011704
+      ],
+      [
+        -0.0486629268319478,
+        0.9988152579192189,
+        -9.995631407477606e-06,
+        -0.00017676744753576695
+      ],
+      [
+        0.9988152579511445,
+        0.04866292676839898,
+        -6.505553554836152e-06,
+        0.23437032681134068
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "gripper_frame_link": [
+      [
+        8.665019265737822e-06,
+        -1.0300368439284612e-05,
+        0.9999999999094099,
+        0.39136147022015805
+      ],
+      [
+        0.04866292685830077,
+        0.9988152579192189,
+        9.866499961486485e-06,
+        -9.21206311460634e-06
+      ],
+      [
+        -0.9988152579303647,
+        0.04866292676839898,
+        9.15599952875738e-06,
+        0.22646971024033286
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "moving_jaw_so101_v1_link": [
+      [
+        -6.063857872591221e-06,
+        -0.9999999998839841,
+        1.3973573542299313e-05,
+        0.316633705410651
+      ],
+      [
+        -0.048662926832473204,
+        -1.3661933390706358e-05,
+        -0.998815257875774,
+        0.017618202177115145
+      ],
+      [
+        0.998815257950802,
+        -6.736668751611337e-06,
+        -0.0486629267439835,
+        0.25546141027515284
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "reference_pose_rad": {
+    "gripper": 0.0,
+    "wrist_roll": 0.0,
+    "wrist_flex": 0.0,
+    "elbow_flex": 0.0,
+    "shoulder_lift": 0.0,
+    "shoulder_pan": 0.0
+  },
+  "reference_pose_basis": "Protocol reference q=0 rad in upstream new calibration; not hardware homing or a verified collision-free pose.",
+  "mount": {
+    "parent_link": "gripper_link",
+    "matrix_m": [
+      [
+        -0.9999999999964793,
+        0.0,
+        2.65358979335273e-06,
+        -0.0079
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -0.000218121
+      ],
+      [
+        -2.65358979335273e-06,
+        0.0,
+        -0.9999999999964793,
+        -0.0981274
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "basis": "upstream_model",
+    "source": "Simulation/SO101/so101_new_calib.urdf#gripper_frame_joint"
+  },
+  "tcp": {
+    "parent_link": "gripper_link",
+    "matrix_m": [
+      [
+        -0.9999999999964793,
+        0.0,
+        2.65358979335273e-06,
+        -0.0079
+      ],
+      [
+        0.0,
+        1.0,
+        0.0,
+        -0.000218121
+      ],
+      [
+        -2.65358979335273e-06,
+        0.0,
+        -0.9999999999964793,
+        -0.0981274
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "basis": "upstream_model",
+    "source": "Simulation/SO101/so101_new_calib.urdf#gripper_frame_joint"
+  },
+  "mount_kind": "virtual_frame_only",
+  "mounting_hole_diameter": {
+    "value": null,
+    "unit": "m",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "mounting_hole_spacing": {
+    "value": null,
+    "unit": "m",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "maximum_payload": {
+    "value": null,
+    "unit": "kg",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "maximum_tool_mass": {
+    "value": null,
+    "unit": "kg",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "supply_voltage": {
+    "value": null,
+    "unit": "V",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "supply_current": {
+    "value": null,
+    "unit": "A",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "vacuum_pressure": {
+    "value": null,
+    "unit": "Pa",
+    "basis": "unknown",
+    "source": "README.md#unverified-physical-constraints"
+  },
+  "vacuum_flow_or_control_interface": "not_provided_by_model",
+  "gripper_command_mapping": "uncalibrated_do_not_convert_lerobot_0_100_to_radians",
+  "limitations": [
+    "URDF coordinates, masses, effort and velocity limits are source-model values, not measured hardware specifications.",
+    "Virtual mount coincides with upstream gripper_frame_link; it is not a verified bolt pattern or fabrication interface.",
+    "The stock gripper body meshes are imported exactly. Hole geometry, tolerances, tool mass and payload limits require measurement and engineering review.",
+    "Reference q=0 is a kinematic test pose, not a hardware command; no collision, contact or seed task was evaluated.",
+    "LeRobot 0..100 gripper commands are not radians. Hardware mapping and calibration remain unknown.",
+    "Supply voltage/current depend on the installed follower variant and are not selected here; no vacuum source, valve or control interface is established.",
+    "The source README mentions removed base collision meshes, but this pinned URDF includes base collision elements; collision fidelity is not established by their presence."
+  ]
+}

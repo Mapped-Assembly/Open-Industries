@@ -80,7 +80,9 @@
     "field-lab:viewer": "node --import tsx scripts/field-lab-viewer.ts",
     "test:field-lab-scene-browser": "node --import tsx scripts/field-lab-browser-test.ts",
     "build:local-runtime": "tsc -p tsconfig.simulation.json && vite build --config vite.local-runtime.config.ts",
-    "test:local-runtime": "npm run build:local-runtime && node --import tsx --test tests/simulation/local-runtime.test.ts"
+    "test:local-runtime": "npm run build:local-runtime && node --import tsx --test tests/simulation/local-runtime.test.ts",
+    "embodied:serve": "python3 scripts/embodied_runtime.py",
+    "test:embodied-browser": "node --import tsx scripts/embodied-browser-test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

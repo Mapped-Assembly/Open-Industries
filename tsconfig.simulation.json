@@ -20,7 +20,8 @@
     "scripts/field-lab-viewer.ts",
     "scripts/field-lab-browser-test.ts",
     "benchmarks/field-lab/runtime-viewer.ts",
-    "src/gifenc.d.ts"
+    "src/gifenc.d.ts",
+    "scripts/embodied-browser-test.ts"
   ],
   "exclude": []
 }

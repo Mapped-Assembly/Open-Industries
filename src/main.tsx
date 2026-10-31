@@ -16,6 +16,7 @@ import { SPACE_BRIEFS, buildSpace, inferSpaceBrief, type SpaceBriefKey } from '.
 import { CaptureTools } from './components/capture-tools';
 import { AuthControls } from './components/auth-controls';
 import { WorkspaceViewer } from './components/workspace-viewer';
+import { EmbodiedWorkbench } from './components/embodied-workbench';
 import { Timeline } from './components/timeline';
 import { SceneControls } from './components/scene-controls';
 import { ProjectInspector } from './components/project-inspector';
@@ -299,7 +300,7 @@ function App(){
     <Timeline workspace={workspace} selected={selected} selectedPart={selectedPart} setPart={setSelectedPart} change={change} time={time} setTime={setTime} playing={playing} setPlaying={setPlaying} disabled={busy}/>
     <SceneControls ref={sceneControls} workspace={workspace} owner={owner} roomId={roomId} current={currentScene} replace={installRoom} flushDraft={flushDraft} getScope={getScope} roomOperation={roomOperation.current} busy={busy} setBusy={setBusy} onExport={exportScene}/>
   </aside>;
-  return <><header className="app-header"><div className="brand"><span className="logo">O</span> OPENINDUSTRIES</div><span className="tag">SPATIAL WORKBENCH</span><AuthControls returnTo={linkMode?location.origin+location.pathname+location.search:undefined} beforeSignIn={()=>linkMode?Promise.resolve():preserveAuthWorkspace(assets,workspace.room,selected,workspace.items.map(i=>i.position),workspace)}/><button disabled={busy} onClick={()=>openFilePicker()}>+ Import project</button></header>
+  return <><header className="app-header"><div className="brand"><span className="logo">O</span> OPENINDUSTRIES</div><span className="tag">SPATIAL WORKBENCH</span><a href="/?run=so101">Robot Run</a><AuthControls returnTo={linkMode?location.origin+location.pathname+location.search:undefined} beforeSignIn={()=>linkMode?Promise.resolve():preserveAuthWorkspace(assets,workspace.room,selected,workspace.items.map(i=>i.position),workspace)}/><button disabled={busy} onClick={()=>openFilePicker()}>+ Import project</button></header>
     <main onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();void load(Array.from(e.dataTransfer.files));}}>
       <div ref={workspaceSlot} style={{display:'contents'}}/>{createPortal(side,workspaceHost)}
       <div ref={stage} className={`stage${expanded?' stage-expanded':''}`}>
@@ -318,4 +319,4 @@ function App(){
     {error&&(isFullscreen&&stage.current?createPortal(<div className="error" role="alert">{error}<button aria-label="Dismiss error" onClick={()=>setError('')}>×</button></div>,stage.current):<div className="error" role="alert">{error}<button aria-label="Dismiss error" onClick={()=>setError('')}>×</button></div>)}
   </>;
 }
-createRoot(document.getElementById('root')!).render(<App/>);
+createRoot(document.getElementById('root')!).render(new URLSearchParams(location.search).get('run')==='so101'?<EmbodiedWorkbench/>:<App/>);
