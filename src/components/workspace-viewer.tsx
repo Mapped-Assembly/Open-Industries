@@ -7,6 +7,7 @@ import { regionBounds, type FloorRegion } from '../lib/gif';
 import { updateCameraDepth } from '../lib/camera-depth';
 
 type Props = { workspace: Workspace; selected: number; selectedPart: number; time: number | null; focus: number;
+  overview?: {position:[number,number,number];target:[number,number,number]}; focusSelection?:boolean;
   region: FloorRegion | null; onSelect: (instance: number, part: number) => void };
 export function WorkspaceViewer(props: Props) {
   const host = useRef<HTMLDivElement>(null);
@@ -44,10 +45,12 @@ export function WorkspaceViewer(props: Props) {
       if (focusKey !== lastFocus) {
         lastFocus = focusKey;
         const group = world.groups[selected];
-        if (group) {
+        if (group && latest.current.focusSelection !== false) {
           const box = new THREE.Box3().setFromObject(selectedPart >= 0 ? group.children[selectedPart] ?? group : group);
           const center = box.getCenter(new THREE.Vector3()); const size = Math.max(box.getSize(new THREE.Vector3()).length(),.01);
           controls.target.copy(center); camera.position.copy(center).add(new THREE.Vector3(size*1.3,size*.9,size*1.3));
+        } else if(latest.current.overview) {
+          controls.target.set(...latest.current.overview.target);camera.position.set(...latest.current.overview.position);
         } else {
           controls.target.set(0,0,0);
           const generatedArchitecture = p.workspace.items.some(item => item.asset.source.kind === 'generated');

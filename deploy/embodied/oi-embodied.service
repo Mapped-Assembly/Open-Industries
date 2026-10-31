@@ -1,0 +1,22 @@
+[Unit]
+Description=OpenIndustries local SO-101 embodied workbench
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=exec
+# Replace the three absolute paths with the pinned checkout, its venv and source checkout.
+WorkingDirectory=/ABSOLUTE/OI
+ExecStart=/ABSOLUTE/OI/.venv-embodied/bin/python scripts/embodied_runtime.py --source /ABSOLUTE/SO-ARM100
+EnvironmentFile=-%h/.config/open-industries/embodied.env
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=30
+
+[Install]
+WantedBy=default.target

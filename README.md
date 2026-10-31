@@ -148,6 +148,14 @@ The [sample-farm adapter](docs/farm-agent-control.md) exposes the original ASTRA
 and SO-101 arm through MCP: agent-selected moves and harvests, OpenCV pickup evidence,
 pause/resume, persistent jobs and a read-only 3D viewer.
 
+## Chat with a simulated robot
+
+The [local embodied workbench](docs/embodied-chat.md) adds chat, grounded block
+selection, live SO-101 approach motion, Stop/Resume and same-run reconnect. It reuses
+the pinned robot model and keeps the agent/controller on your computer. Manual test
+mode works without a model; a configurable local model endpoint enables language
+proposals. Contact-based pick/place and live-model evidence remain under #54.
+
 ## Persistent local runtime
 
 Run the [local FIELD-LAB service](docs/persistent-runtime.md) on your own Linux computer.
