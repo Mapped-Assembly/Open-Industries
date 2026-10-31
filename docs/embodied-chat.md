@@ -82,8 +82,10 @@ There is no multi-step planner or contact skill in this first milestone.
 ## Authority, observations and recovery
 
 The SQLite station contains scene/model pins, joint state, current task, the last 64
-terminal tasks, 128 chat messages, 64 observations and up to 512 immutable request
-receipts. New requests beyond the receipt cap fail explicitly. Each request has a
+terminal tasks, 128 chat messages, 64 observations and 512 ordinary immutable request
+receipts, with reserved allowance for a final Stop and Cancel. New goals beyond the
+receipt cap fail explicitly; exhaustion never disables Stop. Repeated Stop on an
+already-paused controller at capacity is acknowledged without growing storage. Each request has a
 caller UUID; each task has a separate UUID and deterministic controller-command UUID.
 Retries must reuse the exact envelope. A changed envelope with the same ID is rejected.
 

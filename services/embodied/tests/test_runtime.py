@@ -161,6 +161,27 @@ class RuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'RUN_NOT_AVAILABLE'):
             self.runtime.request(body)
 
+    def test_receipt_capacity_does_not_disable_stop(self) -> None:
+        """Budget exhaustion refuses new goals while preserving direct Stop and Cancel."""
+        policy = DelayedPolicy({'skill': 'approach', 'target_id': 'red-block'})
+        self.runtime.policy = policy
+        self.send('chat', 'approach selected', 'red-block')
+        self.assertTrue(policy.entered.wait(2))
+        try:
+            with self.runtime.lock:
+                self.runtime.db.executemany('INSERT INTO receipts VALUES(?,?,?)', [(str(uuid4()), '{}', '{}') for _ in range(512)])
+                self.runtime.db.commit()
+            self.send('stop')
+            self.assertEqual(self.runtime.snapshot()['task']['stage'], 'paused')
+            with self.runtime.lock:
+                count = self.runtime.db.execute('SELECT count(*) FROM receipts').fetchone()[0]
+            self.send('stop')
+            with self.runtime.lock:
+                self.assertEqual(count, self.runtime.db.execute('SELECT count(*) FROM receipts').fetchone()[0])
+            self.send('cancel')
+        finally:
+            policy.release.set()
+
     def test_three_target_poses_and_unreachable_rejection(self) -> None:
         """IK uses actual targets and joint limits, not a stored demonstration route."""
         model = RobotModel(FIXTURE)

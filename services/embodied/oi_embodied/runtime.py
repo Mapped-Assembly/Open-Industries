@@ -130,9 +130,15 @@ class Runtime:
             if old:
                 require(old[0] == canonical(body), 'REQUEST_ID_REUSED')
                 return json.loads(old[1])
-            require(self.db.execute('SELECT count(*) FROM receipts').fetchone()[0] < 512, 'REQUEST_LIMIT_REACHED')
+            full = self.db.execute('SELECT count(*) FROM receipts').fetchone()[0] >= 512
+            stop = body['action'] == 'stop' or body['action'] == 'chat' and body['text'].strip().lower() in ('stop', 'pause')
+            require(not full or stop or body['action'] == 'cancel', 'REQUEST_LIMIT_REACHED')
             require(body['scene_revision'] == self.state['scene_revision'], 'SCENE_CHANGED')
             require(body['selected_id'] is None or body['selected_id'] in [o['id'] for o in self.state['objects']], 'TARGET_NOT_AVAILABLE')
+            if full and stop and self.state['task'] and self.state['task']['stage'] == 'paused':
+                # Global Stop is idempotent. At capacity acknowledge the already-stopped
+                # controller without unbounded receipt growth. No new motion can start.
+                return {'request_id': body['request_id'], 'run_id': self.state['run_id'], 'status': 'paused', 'task_id': self.state['task']['id']}
             before = deepcopy(self.state)
             try:
                 result = self.apply_request(body)
