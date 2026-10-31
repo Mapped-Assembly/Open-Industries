@@ -1,233 +1,186 @@
-# Persistent runtime on one Linux server
+# Local persistent runtime
 
-This deployment runs the existing **work-cell** service under systemd, with Caddy
-terminating HTTPS. Jobs advance with no browser or MCP client connected. SQLite state
-lives outside the release checkout and survives process restarts and compatible redeploys.
-This is a deployment recipe, not evidence that a public server has been provisioned.
-Issue [#52](https://github.com/Mapped-Assembly/Open-Industries/issues/52) stays open until
-an actual host passes the live acceptance checklist below.
+Run FIELD-LAB on your own computer. The worker, built 3D viewer and MCP bridge share
+one authoritative SQLite instance. AWS, cloud accounts, public DNS, public TLS and
+model-provider credentials are **not required**. Internet access is needed to obtain
+the source and npm dependencies; normal modeled execution runs locally afterward.
 
-## Host and storage
+## Install on Linux
 
-Use one Linux machine with systemd 245+, Node 22.16+ installed system-wide, npm, Python
-3.10+, Git, and Caddy 2. A local machine must stay powered on and connected. A cloud VM
-needs a persistent **local filesystem** (not a shared/network SQLite volume). No GPU is
-needed for the supplied modeled work-cell. Capacity must be measured with your workload;
-this does not promise a particular memory size or number of concurrent simulations.
-
-| Item | Location / status |
-| --- | --- |
-| Host/provider, region and monthly cost | Not selected; record VM, disk, backup and egress costs before provisioning |
-| DNS | Replace `runtime.example.com` with a domain pointing to the selected host |
-| Immutable releases | `/opt/open-industries/releases/<commit>` |
-| Active release symlink | `/opt/open-industries/current` |
-| Runtime account | `oi-runtime` (no login shell) |
-| Database, WAL, SHM and future runtime assets | `/var/lib/open-industries/` (private, persistent) |
-| Server configuration | `/etc/open-industries/runtime.env` (root-owned, mode 0600) |
-| Backups | `/var/backups/open-industries/`; additionally copy encrypted backups off host |
-| Runtime logs | Journal namespace `oi-runtime`, capped at 100 MiB persistent / 32 MiB volatile, 14 days |
-
-Only one service owns each database. Keep releases root-owned and read-only to the
-runtime account. Do not put provider keys or runtime session tokens in `VITE_*` variables,
-Git, browser storage, logs, or shell history. No provider keys are needed for this fixture.
-
-## Install a pinned release
-
-Run these commands on the selected host. Install Node/npm and Caddy through their official
-installation instructions first; Node must resolve through `/usr/local/bin:/usr/bin:/bin`
-for the service (a user-only nvm installation will not work).
+The first service target is Ubuntu 24.04 with systemd 245+, Python 3.10+, Git, npm and
+Node 22.16+ installed in `/usr/bin` or `/usr/local/bin`. A home-directory nvm install
+is not accessible to the hardened service. Use a local filesystem, not NFS/SMB.
+Run from a clean checkout of a reviewed commit:
 
 ```bash
-sudo useradd --system --home-dir /var/lib/open-industries --shell /usr/sbin/nologin oi-runtime
-sudo install -d -m 0755 /opt/open-industries/releases
-sudo install -d -m 0700 /etc/open-industries
-sudo install -d -m 0700 -o oi-runtime -g oi-runtime /var/lib/open-industries /var/backups/open-industries
-
-# Set this to the reviewed full commit SHA, not a moving branch.
-OI_RELEASE='<full-commit-sha>'
-git clone https://github.com/Mapped-Assembly/Open-Industries.git oi-release
-cd oi-release
-git checkout --detach "$OI_RELEASE"
 npm ci
-npm run test:runtime-deployment
-sudo cp -a . "/opt/open-industries/releases/$OI_RELEASE"
-sudo chown -R root:root "/opt/open-industries/releases/$OI_RELEASE"
-sudo ln -s "/opt/open-industries/releases/$OI_RELEASE" /opt/open-industries/current
-sudo install -m 0600 deploy/runtime/runtime.env.example /etc/open-industries/runtime.env
-sudo install -m 0644 deploy/runtime/oi-runtime.service deploy/runtime/oi-runtime-health.service deploy/runtime/oi-runtime-health.timer /etc/systemd/system/
-sudo install -d -m 0755 /etc/systemd/journald@oi-runtime.conf.d
-sudo install -m 0644 deploy/runtime/journald.conf /etc/systemd/journald@oi-runtime.conf.d/limits.conf
-sudo systemctl daemon-reload
-sudo systemctl enable --now oi-runtime.service oi-runtime-health.timer
-python3 scripts/runtime_health.py http://127.0.0.1:8791
+npm run test:local-runtime
+sudo python3 scripts/install_local_runtime.py --source "$PWD"
+python3 scripts/runtime_health.py http://127.0.0.1:4193
 ```
 
-`StateDirectory` and the explicit absolute database path prevent redeploys from creating a
-fresh database accidentally. The service receives SIGTERM directly, closes its worker and
-database, and restarts on failure after five seconds. Repeated startup failures are bounded;
-inspect logs and use `systemctl reset-failed oi-runtime` after fixing configuration.
+Open **http://127.0.0.1:4193/** and click Connect / reconnect. Installation explicitly
+creates the baseline automatic simulated task once. Opening/reopening the page does
+not initialize anything. Missing identity, database or assets produces an actionable
+startup failure instead of silently replacing your work. The foreground developer
+command remains `npm run field-lab:viewer`; its default state is now
+`~/.local/share/open-industries/field-lab`, separate from the installed service.
+To reopen a preexisting checkout-local save, set `FIELD_LAB_VIEWER_STATE_DIR` explicitly.
 
-## Provision an account, then enable HTTPS
+The installer copies a pinned release into `/opt/open-industries/local-releases/<sha>`
+and selects `/opt/open-industries/local-current`. It creates the unprivileged
+`oi-runtime` account, enables `oi-local.service` for host startup and starts it now.
+Closing the installation terminal has no effect on systemd. No browser or agent is
+required to drive ticks. A failed process restarts after five seconds, with a bounded
+restart rate; SIGTERM closes HTTP and SQLite gracefully. A kernel file lock prevents
+two installed service processes from owning the same station.
 
-Leave the Caddy site disabled until initial provisioning is complete. The API listens on
-loopback only. Temporarily set `ASTRA_SIMULATION_ALLOW_SIGNUP=true` in the root-owned env
-file, restart `oi-runtime`, and run the following **on the server**, or through an SSH
-session. It reads the password without echoing and does not print the session token:
+| Operation | Command |
+| --- | --- |
+| Start / stop | `sudo systemctl start oi-local` / `sudo systemctl stop oi-local` |
+| Status / PID | `sudo systemctl status oi-local --no-pager` |
+| Readiness | `python3 scripts/runtime_health.py http://127.0.0.1:4193` |
+| Logs | `sudo journalctl --namespace=oi-local -u oi-local -n 100 --no-pager` |
+| Follow logs | `sudo journalctl --namespace=oi-local -u oi-local -f` |
+| Retry after fixing failure | `sudo systemctl reset-failed oi-local && sudo systemctl start oi-local` |
+| Disable host startup | `sudo systemctl disable --now oi-local` |
+
+The dedicated journal is capped at 100 MiB persistent / 32 MiB volatile with 14-day
+retention and rate-limited service output. `/health` checks the stored worker heartbeat;
+a stale heartbeat yields 503. Storage/worker failure exits nonzero for supervisor
+recovery. Port conflicts, absent builds, incompatible saves and missing assets fail
+startup. Inspect the journal; do not delete state to make a failure disappear.
+
+## State, access and MCP
+
+`/var/lib/open-industries/local-lab` is private (0700), outside every release. Keep
+`lab.sqlite`, WAL/SHM, `operator.json`, `session.json`, `client.json` and `assets/`
+together. SQLite retains transactional commands, resource accounting, receipts and
+retained history. Assets are frozen at explicit initialization and preserved on upgrades.
+The service renews its database session after unattended expiry.
+
+HTTP binds only to `127.0.0.1:4193`. The local browser is an operator surface: a person
+or process on this computer can open it. It is not multi-user isolation from other
+local OS users. Strict Host/Origin checks reject foreign browser requests and control
+POSTs require same-origin JSON. No account passwords or bearer tokens enter browser
+storage. Do not expose this port through a public proxy. Remote access is a separate
+[optional deployment](remote-runtime.md).
+
+The MCP bridge authenticates with a private capability file, and cannot select another
+instance or create a new task. Copy the client capability to your own private config:
 
 ```bash
-python3 - <<'PY'
-import getpass, json, urllib.request
-body = json.dumps({"username": input("Username: "), "password": getpass.getpass("Password (12+ characters): ")}).encode()
-request = urllib.request.Request("http://127.0.0.1:8791/auth/register", data=body, headers={"Content-Type": "application/json"})
-with urllib.request.urlopen(request, timeout=10) as response:
-    session = json.load(response)
-request = urllib.request.Request("http://127.0.0.1:8791/auth/logout", data=b"{}", headers={"Content-Type": "application/json", "Authorization": "Bearer " + session["token"]})
-with urllib.request.urlopen(request, timeout=10):
-    print("Account provisioned; provisioning session revoked.")
-PY
+install -d -m 0700 "$HOME/.config/open-industries"
+sudo install -m 0600 -o "$(id -un)" -g "$(id -gn)" \
+  /var/lib/open-industries/local-lab/client.json "$HOME/.config/open-industries/client.json"
 ```
 
-Set signup back to `false` and restart. Confirm `/health` reports
-`registration_enabled: false`. Provision later accounts through the same private process.
+Configure your MCP client with absolute paths (replace `/home/YOU`; use
+`/usr/local/bin/node` if that is where your supported Node is installed):
 
-Replace the example hostname in `deploy/runtime/Caddyfile`, then add that site block to
-the host's existing Caddy configuration (do not overwrite other sites). On a dedicated
-new host, it can be installed as `/etc/caddy/Caddyfile`. Allow inbound TCP 80/443 for HTTPS
-and the certificate challenge, plus restricted administrative SSH access. Do not expose
-8791, 8792 or database files. Validate before reloading:
+```json
+{
+  "mcpServers": {
+    "oi-local": {
+      "command": "/usr/bin/node",
+      "args": ["/opt/open-industries/local-current/server/astra-mcp.mjs"],
+      "env": {"OI_LOCAL_CLIENT_FILE": "/home/YOU/.config/open-industries/client.json"}
+    }
+  }
+}
+```
+
+Use `astra.local_lab_read`, `astra.local_lab_history` and `astra.local_lab_command`.
+Read first, then send a pause/resume/fail/cancel command with the current revision,
+job ID and a unique command ID. Reuse the exact command after an uncertain response;
+receipts prevent duplicate spending. Closing MCP stops only its transport process.
+General chat planning and device execution remain #54 and #56.
+
+## Complete backup, isolated restore, upgrade and rollback
+
+Back up while the service is running using SQLite's online backup API. Do not copy
+only the main database file while WAL mode is active. Do not rotate identity/assets
+concurrently with a backup. The destination must not exist and its parent must exist:
 
 ```bash
-sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
-sudo systemctl enable --now caddy
-sudo systemctl reload caddy
-python3 scripts/runtime_health.py https://runtime.example.com
+sudo install -d -m 0700 /var/backups/open-industries
+sudo python3 scripts/local_runtime_backup.py /var/lib/open-industries/local-lab \
+  /var/backups/open-industries/local-before-upgrade
+sudo python3 scripts/local_runtime_backup.py /var/backups/open-industries/local-before-upgrade \
+  /var/lib/open-industries/local-restored
+sudo chown -R oi-runtime:oi-runtime /var/lib/open-industries/local-restored
 ```
 
-Caddy always blocks public `/auth/register`; it preserves Origin and Authorization headers.
-The runtime continues to reject browser Origins, query strings, invalid bodies and invalid
-sessions. Caddy does not retry mutation requests. Login throttling currently groups proxied
-requests under the loopback address (30 attempts/minute total); do not trust arbitrary
-forwarded-IP headers to bypass it. This is a small deployment, not a public identity service.
-
-## Connect an application or agent
-
-An application backend logs in via `POST /auth/login` with JSON username/password and keeps
-the returned session private. Sessions expire after eight hours: reauthenticate on expiry;
-do not resubmit an uncertain command with a new command ID. Exact retries use the original
-ID, expected revision and payload. A new browser session should retrieve the saved instance
-through its application backend. Browser-to-runtime authentication/proxy UI is not added here.
-
-For the existing MCP work-cell adapter, configure its **server-side** environment:
-
-```text
-ASTRA_SIMULATION_TOOLS_ENABLED=true
-ASTRA_SIMULATION_SERVICE_URL=https://runtime.example.com
-ASTRA_SIMULATION_SESSION=<token returned by server-side login>
-```
-
-Use `astra.simulation_create_work_cell`, `astra.simulation_read`,
-`astra.simulation_command` and `astra.simulation_history`. The adapter's session must be
-renewed on expiry. See [shared runtime adoption](architecture/shared-runtime-adoption.md)
-for full HTTP request shapes and finite limits (three instances/account, eight retained
-jobs/instance, 256 normal receipts). This fixture is intentionally finite, not an unlimited
-production workflow. History cursors can expire; get a fresh snapshot in that case.
-
-## Health and logs
-
-`GET /health` returns 200 only while the database heartbeat is fresh; a stale heartbeat
-returns 503. Storage/read failures also return 503. Worker failure and recovery transitions
-are logged without raw exceptions or credentials. Caddy checks readiness every ten seconds;
-a systemd timer independently checks every thirty seconds. The timer reports failure; it
-does not silently reset a database or restart a persistently broken worker.
+This validates schema 101, SQLite integrity and the bound instance, and includes
+credentials, configuration and frozen scene assets. Protect backups like credentials.
+Record the active release SHA (`cat /opt/open-industries/local-current/RELEASE`) beside
+the backup. Test the restored copy without touching the original, using another port:
 
 ```bash
-sudo systemctl status oi-runtime oi-runtime-health.timer oi-runtime-health.service
-sudo journalctl --namespace=oi-runtime -u oi-runtime -u oi-runtime-health --since '1 hour ago'
-sudo journalctl --namespace=oi-runtime --disk-usage
-df -h /var/lib/open-industries /var/backups/open-industries
+cd /opt/open-industries/local-current
+sudo -u oi-runtime env FIELD_LAB_INSTALLED=true \
+  FIELD_LAB_VIEWER_STATE_DIR=/var/lib/open-industries/local-restored FIELD_LAB_VIEWER_PORT=4196 \
+  /usr/bin/flock --no-fork --nonblock /var/lib/open-industries/local-restored/service.lock \
+  /usr/bin/env node --import tsx scripts/field-lab-viewer.ts
 ```
 
-Connect these checks to the host's alerting system. No notification provider is provisioned
-by this recipe. A green process alone is not proof of worker readiness.
+Open `http://127.0.0.1:4196/`, compare instance ID, jobs, resources and history, then
+Ctrl-C. To test MCP against this copy, make a separate private copy of its `client.json`
+and change only `origin` to port 4196; never edit the original client's config.
 
-## Backup, restore and upgrades
-
-The Python standard-library tool uses SQLite's online backup API, including committed WAL
-content, checks integrity, and creates a private standalone database. It refuses an existing
-destination and bounds lock waits. Do not copy a live `.sqlite` file without its WAL.
+For a compatible upgrade, make the backup above, check out the reviewed new commit,
+run `npm ci && npm run test:local-runtime`, then rerun the installer. It preserves
+state and receipts, changes the release symlink and restarts the service. No schema
+migration or destructive conversion is performed. The runtime rejects incompatible
+save versions. To roll back a compatible build:
 
 ```bash
-OI_BACKUP="/var/backups/open-industries/work-cell-$(date -u +%Y%m%dT%H%M%SZ).sqlite"
-sudo -u oi-runtime python3 /opt/open-industries/current/scripts/runtime_backup.py \
-  /var/lib/open-industries/work-cell.sqlite "$OI_BACKUP"
-readlink -f /opt/open-industries/current
+sudo systemctl stop oi-local
+sudo ln -s /opt/open-industries/local-releases/PRIOR_SHA /opt/open-industries/local-rollback
+sudo mv -Tf /opt/open-industries/local-rollback /opt/open-industries/local-current
+sudo systemctl start oi-local
+python3 scripts/runtime_health.py http://127.0.0.1:4193
 ```
 
-Record that exact release path/commit with the backup. Back up before each deployment and
-regularly according to your required recovery window. Keep at least one tested copy off-host;
-monitor disk usage and apply an explicit retention policy (for example 14 daily copies).
-This PR does not schedule backup deletion or configure off-host credentials.
+For an incompatible save, stop first and restore the **complete** backup under a new
+directory using its matching release. Preserve the failed save. Change the unit's
+state-directory environment and lock path together through a systemd override; run
+`daemon-reload` and start. Never run two workers against the same database or replace
+live WAL/SHM files. Reinstalling an already-copied SHA reuses its immutable release and saved state.
 
-Test restores into a **new isolated directory**, using the exact matching release and a
-separate loopback port. Copy with the same backup tool and start with signup disabled:
+## Host lifecycle and WSL2
 
-```bash
-sudo -u oi-runtime mkdir -m 0700 /var/lib/open-industries/restore-check
-sudo -u oi-runtime python3 /opt/open-industries/current/scripts/runtime_backup.py \
-  "$OI_BACKUP" /var/lib/open-industries/restore-check/work-cell.sqlite
-cd /opt/open-industries/current
-sudo -u oi-runtime env ASTRA_SIMULATION_DB=/var/lib/open-industries/restore-check/work-cell.sqlite \
-  ASTRA_SIMULATION_PORT=18791 ASTRA_SIMULATION_ALLOW_SIGNUP=false \
-  /usr/bin/env node --import tsx server/simulation-service.ts
-```
+The service is enabled for Linux boot; the computer must be running and awake to
+execute. Sleep, power-off and a stopped WSL distro stop execution. On resume, existing
+FIELD-LAB modeled catch-up rules apply. These simulated elapsed-time calculations
+never establish that a physical action occurred. The fixture has 32 fifteen-minute
+slots (eight modeled hours), finite resources and jobs; it does not generate endless
+work. The database caps history at 64 events / 2 MiB per instance plus a checkpoint;
+older individual events become unavailable. The installed bridge binds one instance;
+underlying limits are six instances per account, 256 command receipts per instance,
+1,000 accounts and 16 active sessions per account.
 
-Log in and read a known instance, history and resource balance. Catch-up may advance modeled
-jobs on startup; compare terminal state or account for elapsed time. The automated deployment
-test proves restored terminal results and command receipts. Do not connect an isolated
-restore to physical equipment or external side-effect consumers.
+WSL2 requires systemd enabled in `/etc/wsl.conf` (`[boot]` then `systemd=true`), followed
+by `wsl --shutdown` from Windows and a distro restart. Run the Linux installation
+inside that distro on its Linux filesystem. An enabled Linux unit starts when the
+distro boots; it does **not** guarantee Windows launches that distro at login, prevent
+Windows sleep or guarantee WSL stays running. Windows startup integration is not
+installed by this script. If continuous operation is required, use a native awake
+Linux host until your WSL lifecycle has passed these checks.
 
-For a production restore, stop the service first. Move the complete current DB/WAL/SHM set
-to a private quarantine directory, then restore the backup to the now-unused configured DB
-path. Keep ownership `oi-runtime:oi-runtime` and mode 0600. Never merge tables, newer receipts
-or old resource balances. Verify the matching release before starting. Restoration discards
-work after the backup.
+Before claiming host-lifecycle acceptance, record the instance/progress, disconnect
+all clients, close the terminal, reopen and compare; kill the unit's main PID with
+`sudo systemctl kill --kill-whom=main --signal=SIGKILL oi-local` and confirm a new PID
+and intact receipts; reboot Linux and verify readiness and instance identity. For
+WSL, separately test `wsl --shutdown` plus distro relaunch and a full Windows reboot,
+recording whether manual distro launch was necessary. macOS/Windows native background
+installation is not implemented by this service target.
 
-For an upgrade, prepare and test a new immutable release, stop the service, take a complete
-backup, and switch `current` atomically using a temporary symlink and `mv -Tf` on Linux.
-Start and check readiness plus a known instance. If incompatible, stop again and restore
-both the old binary and its full compatible backup. Unknown schema/module pins must fail
-closed. Never run old and new services against the same database during an upgrade.
+## Verification status
 
-## Other domains
-
-The supplied unit proves work-cell deployment. FIELD-LAB can use a separate copy of the
-unit with `ExecStart` pointing to `server/field-lab-service.ts`, its own env file, and
-`ASTRA_FIELD_LAB_DB`, `ASTRA_FIELD_LAB_PORT` (8792) and
-`ASTRA_FIELD_LAB_ALLOW_SIGNUP=false`. Give it a separate health unit/timer and HTTPS hostname
-pointing to its port. Its schema 101 database must never be shared with work-cell schema 100.
-The game has its own `server/game-service.mjs` entry point and configuration documented in
-[mcp-game-runtime.md](mcp-game-runtime.md); do not assume its transport/schema is interchangeable.
-These alternate deployment configurations are not exercised by the work-cell deployment test.
-
-Garden behavior, robot control and live scene synchronization are separate domain work.
-Simulation catch-up cannot stand for physical actions performed while equipment was offline.
-
-## Live acceptance record (fill in on the selected host)
-
-- [ ] Record host, region, monthly cost, DNS, release SHA, storage and backup destination.
-- [ ] Create an instance/job; disconnect all clients and verify independent progression.
-- [ ] Reconnect with a fresh login; check the same instance, balances and history.
-- [ ] Kill the process; verify systemd restarts it and results/spending are not duplicated.
-- [ ] Reboot the host; verify enabled service startup, HTTPS and preserved state.
-- [ ] Redeploy a compatible release; verify existing state and immutable command retries.
-- [ ] Restore a complete backup into an isolated service and verify a known instance.
-- [ ] Reject unauthenticated and cross-account reads; verify public signup remains blocked.
-- [ ] Exercise failed health monitoring and check logs, disk limits and off-host recovery.
-
-Local/CI process tests cannot substitute for host reboot, real certificate issuance,
-provider billing, firewall configuration, or an actual off-host backup. Keep #52 open until
-these deployment-dependent checks are recorded.
-
-References: [systemd service options](https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html),
-[Caddy reverse proxy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy),
-[Python SQLite backup](https://docs.python.org/3/library/sqlite3.html#sqlite3.Connection.backup).
+See [local runtime evidence](evidence/local-runtime/README.md). Automated process,
+backup, browser and runtime tests are software evidence. CI installs the actual
+systemd unit on Ubuntu and checks crash restart. A CI service restart is not evidence
+of a machine reboot. #52 stays open until real host-reboot evidence (and the explicit
+WSL lifecycle checks if claiming WSL support) is recorded. Cloud provisioning is not
+a prerequisite for any of these checks.

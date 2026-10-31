@@ -1,0 +1,42 @@
+[Unit]
+Description=Open-Industries local FIELD-LAB station
+After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=10
+
+[Service]
+Type=exec
+User=oi-runtime
+Group=oi-runtime
+WorkingDirectory=/opt/open-industries/local-current
+Environment=NODE_ENV=production
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+Environment=FIELD_LAB_INSTALLED=true
+Environment=FIELD_LAB_VIEWER_STATE_DIR=/var/lib/open-industries/local-lab
+Environment=FIELD_LAB_VIEWER_PORT=4193
+ExecStart=/usr/bin/flock --no-fork --nonblock /var/lib/open-industries/local-lab/service.lock /usr/bin/env node --import tsx scripts/field-lab-viewer.ts
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGTERM
+UMask=0077
+StateDirectory=open-industries
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/open-industries
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+RestrictSUIDSGID=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+LogNamespace=oi-local
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=60
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

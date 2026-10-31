@@ -11,6 +11,8 @@ import { agentTools, callAgentTool } from './mcp-agent.mjs';
 import { farmTools, callFarmTool } from './mcp-farm.mjs';
 import { scrubPortableData as scrub } from '../src/lib/portable-data.mjs';
 
+import { localLabTools, callLocalLabTool } from './mcp-local-lab.mjs';
+
 let sceneRuntime;
 let gameRuntime;
 let simulationRuntime;
@@ -38,6 +40,7 @@ const localPath = value => {
 const textResult = value => { const clean = scrub(value); return { content: [{ type: 'text', text: JSON.stringify(clean, null, 2) }], structuredContent: clean }; };
 
 const tools = [
+  ...localLabTools,
   ...roomTools,
   ...sceneTools,
   ...gameTools,
@@ -53,6 +56,7 @@ const tools = [
 ];
 
 async function callTool(name, args = {}) {
+  if(localLabTools.some(tool=>tool.name===name))return callLocalLabTool(name,args);
   if(farmTools.some(tool=>tool.name===name))return callFarmTool(name,args);
   if(agentTools.some(tool=>tool.name===name))return callAgentTool(root,name,args);
   if(visionTools.some(tool=>tool.name===name))return callVisionTool(name,args);

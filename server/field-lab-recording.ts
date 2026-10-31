@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
+import { resolve } from 'node:path';
 import { readFileSync } from 'node:fs';
 import type { FieldLabDatabase } from './simulation/field-lab-runtime.js';
 import type { LabRecording, LabSnapshot, LabFrame } from '../src/lib/field-lab-playback.js';
 
 /** Export authorized history at one fixed head, including its compacted checkpoint. */
-export function recordLab(db: FieldLabDatabase, token: string, instanceId: string, sourceRevision: string): LabRecording {
+export function recordLab(db: FieldLabDatabase, token: string, instanceId: string, sourceRevision: string, assetDirectory?: string): LabRecording {
+  const asset = (name: string): URL | string => assetDirectory ? resolve(assetDirectory, name) : new URL(`../benchmarks/field-lab/fixtures/${name}`, import.meta.url);
   let cursor: string | null = null;
   const frames: LabFrame[] = [];
   do {
@@ -17,9 +19,9 @@ export function recordLab(db: FieldLabDatabase, token: string, instanceId: strin
   } while (cursor);
   return {
     schema: 'oi.field-lab-recording/v1', source_revision: sourceRevision,
-    source_form_sha256: createHash('sha256').update(readFileSync(new URL('../benchmarks/field-lab/fixtures/field-lab-pipette.form.json', import.meta.url), 'utf8').replace(/\r\n/g, '\n')).digest('hex'),
-    scene_json: readFileSync(new URL('../benchmarks/field-lab/fixtures/field-lab.oi.json', import.meta.url), 'utf8'),
-    motion_json: readFileSync(new URL('../benchmarks/field-lab/fixtures/pipette-motion.json', import.meta.url), 'utf8'),
+    source_form_sha256: createHash('sha256').update(readFileSync(asset('field-lab-pipette.form.json'), 'utf8').replace(/\r\n/g, '\n')).digest('hex'),
+    scene_json: readFileSync(asset('field-lab.oi.json'), 'utf8'),
+    motion_json: readFileSync(asset('pipette-motion.json'), 'utf8'),
     frames, cursor: frames.length - 1,
     history_scope: 'Retained authoritative post-state events plus checkpoint. Earlier compacted history is unavailable; frames hold until the next recorded event.',
   };
