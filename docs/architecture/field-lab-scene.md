@@ -22,7 +22,7 @@ For another independent day use a new `FIELD_LAB_VIEWER_STATE_DIR` directory.
 `FIELD_LAB_VIEWER_PORT` changes the local port.
 
 This development launcher is an operator-local Vite application, bound to 127.0.0.1.
-Its private operator credentials live in `.astra/field-lab-viewer/operator.json` and never
+Its private operator credentials live in `~/.local/share/open-industries/field-lab/operator.json` and never
 enter browser responses or exports. Back up this directory coherently with its SQLite
 state. Host/Origin checks reject foreign browser requests. It is not a remotely exposed
 multi-user deployment or a physical equipment controller.
@@ -113,3 +113,8 @@ Browser tests consume those fixtures, verify selection/pose/cursor and screensho
 exercise a fresh live station with viewer disconnection, reconnect, pause and origin checks.
 Set `ASTRA_CHROME_PATH` to an installed Chromium executable if necessary. No cloud account
 or model provider is needed. CI also regenerates the handoff against pinned OpenCAD.
+
+For background execution across terminal closure and Linux host startup, use the
+[installed local service](../persistent-runtime.md). `field-lab:viewer` remains foreground development.
+Existing checkout-local saves are not moved automatically: set `FIELD_LAB_VIEWER_STATE_DIR`
+to their absolute directory to reopen them. Opening a viewer never resets an installed station.

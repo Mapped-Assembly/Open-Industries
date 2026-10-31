@@ -22,3 +22,5 @@ build/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
+
+dist-field-lab/

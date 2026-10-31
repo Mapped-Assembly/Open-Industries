@@ -1,0 +1,29 @@
+name: Local persistent runtime
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  local-service:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:local-runtime
+        env:
+          OI_TEST_BROWSER: 'true'
+      - run: systemd-analyze verify deploy/local-runtime/oi-local.service
+      - run: bash scripts/local-runtime-systemd-smoke.sh
+      - name: Service diagnostics
+        if: always()
+        run: |
+          sudo systemctl status oi-local --no-pager || true
+          sudo journalctl --namespace=oi-local -u oi-local -n 100 --no-pager || true

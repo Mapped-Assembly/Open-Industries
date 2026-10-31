@@ -148,13 +148,14 @@ The [sample-farm adapter](docs/farm-agent-control.md) exposes the original ASTRA
 and SO-101 arm through MCP: agent-selected moves and harvests, OpenCV pickup evidence,
 pause/resume, persistent jobs and a read-only 3D viewer.
 
-## Persistent runtime hosting
+## Persistent local runtime
 
-For an always-on simulation backend, use the [single-server deployment guide](docs/persistent-runtime.md).
-It includes a systemd service, HTTPS proxy configuration, private persistent SQLite storage,
-worker readiness checks, and backup/restore verification. The browser may disconnect while
-supported modeled jobs continue. A host and domain still need to be provisioned; this is
-separate from the browser-only hosted workbench.
+Run the [local FIELD-LAB service](docs/persistent-runtime.md) on your own Linux computer.
+It keeps simulated work running after you close the browser, terminal or MCP client,
+with a built viewer, shared MCP instance, private SQLite state and backup/restore.
+No AWS account, public domain, HTTPS certificate or model-provider credentials are needed.
+The computer must remain awake; startup after sleep follows modeled catch-up semantics.
+[Remote hosting](docs/remote-runtime.md) is optional.
 
 ## Technology and repository map
 
