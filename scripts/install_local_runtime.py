@@ -8,6 +8,9 @@ import pwd
 import shutil
 import subprocess
 import sys
+import time
+
+from runtime_health import check_health
 
 
 def run(*args: str, cwd: Path | None = None) -> str:
@@ -78,6 +81,12 @@ def install(source: Path) -> None:
     run('systemctl', 'daemon-reload')
     run('systemctl', 'enable', 'oi-local.service')
     run('systemctl', 'restart', 'oi-local.service')
+    for _ in range(60):
+        if check_health('http://127.0.0.1:4193'):
+            break
+        time.sleep(0.5)
+    else:
+        raise ValueError('Service did not become ready; inspect systemctl status oi-local and journalctl --namespace=oi-local -u oi-local')
     print('Local station installed: http://127.0.0.1:4193/\nState: ' + str(state))
     print('Check readiness: python3 scripts/runtime_health.py http://127.0.0.1:4193')
 
